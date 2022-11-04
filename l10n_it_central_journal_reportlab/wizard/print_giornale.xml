@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+
     <record id="wizard_giornale_reportlab" model="ir.ui.view">
         <field name="name">General Journal Reportlab</field>
         <field name="model">wizard.giornale.reportlab</field>
@@ -81,4 +82,5 @@
         action="action_giornale_reportlab"
         id="menu_giornale"
     />
+
 </odoo>
