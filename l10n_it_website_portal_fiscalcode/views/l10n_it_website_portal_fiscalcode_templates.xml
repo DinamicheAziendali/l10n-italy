@@ -7,19 +7,15 @@
     <template
         id="fiscalcode_details"
         name="Add fiscalcode"
-        inherit_id="portal.portal_my_details"
+        inherit_id="portal.portal_my_details_fields"
     >
-        <xpath
-            expr="//div[hasclass('o_portal_details')]/div[1]/div[1]/div[7]"
-            position="after"
-        >
-            <!-- After VAT -->
+        <xpath expr="//div[label[@for='vat']]" position="after">
             <div
                 t-attf-class="form-group #{error.get('fiscalcode') and 'o_has_error' or ''} col-xl-6"
             >
                 <label
                     class="col-form-label label-optional"
-                    for="vat"
+                    for="fiscalcode"
                 >Fiscal Code</label>
                 <input
                     type="text"
