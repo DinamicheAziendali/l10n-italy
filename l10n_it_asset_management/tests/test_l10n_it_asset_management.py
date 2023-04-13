@@ -21,13 +21,7 @@ class TestAssets(TransactionCase):
                 "name": "Asset category 1",
                 "asset_account_id": cls.env["account.account"]
                 .search(
-                    [
-                        (
-                            "account_type",
-                            "=",
-                            "asset_fixed"
-                        )
-                    ],
+                    [("account_type", "=", "asset_fixed")],
                     limit=1,
                 )
                 .id,
@@ -45,25 +39,13 @@ class TestAssets(TransactionCase):
                 .id,
                 "fund_account_id": cls.env["account.account"]
                 .search(
-                    [
-                        (
-                            "account_type",
-                            "=",
-                            "asset_non_current"
-                        )
-                    ],
+                    [("account_type", "=", "asset_non_current")],
                     limit=1,
                 )
                 .id,
                 "gain_account_id": cls.env["account.account"]
                 .search(
-                    [
-                        (
-                            "account_type",
-                            "=",
-                            "expense_direct_cost"
-                        )
-                    ],
+                    [("account_type", "=", "expense_direct_cost")],
                     limit=1,
                 )
                 .id,
@@ -72,13 +54,7 @@ class TestAssets(TransactionCase):
                 .id,
                 "loss_account_id": cls.env["account.account"]
                 .search(
-                    [
-                        (
-                            "account_type",
-                            "=",
-                            "expense"
-                        )
-                    ],
+                    [("account_type", "=", "expense")],
                     limit=1,
                 )
                 .id,
