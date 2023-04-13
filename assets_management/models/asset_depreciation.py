@@ -83,7 +83,7 @@ class AssetDepreciation(models.Model):
         "res.currency", readonly=True, related="asset_id.currency_id", string="Currency"
     )
 
-    date_start = fields.Date(string="Date Start")
+    date_start = fields.Date()
 
     dismiss_move_id = fields.Many2one("account.move", string="Dismiss Move")
 
@@ -117,9 +117,7 @@ class AssetDepreciation(models.Model):
     pro_rata_temporis = fields.Boolean(string="Pro-rata Temporis")
 
     requires_account_move = fields.Boolean(
-        readonly=True,
-        related="type_id.requires_account_move",
-        string="Requires Account Move",
+        readonly=True, related="type_id.requires_account_move"
     )
 
     state = fields.Selection(
@@ -131,7 +129,6 @@ class AssetDepreciation(models.Model):
         compute="_compute_state",
         default="non_depreciated",
         store=True,
-        string="State",
     )
 
     type_id = fields.Many2one("asset.depreciation.type", string="Depreciation Type")

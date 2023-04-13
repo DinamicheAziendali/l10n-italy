@@ -27,7 +27,6 @@ class AssetDepreciationMode(models.Model):
 
     name = fields.Char(
         required=True,
-        string="Name",
     )
 
     used_asset_coeff = fields.Float(

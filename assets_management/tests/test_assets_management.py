@@ -204,20 +204,20 @@ class TestAssets(SavepointCase):
         )
 
         wiz_vals = asset.with_context(
-            {"allow_reload_window": True}
+            **{"allow_reload_window": True}
         ).launch_wizard_generate_depreciations()
         wiz = (
             self.env["wizard.asset.generate.depreciation"]
-            .with_context(wiz_vals["context"])
+            .with_context(**wiz_vals["context"])
             .create({"date_dep": first_depreciation_date})
         )
         wiz.do_generate()
         wiz_vals = asset.with_context(
-            {"allow_reload_window": True}
+            **{"allow_reload_window": True}
         ).launch_wizard_generate_depreciations()
         wiz = (
             self.env["wizard.asset.generate.depreciation"]
-            .with_context(wiz_vals["context"])
+            .with_context(**wiz_vals["context"])
             .create({"date_dep": second_depreciation_date})
         )
         wiz.do_generate()
@@ -266,7 +266,7 @@ class TestAssets(SavepointCase):
         wiz_vals["context"]["default_move_line_ids"] = [(6, 0, move_lines_to_do.ids)]
         wiz = (
             self.env["wizard.account.move.manage.asset"]
-            .with_context(wiz_vals["context"])
+            .with_context(**wiz_vals["context"])
             .create(
                 {
                     "management_type": "dismiss",
@@ -293,7 +293,7 @@ class TestAssets(SavepointCase):
         wiz_vals["context"]["default_move_line_ids"] = [(6, 0, move_lines_to_do.ids)]
         wiz = (
             self.env["wizard.account.move.manage.asset"]
-            .with_context(wiz_vals["context"])
+            .with_context(**wiz_vals["context"])
             .create(
                 {
                     "management_type": "dismiss",
@@ -345,7 +345,7 @@ class TestAssets(SavepointCase):
         wiz_vals["context"]["default_move_line_ids"] = [(6, 0, move_lines_to_do.ids)]
         wiz = (
             self.env["wizard.account.move.manage.asset"]
-            .with_context(wiz_vals["context"])
+            .with_context(**wiz_vals["context"])
             .create(
                 {
                     "management_type": "create",
@@ -393,7 +393,7 @@ class TestAssets(SavepointCase):
         wiz_vals["context"]["default_move_line_ids"] = [(6, 0, move_lines_to_do.ids)]
         wiz = (
             self.env["wizard.account.move.manage.asset"]
-            .with_context(wiz_vals["context"])
+            .with_context(**wiz_vals["context"])
             .create(
                 {
                     "management_type": "dismiss",
@@ -453,7 +453,7 @@ class TestAssets(SavepointCase):
         wiz_vals["context"]["default_move_line_ids"] = [(6, 0, move_lines_to_do.ids)]
         wiz = (
             self.env["wizard.account.move.manage.asset"]
-            .with_context(wiz_vals["context"])
+            .with_context(**wiz_vals["context"])
             .create(
                 {
                     "management_type": "create",

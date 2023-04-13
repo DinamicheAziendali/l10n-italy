@@ -16,17 +16,16 @@ class DepLineType(models.Model):
     def get_default_company_id(self):
         return self.env.user.company_id
 
-    code = fields.Char(string="Code")
+    code = fields.Char()
 
     company_id = fields.Many2one(
         "res.company", default=get_default_company_id, string="Company"
     )
 
-    name = fields.Char(required=True, string="Name")
+    name = fields.Char(required=True)
 
     type = fields.Selection(
         [("in", "In"), ("out", "Out")],
-        string="Type",
     )
 
     def unlink(self):
@@ -37,8 +36,8 @@ class DepLineType(models.Model):
                 raise ValidationError(
                     _(
                         "Cannot remove type {}: there is some depreciation"
-                        " line linked to it.".format(line_type.name)
-                    )
+                        " line linked to it."
+                    ).format(line_type.name)
                 )
 
         return super().unlink()
