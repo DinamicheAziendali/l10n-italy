@@ -24,22 +24,20 @@
                             <field name="name" />
                         </h2>
                     </div>
-                    <group>
-                        <field
-                            name="type_ids"
-                            context="{'default_category_id':id}"
-                            nolabel="1"
-                        >
-                            <tree editable="bottom">
-                                <field name="category_id" invisible="1" />
-                                <field name="depreciation_type_id" />
-                                <field name="pro_rata_temporis" />
-                                <field name="base_coeff" />
-                                <field name="percentage" />
-                                <field name="mode_id" />
-                            </tree>
-                        </field>
-                    </group>
+                    <field
+                        name="type_ids"
+                        context="{'default_category_id':id}"
+                        nolabel="1"
+                    >
+                        <tree editable="bottom">
+                            <field name="category_id" invisible="1" />
+                            <field name="depreciation_type_id" />
+                            <field name="pro_rata_temporis" />
+                            <field name="base_coeff" />
+                            <field name="percentage" />
+                            <field name="mode_id" />
+                        </tree>
+                    </field>
                     <group>
                         <group>
                             <field
