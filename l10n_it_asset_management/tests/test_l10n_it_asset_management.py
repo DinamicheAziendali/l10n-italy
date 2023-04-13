@@ -2,20 +2,20 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 from odoo import fields
 from odoo.exceptions import ValidationError
-from odoo.tests.common import SavepointCase
+from odoo.tests.common import TransactionCase
 from odoo.tools.date_utils import relativedelta
 
 
-class TestAssets(SavepointCase):
+class TestAssets(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.data_account_type_current_assets = cls.env.ref(
-            "account.data_account_type_current_assets"
-        )
-        cls.data_account_type_current_liabilities = cls.env.ref(
-            "account.data_account_type_current_liabilities"
-        )
+        # cls.data_account_type_current_assets = cls.env.ref(
+        #     "account.data_account_type_current_assets"
+        # )
+        # cls.data_account_type_current_liabilities = cls.env.ref(
+        #     "account.data_account_type_current_liabilities"
+        # )
         cls.asset_category_1 = cls.env["asset.category"].create(
             {
                 "name": "Asset category 1",
@@ -23,9 +23,9 @@ class TestAssets(SavepointCase):
                 .search(
                     [
                         (
-                            "user_type_id",
+                            "account_type",
                             "=",
-                            cls.env.ref("account.data_account_type_fixed_assets").id,
+                            "asset_fixed"
                         )
                     ],
                     limit=1,
@@ -35,9 +35,9 @@ class TestAssets(SavepointCase):
                 .search(
                     [
                         (
-                            "user_type_id",
+                            "account_type",
                             "=",
-                            cls.env.ref("account.data_account_type_expenses").id,
+                            "expense",
                         )
                     ],
                     limit=1,
@@ -47,11 +47,9 @@ class TestAssets(SavepointCase):
                 .search(
                     [
                         (
-                            "user_type_id",
+                            "account_type",
                             "=",
-                            cls.env.ref(
-                                "account.data_account_type_non_current_assets"
-                            ).id,
+                            "asset_non_current"
                         )
                     ],
                     limit=1,
@@ -61,9 +59,9 @@ class TestAssets(SavepointCase):
                 .search(
                     [
                         (
-                            "user_type_id",
+                            "account_type",
                             "=",
-                            cls.env.ref("account.data_account_type_revenue").id,
+                            "expense_direct_cost"
                         )
                     ],
                     limit=1,
@@ -76,9 +74,9 @@ class TestAssets(SavepointCase):
                 .search(
                     [
                         (
-                            "user_type_id",
+                            "account_type",
                             "=",
-                            cls.env.ref("account.data_account_type_expenses").id,
+                            "expense"
                         )
                     ],
                     limit=1,
@@ -104,9 +102,7 @@ class TestAssets(SavepointCase):
             {
                 "name": "Deductable tax",
                 "code": "DEDTAX",
-                "user_type_id": cls.env.ref(
-                    "account.data_account_type_current_assets"
-                ).id,
+                "account_type": "asset_current",
             }
         )
         cls.tax_22_partial_60 = cls.env["account.tax"].create(
