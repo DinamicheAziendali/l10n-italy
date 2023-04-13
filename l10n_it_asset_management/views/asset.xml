@@ -139,11 +139,7 @@
                                     <field name="amount_depreciated" />
                                     <field name="last_depreciation_date" />
                                     <field name="amount_residual" />
-                                    <field
-                                        name="state"
-                                        invisible="1"
-                                        force_save="1"
-                                    />
+                                    <field name="state" invisible="1" force_save="1" />
                                     <field name="currency_id" invisible="1" />
                                     <field name="company_id" invisible="1" />
                                 </tree>

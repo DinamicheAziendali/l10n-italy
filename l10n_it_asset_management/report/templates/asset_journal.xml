@@ -38,7 +38,9 @@
         <t t-set="category_nr" t-value="len(o.report_category_ids)" />
         <t t-foreach="o.report_category_ids" t-as="category_section">
             <div class="act_as_table data_table" style="width: 100%;">
-                <t t-call="l10n_it_asset_management.template_asset_journal_category_data" />
+                <t
+                    t-call="l10n_it_asset_management.template_asset_journal_category_data"
+                />
                 <t t-call="l10n_it_asset_management.template_asset_journal_asset" />
                 <t t-if="o.show_category_totals">
                     <br />
@@ -114,7 +116,9 @@
                     class="act_as_thead"
                     style="width: 100%; font-size: 14px; margin: 3px;"
                 >
-                    <t t-call="l10n_it_asset_management.template_asset_journal_asset_title" />
+                    <t
+                        t-call="l10n_it_asset_management.template_asset_journal_asset_title"
+                    />
                     <t
                         t-call="l10n_it_asset_management.template_asset_journal_asset_table_header"
                     />
@@ -142,7 +146,9 @@
                     </div>
                 </div>
             </t>
-            <t t-call="l10n_it_asset_management.template_asset_journal_asset_depreciations" />
+            <t
+                t-call="l10n_it_asset_management.template_asset_journal_asset_depreciations"
+            />
             <t t-if="asset_section.report_sale_doc_id">
                 <div class="act_as_table" style="width: 100%">
                     <div
@@ -873,11 +879,15 @@
             style="width: 100%; font-size: 14px; margin: 3px;"
         >
             <div class="act_as_thead" style="width: 100%;">
-                <t t-call="l10n_it_asset_management.template_asset_journal_totals_header" />
+                <t
+                    t-call="l10n_it_asset_management.template_asset_journal_totals_header"
+                />
             </div>
             <div class="act_as_tbody" style="width: 100%;">
                 <t t-foreach="totals_sections" t-as="totals_section">
-                    <t t-call="l10n_it_asset_management.template_asset_journal_totals_data" />
+                    <t
+                        t-call="l10n_it_asset_management.template_asset_journal_totals_data"
+                    />
                 </t>
             </div>
         </div>

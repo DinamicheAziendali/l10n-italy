@@ -25,7 +25,7 @@
                             options="{'no_create_edit': True}"
                         />
                     </group>
-                    <separator string="Assets"/>
+                    <separator string="Assets" />
                     <field name="asset_ids" nolabel="1" />
                     <group name="print_options" string="Options">
                         <group>
