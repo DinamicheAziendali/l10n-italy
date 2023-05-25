@@ -100,7 +100,11 @@ class AccountIntrastatStatement(models.Model):
             ]
         ):
             raise UserError(
-                _("Wrong section type %s or number %s") % (section_type, section_number)
+                _(
+                    "Wrong section type %(section_type)s or number %(section_number)s",
+                    section_type=section_type,
+                    section_number=section_number,
+                )
             )
         for statement in self:
             op_number = len(statement[section_ids_field])
@@ -197,7 +201,6 @@ class AccountIntrastatStatement(models.Model):
             ("M", "Month"),
             ("T", "Quarter"),
         ],
-        string="Period Type",
         default="M",
         required=True,
     )
@@ -222,7 +225,6 @@ class AccountIntrastatStatement(models.Model):
                 "Change Period in quarter: only first and second month " "operations",
             ),
         ],
-        string="Content Type",
         required=True,
         default="0",
     )
@@ -233,7 +235,6 @@ class AccountIntrastatStatement(models.Model):
             ("9", "First Statement in Ceasing Activity or Changing VAT Number"),
             ("0", "None of the above cases"),
         ],
-        string="Special Cases",
         required=True,
         default="0",
     )
