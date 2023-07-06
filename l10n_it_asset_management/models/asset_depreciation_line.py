@@ -115,7 +115,7 @@ class AssetDepreciationLine(models.Model):
     # depreciable amount
     _update_move_types = ("in", "out")
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         line = super().create(vals)
         if line.need_normalize_depreciation_nr():

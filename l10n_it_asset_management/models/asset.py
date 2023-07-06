@@ -96,7 +96,7 @@ class Asset(models.Model):
 
     used = fields.Boolean()
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         # Add depreciation if it's missing while category is set
         create_deps_from_categ = False

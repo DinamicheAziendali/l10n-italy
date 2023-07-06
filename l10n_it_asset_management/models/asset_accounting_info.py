@@ -57,7 +57,7 @@ class AssetAccountingInfo(models.Model):
         required=True,
     )
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         info = super().create(vals)
         info.check_and_normalize()
