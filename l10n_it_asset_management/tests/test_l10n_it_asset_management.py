@@ -256,6 +256,8 @@ class TestAssets(TransactionCase):
         )
         sale_invoice.button_cancel()
         sale_invoice.button_draft()
+        # Reset name to allow sequence year changing
+        sale_invoice.name = "/"
         sale_invoice.invoice_date = second_depreciation_date + relativedelta(days=10)
         sale_invoice.action_post()
         self.assertEqual(sale_invoice.state, "posted")
