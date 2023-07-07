@@ -97,16 +97,17 @@ class Asset(models.Model):
     used = fields.Boolean()
 
     @api.model_create_multi
-    def create(self, vals):
+    def create(self, vals_list):
         # Add depreciation if it's missing while category is set
-        create_deps_from_categ = False
-        if vals.get("category_id") and not vals.get("depreciation_ids"):
-            create_deps_from_categ = True
-        if vals.get("code"):
-            vals["code"] = " ".join(vals.get("code").split())
-        asset = super().create(vals)
-        if create_deps_from_categ:
-            asset.onchange_category_id()
+        for vals in vals_list:
+            create_deps_from_categ = False
+            if vals.get("category_id") and not vals.get("depreciation_ids"):
+                create_deps_from_categ = True
+            if vals.get("code"):
+                vals["code"] = " ".join(vals.get("code").split())
+            asset = super().create(vals)
+            if create_deps_from_categ:
+                asset.onchange_category_id()
         return asset
 
     def write(self, vals):

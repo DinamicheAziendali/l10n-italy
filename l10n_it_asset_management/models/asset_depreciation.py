@@ -136,8 +136,8 @@ class AssetDepreciation(models.Model):
     zero_depreciation_until = fields.Date(string="Zero Depreciation Up To")
 
     @api.model_create_multi
-    def create(self, vals):
-        dep = super().create(vals)
+    def create(self, vals_list):
+        dep = super().create(vals_list)
         dep.normalize_first_dep_nr()
         if dep.line_ids:
             num_lines = dep.line_ids.filtered("requires_depreciation_nr")

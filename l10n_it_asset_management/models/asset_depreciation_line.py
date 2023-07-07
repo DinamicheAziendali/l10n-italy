@@ -116,8 +116,8 @@ class AssetDepreciationLine(models.Model):
     _update_move_types = ("in", "out")
 
     @api.model_create_multi
-    def create(self, vals):
-        line = super().create(vals)
+    def create(self, vals_list):
+        line = super().create(vals_list)
         if line.need_normalize_depreciation_nr():
             line.normalize_depreciation_nr(force=True)
         return line
