@@ -71,7 +71,7 @@ class WizardAssetPrevisionalReport(models.TransientModel):
     show_totals = fields.Boolean(default=True)
 
     show_category_totals = fields.Boolean(default=True)
-
+    show_sold_assets = fields.Boolean()
     report_footer_year = fields.Char(default=get_default_report_footer_year)
 
     type_ids = fields.Many2many(
@@ -150,6 +150,7 @@ class WizardAssetPrevisionalReport(models.TransientModel):
             "date": self.date,
             "show_totals": self.show_totals,
             "show_category_totals": self.show_category_totals,
+            "show_sold_assets": self.show_sold_assets,
             "report_footer_year": self.report_footer_year,
             "type_ids": [(6, 0, self.type_ids.ids)],
         }
