@@ -217,7 +217,7 @@ class EFatturaOut:
             if currency == euro:
                 return amount
             if line and field and field in line._fields is not None:
-                return line[field]
+                return line[field] if amount > 0 else -line[field]
             return currency._convert(
                 amount, euro, invoice.company_id, invoice.date, False
             )

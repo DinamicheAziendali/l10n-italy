@@ -170,7 +170,12 @@ e 'line' per riga di fattura (a seconda del livello in cui sono chiamati)
                 t-call="l10n_it_fatturapa_out.account_invoice_line_it_sconto_maggiorazione"
             />
                 <PrezzoTotale
+                t-if="line.credit > 0"
                 t-out="format_monetary(fpa_to_eur(line.price_subtotal, line=line, field='credit'), euro)"
+            />
+                <PrezzoTotale
+                t-if="not line.credit > 0"
+                t-out="format_monetary(fpa_to_eur(line.price_subtotal, line=line, field='debit'), euro)"
             />
                 <AliquotaIVA
                 t-if="not line_is_section_note"
@@ -212,7 +217,7 @@ e 'line' per riga di fattura (a seconda del livello in cui sono chiamati)
                     <TipoDato>Valuta</TipoDato>
                     <RiferimentoTesto t-out="line.currency_id.name" />
                     <RiferimentoNumero
-                    t-out="format_price(line, original_currency=True)"
+                    t-out="format_monetary(line.price_subtotal, line.currency_id)"
                 />
                     <RiferimentoData t-out="format_date(record.date)" />
                 </AltriDatiGestionali>
@@ -580,10 +585,10 @@ e 'line' per riga di fattura (a seconda del livello in cui sono chiamati)
                               <!--                <SpeseAccessorie t-out=""/>-->
                               <!--                <Arrotondamento t-out=""/>-->
                               <ImponibileImporto
-                            t-out="format_monetary(fpa_to_eur(tax_data['ImponibileImporto'], invoice=record), euro)"
+                            t-out="format_monetary(tax_data['ImponibileImporto'], euro)"
                         />
                               <Imposta
-                            t-out="format_monetary(fpa_to_eur(tax_data['Imposta'], invoice=record), euro)"
+                            t-out="format_monetary(tax_data['Imposta'], euro)"
                         />
                                 <EsigibilitaIVA
                             t-if="tax_data.get('EsigibilitaIVA', False)"
