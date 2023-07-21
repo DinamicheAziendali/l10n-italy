@@ -1,3 +1,5 @@
 odoo-addon-l10n_it_reverse_charge @ git+https://github.com/OCA/l10n-italy.git@refs/pull/3300/head#subdirectory=setup/l10n_it_reverse_charge
 odoo-addon-l10n_it_split_payment @ git+https://github.com/OCA/l10n-italy.git@refs/pull/3387/head#subdirectory=setup/l10n_it_split_payment
 odoo-addon-l10n_it_fatturapa @ git+https://github.com/OCA/l10n-italy@refs/pull/2995/head#subdirectory=setup/l10n_it_fatturapa
+odoo-addon-l10n_it_vat_registries @ git+https://github.com/OCA/l10n-italy.git@refs/pull/3080/head#subdirectory=setup/l10n_it_vat_registries
+odoo-addon-l10n_it_split_payment @ git+https://github.com/OCA/l10n-italy.git@refs/pull/3387/head#subdirectory=setup/l10n_it_split_payment
