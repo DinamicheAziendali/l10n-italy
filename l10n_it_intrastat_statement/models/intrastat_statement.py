@@ -411,11 +411,12 @@ class AccountIntrastatStatement(models.Model):
         compute="_compute_amount_purchase_s4",
     )
 
-    @api.model
-    def create(self, vals):
-        statement = super().create(vals)
-        statement._normalize_statement()
-        return statement
+    @api.model_create_multi
+    def create(self, vals_list):
+        statements = super().create(vals_list)
+        for statement in statements:
+            statement._normalize_statement()
+        return statements
 
     def write(self, vals):
         res = super().write(vals)
