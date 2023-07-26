@@ -588,7 +588,7 @@ class WizardGiornaleReportlab(models.TransientModel):
         self.daterange_id.write(daterange_vals)
 
         view_id = self.env.ref(
-            "l10n_it_central_journal_reportlab.l10n_it_wizard_giornale_reportlab",
+            "l10n_it_central_journal_reportlab.wizard_giornale_reportlab",
             raise_if_not_found=False,
         )
 
