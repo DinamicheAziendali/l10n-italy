@@ -595,7 +595,7 @@ class WizardGiornaleReportlab(models.TransientModel):
         return {
             "view_id": view_id.id,
             "view_mode": "form",
-            "res_model": "l10n_it_wizard.giornale.reportlab",
+            "res_model": "wizard.giornale.reportlab",
             "res_id": self.id,
             "type": "ir.actions.act_window",
             "target": "new",
