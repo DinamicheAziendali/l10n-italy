@@ -477,3 +477,23 @@ class TestDeclarationOfIntent(AccountTestInvoicingCommon):
         )
         self.assertEqual(declaration_model.search([]), declaration)
         self.assertEqual(self.env.company, declaration.company_id)
+
+    def test_action_register_payment(self):
+        """
+        Check register payment from action in invoice.
+        """
+        partner = self.partner1
+        partner.property_account_position_id = self.fiscal_position.id
+
+        out_invoice = self._create_invoice(
+            "test_out_invoice_registr_payment", partner, tax=self.tax1, in_type=False
+        )
+        self.assertEqual(out_invoice.move_type, "out_invoice")
+        out_invoice.action_post()
+
+        result = out_invoice.action_register_payment()
+        wizard = Form(
+            self.env[(result.get("res_model"))].with_context(**result["context"])
+        ).save()
+        self.assertEqual(wizard._name, "account.payment.register")
+        wizard.action_create_payments()
