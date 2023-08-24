@@ -496,4 +496,10 @@ class TestDeclarationOfIntent(AccountTestInvoicingCommon):
             self.env[(result.get("res_model"))].with_context(**result["context"])
         ).save()
         self.assertEqual(wizard._name, "account.payment.register")
-        wizard.action_create_payments()
+        action = wizard.action_create_payments()
+        if action.get("res_id", False):
+            payments = [action["res_id"]]
+            self.assertTrue(len(payments) == 1)
+        else:
+            payments = action["domain"][0][2]
+            self.assertTrue(len(payments) > 1)
