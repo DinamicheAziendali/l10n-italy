@@ -33,7 +33,8 @@ addon | version | maintainers | summary
 [l10n_it_delivery_note_base](l10n_it_delivery_note_base/) | 16.0.1.0.0 | [![As400it](https://github.com/As400it.png?size=30px)](https://github.com/As400it) [![Byloth](https://github.com/Byloth.png?size=30px)](https://github.com/Byloth) | Crea e gestisce tabelle principali per gestire i DDT
 [l10n_it_fatturapa](l10n_it_fatturapa/) | 16.0.1.0.2 |  | Fatture elettroniche
 [l10n_it_fatturapa_in](l10n_it_fatturapa_in/) | 16.0.1.0.0 |  | Ricezione fatture elettroniche
-[l10n_it_fatturapa_out](l10n_it_fatturapa_out/) | 16.0.1.0.7 |  | Emissione fatture elettroniche
+[l10n_it_fatturapa_out](l10n_it_fatturapa_out/) | 16.0.1.0.8 |  | Emissione fatture elettroniche
+[l10n_it_fatturapa_out_di](l10n_it_fatturapa_out_di/) | 16.0.1.0.0 |  | Dichiarazioni d'intento in fatturapa
 [l10n_it_fiscal_document_type](l10n_it_fiscal_document_type/) | 16.0.1.0.0 |  | ITA - Tipi di documento fiscale per dichiarativi
 [l10n_it_fiscal_payment_term](l10n_it_fiscal_payment_term/) | 16.0.1.0.0 |  | Condizioni di pagamento delle fatture elettroniche
 [l10n_it_fiscalcode](l10n_it_fiscalcode/) | 16.0.1.0.0 |  | ITA - Codice fiscale
@@ -44,7 +45,7 @@ addon | version | maintainers | summary
 [l10n_it_sdi_channel](l10n_it_sdi_channel/) | 16.0.1.0.0 | [![sergiocorato](https://github.com/sergiocorato.png?size=30px)](https://github.com/sergiocorato) | Aggiunge il canale di invio/ricezione dei file XML attraverso lo SdI
 [l10n_it_vat_payability](l10n_it_vat_payability/) | 16.0.1.0.0 |  | ITA - Esigibilità IVA
 [l10n_it_website_portal_ipa](l10n_it_website_portal_ipa/) | 16.0.1.0.1 |  | Aggiunge l'indice PA (IPA) tra i dettagli dell'utente nel portale.
-[l10n_it_withholding_tax](l10n_it_withholding_tax/) | 16.0.1.1.1 |  | ITA - Ritenute d'acconto
+[l10n_it_withholding_tax](l10n_it_withholding_tax/) | 16.0.1.1.2 |  | ITA - Ritenute d'acconto
 [l10n_it_withholding_tax_reason](l10n_it_withholding_tax_reason/) | 16.0.1.0.0 |  | ITA - Causali pagamento per ritenute d'acconto
 
 [//]: # (end addons)
