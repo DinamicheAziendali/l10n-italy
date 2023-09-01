@@ -154,7 +154,6 @@ class StockDeliveryNoteLine(models.Model):
                         "tax_ids": [(5, False, False)],
                     }
                 )
-
         return super().create(vals_list)
 
     def write(self, vals):

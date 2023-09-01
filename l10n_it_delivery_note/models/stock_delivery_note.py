@@ -488,12 +488,10 @@ class StockDeliveryNote(models.Model):
                     raise UserError(
                         _(
                             "In %(dn_name)s there is %(product_name)s "
-                            "with invoicing policy 'order'"
+                            "with invoicing policy 'order'",
+                            dn_name=delivery_note_id.display_name,
+                            product_name=line.product_id.name,
                         )
-                        % {
-                            "dn_name": delivery_note_id.display_name,
-                            "product_name": line.product_id.name,
-                        }
                     )
 
     def _fix_quantities_to_invoice(self, lines, invoice_method):
