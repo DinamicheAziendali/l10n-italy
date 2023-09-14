@@ -24,7 +24,7 @@
                             groups="base.group_multi_company"
                         />
                     </group>
-                    <group string="Self Invoicing" colspan="4">
+                    <group string="Self Invoicing">
                         <field
                             name="partner_type"
                             attrs="{

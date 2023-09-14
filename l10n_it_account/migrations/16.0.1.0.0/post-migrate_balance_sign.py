@@ -5,7 +5,6 @@ from openupgradelib import openupgrade
 
 
 def migrate(cr, installed_version):
-    return #add this return because after this line, odoo give us an error on account_account_type
     # Assign the sign of the account type to the account
     openupgrade.logged_query(
         cr,
