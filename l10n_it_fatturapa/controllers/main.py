@@ -13,6 +13,8 @@ class FatturaElettronicaController(Controller):
     def pdf_preview(self, attachment_id, **data):
         attach = request.env["ir.attachment"].browse(int(attachment_id))
         html = attach.get_fattura_elettronica_preview()
+        if type(html) == bytes:
+            html = html.decode()
         pdf = request.env["ir.actions.report"]._run_wkhtmltopdf([html])
 
         pdfhttpheaders = [
