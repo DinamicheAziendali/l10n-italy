@@ -6,3 +6,6 @@
 
    * Giovanni Serra <giovanni@gslab.it>
 * Nextev Srl <odoo@nextev.it>
+* `Aion Tech <https://aiontech.company/>`_:
+
+  * Simone Rubino <simone.rubino@aion-tech.it>

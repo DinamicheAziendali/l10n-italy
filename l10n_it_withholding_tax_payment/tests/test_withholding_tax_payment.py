@@ -39,12 +39,13 @@ class TestWithholdingTaxPayment(AccountTestInvoicingCommon):
         """
         cls.set_allowed_companies(company_data["company"])
         wh_tax = cls.setup_withholding_tax(company_data)
-        invoice = cls.init_invoice("in_invoice", amounts=[100])
+        invoice = cls.init_invoice(
+            "in_invoice", amounts=[100], company=company_data["company"]
+        )
         invoice_form = Form(invoice)
         with invoice_form.invoice_line_ids.edit(0) as line_form:
             line_form.invoice_line_tax_wt_ids.clear()
             line_form.invoice_line_tax_wt_ids.add(wh_tax)
-        invoice.company_id = company_data["company"]
         invoice = invoice_form.save()
         return invoice
 

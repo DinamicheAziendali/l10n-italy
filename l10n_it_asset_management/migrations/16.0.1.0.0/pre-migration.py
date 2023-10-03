@@ -3,10 +3,12 @@
 from openupgradelib import openupgrade
 
 
-def migrate(cr, installed_version):
-    if not installed_version or openupgrade.table_exists(
-        cr, "l10n_it_asset_management"
-    ):
-        return
-
-    openupgrade.rename_tables(cr, [("assets_management", "l10n_it_asset_management")])
+def migrate(cr):
+    if openupgrade.is_module_installed(cr, "assets_management"):
+        openupgrade.update_module_names(
+            cr,
+            [
+                ("assets_management", "l10n_it_asset_management"),
+            ],
+            merge_modules=True,
+        )
