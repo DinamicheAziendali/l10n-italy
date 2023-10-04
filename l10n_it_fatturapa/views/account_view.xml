@@ -31,7 +31,7 @@
                     </group>
                 </div>
                 <group string="Related Documents">
-                    <field name="related_documents" nolabel="1" />
+                    <field name="related_documents" />
                 </group>
             </xpath>
         </field>
