@@ -47,7 +47,7 @@
                     attrs="{'invisible': [('electronic_invoice_subjected', '=', False)]}"
                 >
                     <group string="Related Documents">
-                        <field name="related_documents" nolabel="1">
+                        <field name="related_documents">
                             <tree editable="bottom">
                                 <field name="type" />
                                 <field name="name" />
@@ -83,7 +83,7 @@
                                           ('fatturapa_attachment_out_id', '=', False)]}"
                 >
                     <group string="Attachments">
-                        <field name="fatturapa_doc_attachments" nolabel="1">
+                        <field name="fatturapa_doc_attachments">
                             <tree>
                                 <field name="ir_attachment_id" />
                                 <field name="name" />
