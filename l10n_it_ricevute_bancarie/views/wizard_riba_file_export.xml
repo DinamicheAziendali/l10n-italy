@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Copyright 2023 Simone Rubino - Aion Tech
+  ~ License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+  -->
 <odoo>
-
     <record id="wizard_riba_file_export" model="ir.ui.view">
         <field name="name">Export C/O</field>
         <field name="model">riba.file.export</field>
@@ -30,5 +33,4 @@
         <field name="state">code</field>
         <field name="code">action = records.action_riba_export()</field>
     </record>
-
 </odoo>

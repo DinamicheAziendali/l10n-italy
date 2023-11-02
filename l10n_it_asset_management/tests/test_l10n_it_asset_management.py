@@ -10,21 +10,17 @@ class TestAssets(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # cls.data_account_type_current_assets = cls.env.ref(
-        #     "account.data_account_type_current_assets"
-        # )
-        # cls.data_account_type_current_liabilities = cls.env.ref(
-        #     "account.data_account_type_current_liabilities"
-        # )
+        cls.account_asset_fixed = cls.env["account.account"].create(
+            {
+                "name": "it_account_asset_fixed",
+                "code": "it.account.asset.fixed",
+                "account_type": "asset_fixed",
+            }
+        )
         cls.asset_category_1 = cls.env["asset.category"].create(
             {
                 "name": "Asset category 1",
-                "asset_account_id": cls.env["account.account"]
-                .search(
-                    [("account_type", "=", "asset_fixed")],
-                    limit=1,
-                )
-                .id,
+                "asset_account_id": cls.account_asset_fixed.id,
                 "depreciation_account_id": cls.env["account.account"]
                 .search(
                     [
@@ -45,7 +41,7 @@ class TestAssets(TransactionCase):
                 .id,
                 "gain_account_id": cls.env["account.account"]
                 .search(
-                    [("account_type", "=", "expense_direct_cost")],
+                    [("account_type", "=", "income")],
                     limit=1,
                 )
                 .id,

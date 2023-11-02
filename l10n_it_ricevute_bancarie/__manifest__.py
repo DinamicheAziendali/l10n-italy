@@ -5,12 +5,13 @@
 # (<http://www.odoo-italia.org>).
 # Copyright (C) 2012-2017 Lorenzo Battistini - Agile Business Group
 # Copyright (C) 2019 Sergio Zanchetta - Associazione PNLUG
+# Copyright 2023 Simone Rubino - Aion Tech
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
     "name": "ITA - Ricevute bancarie",
-    "version": "16.0.1.0.0",
-    "development_status": "Alpha",
+    "version": "16.0.1.1.2",
+    "development_status": "Beta",
     "author": "Odoo Community Association (OCA)",
     "category": "Localization/Italy",
     "summary": "Ricevute bancarie",
@@ -40,6 +41,7 @@
         "views/account_config_view.xml",
         "views/distinta_report.xml",
         "views/riba_detail_view.xml",
+        "views/wizard_presentation.xml",
     ],
     "demo": ["demo/riba_demo.xml"],
     "installable": True,

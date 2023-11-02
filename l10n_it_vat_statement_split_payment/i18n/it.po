@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* l10n_it_vat_statement_split_payment
+# 	* l10n_it_vat_statement_split_payment
 #
 msgid ""
 msgstr ""
@@ -53,13 +53,15 @@ msgid "VAT period end statement"
 msgstr "Dichiarazione IVA di fine periodo"
 
 #. module: l10n_it_vat_statement_split_payment
-#: code:addons/l10n_it_vat_statement_split_payment/models/statement.py:26
+#. odoo-python
+#: code:addons/l10n_it_vat_statement_split_payment/models/statement.py:0
 #, python-format
 msgid "Write-off tax amount on tax"
 msgstr "Storno valore imposta sull'imposta"
 
 #. module: l10n_it_vat_statement_split_payment
-#: code:addons/l10n_it_vat_statement_split_payment/models/statement.py:48
+#. odoo-python
+#: code:addons/l10n_it_vat_statement_split_payment/models/statement.py:0
 #, python-format
 msgid "from {} to {}"
 msgstr "dal {} al {}"

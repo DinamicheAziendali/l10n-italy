@@ -4,6 +4,7 @@
 # Copyright (C) 2012 Associazione OpenERP Italia
 # (<http://www.odoo-italia.org>).
 # Copyright (C) 2012-2017 Lorenzo Battistini - Agile Business Group
+# Copyright 2023 Simone Rubino - Aion Tech
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import _, api, fields, models
@@ -229,7 +230,7 @@ class RibaUnsolved(models.TransientModel):
         to_be_reconciled_lines.reconcile()
         distinta_line.distinta_id.state = "unsolved"
         return {
-            "name": _("Past Due Entry"),
+            "name": _("Unsolved Entry"),
             "view_mode": "form",
             "res_model": "account.move",
             "type": "ir.actions.act_window",

@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-09 20:32+0000\n"
-"PO-Revision-Date: 2023-09-22 16:38+0000\n"
+"PO-Revision-Date: 2023-10-28 15:47+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -176,6 +176,7 @@ msgstr "Numero fatture"
 
 #. module: l10n_it_fatturapa_in
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__invoices_total
+#: model_terms:ir.ui.view,arch_db:l10n_it_fatturapa_in.view_fatturapa_in_attachment_tree
 msgid "Bills Total"
 msgstr "Totale fatture"
 
@@ -625,13 +626,6 @@ msgid "File Size"
 msgstr "Dimensione file"
 
 #. module: l10n_it_fatturapa_in
-#. odoo-python
-#: code:addons/l10n_it_fatturapa_in/wizard/wizard_import_fatturapa.py:0
-#, python-format
-msgid "File is linked to bills yet."
-msgstr "Il file è già collegato a delle fatture."
-
-#. module: l10n_it_fatturapa_in
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__message_follower_ids
 msgid "Followers"
 msgstr "Seguito da"
@@ -710,7 +704,7 @@ msgstr "Altezza immagine"
 #. module: l10n_it_fatturapa_in
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__image_src
 msgid "Image Src"
-msgstr "Immagine Src"
+msgstr "Sorgente immagine"
 
 #. module: l10n_it_fatturapa_in
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__image_width
@@ -1620,6 +1614,10 @@ msgstr "È possibile selezionare solo un file XML da collegare."
 #: model_terms:ir.ui.view,arch_db:l10n_it_fatturapa_in.view_fatturapa_in_attachment_form
 msgid "on"
 msgstr "il"
+
+#, python-format
+#~ msgid "File is linked to bills yet."
+#~ msgstr "Il file è già collegato a delle fatture."
 
 #~ msgid "Number of messages which requires an action"
 #~ msgstr "Numero di messaggi che richiedono un'azione"

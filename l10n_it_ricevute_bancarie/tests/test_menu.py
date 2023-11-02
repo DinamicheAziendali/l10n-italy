@@ -1,4 +1,5 @@
 #  Copyright 2022 Simone Rubino - Agile Business Group
+#  Copyright 2023 Simone Rubino - Aion Tech
 #  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo.tests import common

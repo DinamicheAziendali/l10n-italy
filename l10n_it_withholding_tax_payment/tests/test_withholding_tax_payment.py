@@ -1,4 +1,5 @@
 #  Copyright 2021 Simone Rubino - Agile Business Group
+#  Copyright 2023 Simone Rubino - Aion Tech
 #  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo.tests import Form, tagged
@@ -98,7 +99,6 @@ class TestWithholdingTaxPayment(AccountTestInvoicingCommon):
             .with_context(
                 active_model=wh_tax_move._name,
                 active_ids=wh_tax_move.ids,
-                wt_move_ids=wh_tax_move.ids,
             )
             .create({})
         )

@@ -139,10 +139,11 @@ class AssetDepreciation(models.Model):
     def create(self, vals_list):
         dep = super().create(vals_list)
         dep.normalize_first_dep_nr()
-        if dep.line_ids:
-            num_lines = dep.line_ids.filtered("requires_depreciation_nr")
-            if num_lines:
-                num_lines.normalize_depreciation_nr()
+        for d in dep:
+            if d.line_ids:
+                num_lines = d.line_ids.filtered("requires_depreciation_nr")
+                if num_lines:
+                    num_lines.normalize_depreciation_nr()
         return dep
 
     def write(self, vals):
@@ -226,6 +227,7 @@ class AssetDepreciation(models.Model):
         "line_ids.balance",
         "line_ids.move_type",
         "asset_id.sold",
+        "asset_id.dismissed",
     )
     def _compute_amounts(self):
         for dep in self:
@@ -257,16 +259,14 @@ class AssetDepreciation(models.Model):
 
         lines = self.mapped("line_ids")
 
-        posted_lines = lines.filtered(
-            lambda line: line.date == dep_date
-            and line.move_id
-            and line.move_id.state != "draft"
+        draft_lines = lines.filtered(
+            lambda line: line.date == dep_date and line.move_type == "depreciated"
         )
-        if posted_lines:
-            posted_names = ", ".join(
+        if draft_lines:
+            draft_names = ", ".join(
                 [
                     asset_name
-                    for asset_id, asset_name in posted_lines.mapped(
+                    for asset_id, asset_name in draft_lines.mapped(
                         "depreciation_id.asset_id"
                     ).name_get()
                 ]
@@ -274,8 +274,8 @@ class AssetDepreciation(models.Model):
             raise ValidationError(
                 _(
                     "Cannot update the following assets which contain"
-                    " posted depreciation for the chosen date and types:\n{}"
-                ).format(posted_names)
+                    " draft depreciation for the chosen date and types:\n{}"
+                ).format(draft_names)
             )
 
     def generate_depreciation_lines(self, dep_date):
@@ -324,7 +324,7 @@ class AssetDepreciation(models.Model):
             if "amount_{}".format(k) in self._fields
         }
 
-        if self.asset_id.sold:
+        if self.asset_id.sold or self.asset_id.dismissed:
             vals.update({"amount_depreciable_updated": 0, "amount_residual": 0})
         else:
             non_residual_types = self.line_ids.get_non_residual_move_types()
@@ -478,7 +478,7 @@ class AssetDepreciation(models.Model):
         self.ensure_one()
         return {
             "company_id": self.company_id.id,
-            "date": self.asset_id.sale_date,
+            "date": self._context.get("dismiss_date") or self.asset_id.sale_date,
             "journal_id": self.asset_id.category_id.journal_id.id,
             "line_ids": [],
             "ref": _("Asset dismissal: ") + self.asset_id.make_name(),

@@ -1,6 +1,7 @@
 # Author: Andrea Gallina
 # ©  2015 Apulia Software srl
 # Copyright (C) 2017 Lorenzo Battistini - Agile Business Group
+# Copyright 2023 Simone Rubino - Aion Tech
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import base64
@@ -12,9 +13,6 @@ from . import riba_common
 
 
 class TestInvoiceDueCost(riba_common.TestRibaCommon):
-    def setUp(self):
-        super(TestInvoiceDueCost, self).setUp()
-
     def test_add_due_cost(self):
         # ---- Set Service in Company Config
         self.invoice.company_id.due_cost_service_id = self.service_due_cost.id
@@ -526,3 +524,14 @@ class TestInvoiceDueCost(riba_common.TestRibaCommon):
         riba_txt = base64.decodebytes(wizard_riba_export.riba_txt)
         self.assertTrue(b"CIG: 7987210EG5 CUP: H71N17000690124" in riba_txt)
         self.assertTrue(b"CIG: 7987210EG5 CUP: H71N17000690125" in riba_txt)
+
+    def test_riba_presentation(self):
+        total_amount = 200000
+        wizard_riba_issue = self.env["presentation.riba.issue"].create(
+            {"presentation_amount": total_amount}
+        )
+        domain = wizard_riba_issue.action_presentation_riba()["domain"]
+        total_issue_amount = sum(
+            self.env["account.move.line"].search(domain).mapped("amount_residual")
+        )
+        self.assertTrue(total_amount - total_issue_amount >= 0)

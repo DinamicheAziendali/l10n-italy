@@ -210,9 +210,9 @@ class TestFatturaPAXMLValidation(FatturapaCommon):
 
     def test_08_xml_import_no_account(self):
         """Check that a useful error message is raised when
-        the credit account is missing in purchase journal."""
+        the credit account is missing in journal."""
         company = self.env.company
-        journal = self.wizard_model.get_purchase_journal(company)
+        journal = self.wizard_model.get_journal(company)
         journal_account = journal.default_account_id
         journal.default_account_id = False
 
@@ -939,16 +939,9 @@ class TestFatturaPAXMLValidation(FatturapaCommon):
         )
         self.wizard_model.reset_inconsistencies()
 
-    def test_54_xml_in_invoice_registration_date_inv_date(self):
-        self.env.company.in_invoice_registration_date = "inv_date"
-        res = self.run_wizard("test54", "IT05979361218_017.xml")
-        invoice_id = res.get("domain")[0][2][0]
-        invoice = self.invoice_model.browse(invoice_id)
-        self.assertEqual(invoice.invoice_date, date(2015, 2, 16))
-
-    def test_55_xml_in_invoice_registration_date_rec_date(self):
+    def test_54_xml_in_invoice_registration_date_rec_date(self):
         self.env.company.in_invoice_registration_date = "rec_date"
-        res = self.run_wizard("test55", "IT05979361218_018.xml")
+        res = self.run_wizard("test55", "IT05979361218_017.xml")
         invoice_id = res.get("domain")[0][2][0]
         invoice = self.invoice_model.browse(invoice_id)
         self.assertEqual(invoice.date, fields.Date.today())
@@ -1072,116 +1065,10 @@ class TestFatturaPAEnasarco(FatturapaCommon):
         self.invoice_model = self.env["account.move"]
 
     def test_01_xml_import_enasarco(self):
-        account_payable = self.env["account.account"].create(
-            {
-                "name": "Test WH tax",
-                "code": "whtaxpay2",
-                "account_type": "liability_payable",
-                "reconcile": True,
-            }
-        )
-        account_receivable = self.env["account.account"].create(
-            {
-                "name": "Test WH tax",
-                "code": "whtaxrec2",
-                "account_type": "asset_receivable",
-                "reconcile": True,
-            }
-        )
-        misc_journal = self.env["account.journal"].search(
-            [
-                ("company_id", "=", self.env.company.id),
-                ("code", "=", "MISC"),
-            ]
-        )
-        self.env["withholding.tax"].create(
-            {
-                "name": "Enasarco",
-                "code": "TC07",
-                "account_receivable_id": account_receivable.id,
-                "account_payable_id": account_payable.id,
-                "journal_id": misc_journal.id,
-                "payment_term": self.env.ref("account.account_payment_term_advance").id,
-                "wt_types": "enasarco",
-                "payment_reason_id": self.env.ref("l10n_it_payment_reason.r").id,
-                "rate_ids": [
-                    (
-                        0,
-                        0,
-                        {
-                            "tax": 1.57,
-                            "base": 1.0,
-                        },
-                    )
-                ],
-            }
-        )
-        self.env["withholding.tax"].create(
-            {
-                "name": "Enasarco 8,50",
-                "code": "TC07",
-                "account_receivable_id": account_receivable.id,
-                "account_payable_id": account_payable.id,
-                "journal_id": misc_journal.id,
-                "payment_term": self.env.ref("account.account_payment_term_advance").id,
-                "wt_types": "enasarco",
-                "payment_reason_id": self.env.ref("l10n_it_payment_reason.r").id,
-                "rate_ids": [
-                    (
-                        0,
-                        0,
-                        {
-                            "tax": 8.5,
-                            "base": 1.0,
-                        },
-                    )
-                ],
-            }
-        )
-        self.env["withholding.tax"].create(
-            {
-                "name": "1040/3",
-                "code": "1040",
-                "account_receivable_id": account_receivable.id,
-                "account_payable_id": account_payable.id,
-                "journal_id": misc_journal.id,
-                "payment_term": self.env.ref("account.account_payment_term_advance").id,
-                "wt_types": "ritenuta",
-                "payment_reason_id": self.env.ref("l10n_it_payment_reason.a").id,
-                "rate_ids": [
-                    (
-                        0,
-                        0,
-                        {
-                            "tax": 11.50,
-                            "base": 1.0,
-                        },
-                    )
-                ],
-            }
-        )
-        self.env["withholding.tax"].create(
-            {
-                "name": "1040 R",
-                "code": "1040R",
-                "account_receivable_id": account_receivable.id,
-                "account_payable_id": account_payable.id,
-                "journal_id": misc_journal.id,
-                "payment_term": self.env.ref("account.account_payment_term_advance").id,
-                "wt_types": "ritenuta",
-                "payment_reason_id": self.env.ref("l10n_it_payment_reason.r").id,
-                "rate_ids": [
-                    (
-                        0,
-                        0,
-                        {
-                            "tax": 11.50,
-                            "base": 1.0,
-                        },
-                    )
-                ],
-            }
-        )
+        self.create_wt_enasarco_157_r()
+        self.create_wt_enasarco_85_r()
+        self.create_wt_enasarco_115_a()
+        self.create_wt_115_r()
         # case with ENASARCO only in DatiCassaPrevidenziale and not in DatiRitenuta.
         # This should not happen, but it is valid for SDI
         res = self.run_wizard("test01", "IT05979361218_014.xml")

@@ -117,10 +117,11 @@ class AssetDepreciationLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        line = super().create(vals_list)
-        if line.need_normalize_depreciation_nr():
-            line.normalize_depreciation_nr(force=True)
-        return line
+        lines = super().create(vals_list)
+        for line in lines:
+            if line.need_normalize_depreciation_nr():
+                line.normalize_depreciation_nr(force=True)
+        return lines
 
     def write(self, vals):
         res = super().write(vals)

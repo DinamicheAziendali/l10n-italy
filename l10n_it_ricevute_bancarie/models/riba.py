@@ -4,12 +4,13 @@
 # Copyright (C) 2012 Associazione OpenERP Italia
 # (<http://www.odoo-italia.org>).
 # Copyright (C) 2012-2017 Lorenzo Battistini - Agile Business Group
+# Copyright 2023 Simone Rubino - Aion Tech
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from datetime import date
 
 from odoo import _, api, fields, models
-from odoo.exceptions import Warning as UserError
+from odoo.exceptions import UserError
 
 
 class RibaList(models.Model):
@@ -135,17 +136,18 @@ class RibaList(models.Model):
             "context": self.env.context,
         }
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_not_confirmed(self):
         for riba_list in self:
             if riba_list.state not in ("draft", "cancel"):
                 raise UserError(
                     _(
                         "Slip %(name)s is in state '%(state)s'. You can only delete documents"
-                        " in state 'Draft' or 'Canceled'."
+                        " in state 'Draft' or 'Canceled'.",
+                        name=riba_list.name,
+                        state=riba_list.state,
                     )
-                    % {"name": riba_list.name, "state": riba_list.state}
                 )
-        return super(RibaList, self).unlink()
 
     def confirm(self):
         for distinta in self:
@@ -175,7 +177,7 @@ class RibaList(models.Model):
         if self.date_accepted and self.date_accreditation:
             if self.date_accepted > self.date_accreditation:
                 raise UserError(
-                    _("Credit date must be greater or equal to" " acceptance date.")
+                    _("Credit date must be greater or equal to acceptance date.")
                 )
 
     def riba_unsolved(self):
@@ -367,8 +369,8 @@ class RibaListLine(models.Model):
             total_credit = 0.0
             move = move_model.create(
                 {
-                    "ref": "C/O {} - Line {}".format(
-                        line.distinta_id.name, line.sequence
+                    "ref": "{} C/O {} - Line {}".format(
+                        line.invoice_number, line.distinta_id.name, line.sequence
                     ),
                     "journal_id": journal.id,
                     "date": line.distinta_id.registration_date,
@@ -416,8 +418,9 @@ class RibaListLine(models.Model):
                 to_be_reconciled |= riba_move_line.move_line_id
             move_line_model.with_context(check_move_validity=False).create(
                 {
-                    "name": "C/O %s-%s Ref. %s - %s"
+                    "name": "%s C/O %s-%s Ref. %s - %s"
                     % (
+                        line.invoice_number,
                         line.distinta_id.name,
                         line.sequence,
                         riba_move_line_name,

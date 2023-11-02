@@ -75,9 +75,12 @@ class Asset(models.Model):
 
     sale_date = fields.Date()
 
+    dismiss_date = fields.Date()
+
     sale_move_id = fields.Many2one("account.move", string="Sale Move")
 
     sold = fields.Boolean()
+    dismissed = fields.Boolean()
 
     state = fields.Selection(
         [
@@ -99,6 +102,7 @@ class Asset(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         # Add depreciation if it's missing while category is set
+        assets = self.browse()
         for vals in vals_list:
             create_deps_from_categ = False
             if vals.get("category_id") and not vals.get("depreciation_ids"):
@@ -106,9 +110,10 @@ class Asset(models.Model):
             if vals.get("code"):
                 vals["code"] = " ".join(vals.get("code").split())
             asset = super().create(vals)
+            assets |= asset
             if create_deps_from_categ:
                 asset.onchange_category_id()
-        return asset
+        return assets
 
     def write(self, vals):
         if vals.get("code"):

@@ -10,3 +10,6 @@
 * Simone Vanin <simone.vanin@agilebg.com>
 * Sergio Corato <https://github.com/sergiocorato>
 * Giovanni Serra <giovanni@gslab.it>
+* `Aion Tech <https://aiontech.company/>`_:
+
+  * Simone Rubino <simone.rubino@aion-tech.it>

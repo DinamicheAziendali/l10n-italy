@@ -17,8 +17,8 @@
         "mail",
     ],
     "data": [
-        "security/ir.model.access.csv",
         "security/res_groups.xml",
+        "security/ir.model.access.csv",
         "security/rules.xml",
         "data/ir_cron.xml",
         "data/asset_data.xml",
@@ -43,6 +43,12 @@
         "wizard/asset_journal_report_view.xml",
         "wizard/asset_previsional_report_view.xml",
     ],
+    "external_dependencies": {
+        "python": [
+            "openupgradelib",
+        ],
+    },
+    "pre_init_hook": "pre_absorb_old_module",
     "development_status": "Beta",
     "installable": True,
 }

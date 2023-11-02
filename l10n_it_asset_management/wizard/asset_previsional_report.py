@@ -71,7 +71,13 @@ class WizardAssetPrevisionalReport(models.TransientModel):
     show_totals = fields.Boolean(default=True)
 
     show_category_totals = fields.Boolean(default=True)
-    show_sold_assets = fields.Boolean()
+    show_sold_assets = fields.Boolean(
+        help="By default, only unsold or assets sold in the selected year are printed."
+        "\nBy selecting this flag, the report will show all assets, ignoring the sold "
+        "check."
+    )
+    show_dismissed_assets = fields.Boolean()
+
     report_footer_year = fields.Char(default=get_default_report_footer_year)
 
     type_ids = fields.Many2many(
@@ -151,6 +157,7 @@ class WizardAssetPrevisionalReport(models.TransientModel):
             "show_totals": self.show_totals,
             "show_category_totals": self.show_category_totals,
             "show_sold_assets": self.show_sold_assets,
+            "show_dismissed_assets": self.show_dismissed_assets,
             "report_footer_year": self.report_footer_year,
             "type_ids": [(6, 0, self.type_ids.ids)],
         }

@@ -1,25 +1,9 @@
 <?xml version="1.0" ?>
+<!--
+  ~ Copyright 2023 Simone Rubino - Aion Tech
+  ~ License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+  -->
 <odoo>
-
-    <!-- TODO: record model="ir.ui.view" id="account_config_view_service_due_cost">
-        <field name="name">account.config.view.service.due.cost</field>
-        <field name="model">account.config.settings</field>
-        <field name="inherit_id" ref="account.view_account_config_settings"/>
-        <field name="arch" type="xml">
-            <xpath expr="//group[@name='bank_cash']" position="after">
-                <separator string="C/O Collection Fees Config"/>
-                <group name="riba_config">
-                    <label for="id" string="Collection Fees Service"/>
-                        <div>
-                            <div>
-                                <field name="due_cost_service_id"
-                                       class="oe_inline"/>
-                            </div>
-                        </div>
-                </group>
-            </xpath>
-        </field>
-    </record-->
     <record id="view_account_config_settings_riba" model="ir.ui.view">
         <field name="name">view_account_config_settings_riba</field>
         <field name="model">res.config.settings</field>

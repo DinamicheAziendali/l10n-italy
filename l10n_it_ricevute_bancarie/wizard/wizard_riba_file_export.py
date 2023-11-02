@@ -4,6 +4,7 @@
 # Thanks to Antonio de Vincentiis http://www.devincentiis.it/ ,
 # GAzie http://gazie.sourceforge.net/
 # and Cecchi s.r.l http://www.cecchi.com/
+# Copyright 2023 Simone Rubino - Aion Tech
 
 
 import base64
@@ -74,20 +75,6 @@ class RibaFileExport(models.TransientModel):
     _name = "riba.file.export"
     _description = "C/O File Export Wizard"
     _ribaStorage = RibaStorage()
-
-    #     @classmethod
-    #     def _build_model_attributes(cls, pool):
-    #         """ Initialize base model attributes. """
-    #         ret = super(RibaFileExport,cls)._build_model_attributes( pool)
-    #         cls.progressivo = 0
-    #         cls.assuntrice = 0
-    #         cls.sia = 0
-    #         cls.riba_data = 0
-    #         cls.supporto = 0
-    #         cls.riba_totale = 0
-    #         cls.riba_creditore = 0
-    #         cls.riba_descrizione = ''
-    #         cls.riba_comune_provincia_debitor = ''
 
     def _RecordIB(
         self,
@@ -309,7 +296,12 @@ class RibaFileExport(models.TransientModel):
         credit_cab = credit_iban[10:15]
         credit_conto = credit_iban[-12:]
         if not credit_bank.codice_sia:
-            raise UserError(_("No SIA Code specified for ") + name_company)
+            raise UserError(
+                _(
+                    "No SIA Code specified for %(company)s",
+                    company=name_company,
+                )
+            )
         credit_sia = credit_bank.codice_sia
         dataemissione = datetime.datetime.now().strftime("%d%m%y")
         nome_supporto = datetime.datetime.now().strftime("%d%m%y%H%M%S") + credit_sia
@@ -319,7 +311,12 @@ class RibaFileExport(models.TransientModel):
             not order_obj.config_id.company_id.partner_id.vat
             and not order_obj.config_id.company_id.partner_id.fiscalcode
         ):
-            raise UserError(_("No VAT or Fiscal Code specified for ") + name_company)
+            raise UserError(
+                _(
+                    "No VAT or Fiscal Code specified for %(company)s",
+                    company=name_company,
+                )
+            )
         array_testata = [
             credit_sia,
             credit_abi,
@@ -353,7 +350,10 @@ class RibaFileExport(models.TransientModel):
                 debit_cab = debit_iban[10:15]
             else:
                 raise UserError(
-                    _("No IBAN or ABI/CAB specified for ") + line.partner_id.name
+                    _(
+                        "No IBAN or ABI/CAB specified for %(partner)s",
+                        partner=line.partner_id.name,
+                    )
                 )
             debitor_city = (
                 debitor_address.city and debitor_address.city.ljust(23)[0:23] or ""
@@ -368,7 +368,10 @@ class RibaFileExport(models.TransientModel):
 
             if not line.partner_id.vat and not line.partner_id.fiscalcode:
                 raise UserError(
-                    _("No VAT or Fiscal Code specified for ") + line.partner_id.name
+                    _(
+                        "No VAT or Fiscal Code specified for %(partner)s",
+                        partner=line.partner_id.name,
+                    )
                 )
             Riba = [
                 line.sequence,

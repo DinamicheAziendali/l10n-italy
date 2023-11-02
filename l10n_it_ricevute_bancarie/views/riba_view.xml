@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Copyright 2023 Simone Rubino - Aion Tech
+  ~ License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+  -->
 <odoo>
 
     <menuitem name="C/O" parent="account.menu_finance" id="menu_riba" />
 
     <!-- ====================================================== -->
-    <!--                     DISTINTA RIBA - FILTRI             -->
+    <!--                     RIBA SLIP - FILTERS             -->
     <!-- ====================================================== -->
     <record model="ir.ui.view" id="view_distinta_riba_filtri">
         <field name="name">riba.distinta.filtri</field>
@@ -39,7 +43,7 @@
     </record>
 
     <!-- ====================================================== -->
-    <!--                     DISTINTA RIBA TREE                 -->
+    <!--                     RIBA SLIP TREE                 -->
     <!-- ====================================================== -->
     <record model="ir.ui.view" id="view_distinta_riba_tree">
         <field name="name">riba.distinta.tree</field>
@@ -56,7 +60,7 @@
     </record>
 
     <!-- ====================================================== -->
-    <!--                     DISTINTA LINE FORM                 -->
+    <!--                     RIBA SLIP LINE FORM                 -->
     <!-- ====================================================== -->
     <record model="ir.ui.view" id="view_riba_distinta_line_form">
         <field name="name">riba.distinta.line.form</field>
@@ -124,7 +128,7 @@
 
 
     <!-- ====================================================== -->
-    <!--                     DISTINTA RIBA FORM                 -->
+    <!--                     RIBA SLIP FORM                 -->
     <!-- ====================================================== -->
     <record model="ir.ui.view" id="view_riba_distinta_form">
         <field name="name">riba.distinta.form</field>
@@ -246,7 +250,7 @@
     </record>
 
     <!-- ====================================================== -->
-    <!--                     ACTION DISTINTA RIBA               -->
+    <!--                     RIBA SLIP ACTION               -->
     <!-- ====================================================== -->
     <record id="distinta_riba_action" model="ir.actions.act_window">
         <field name="name">C/O Slip</field>
@@ -257,7 +261,7 @@
     </record>
 
     <!-- ====================================================== -->
-    <!--                     DISTINTA RIBA - MENU               -->
+    <!--                     RIBA SLIP - MENU               -->
     <!-- ====================================================== -->
     <menuitem
         name="Slips"

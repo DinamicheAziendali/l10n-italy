@@ -1,10 +1,13 @@
+#  Copyright 2023 Simone Rubino - Aion Tech
+#  License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+
 from odoo import fields
 from odoo.tests import common
 
 
 class TestRibaCommon(common.TransactionCase):
     def setUp(self):
-        super(TestRibaCommon, self).setUp()
+        super().setUp()
         tax_model = self.env["account.tax"]
         self.account_tax = (
             self.env.ref("l10n_it.2601", raise_if_not_found=False)

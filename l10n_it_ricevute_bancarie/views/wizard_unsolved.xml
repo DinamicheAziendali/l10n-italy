@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Copyright 2023 Simone Rubino - Aion Tech
+  ~ License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+  -->
 <odoo>
-
     <record id="riba_unsolved" model="ir.ui.view">
         <field name="name">riba.unsolved.wizard</field>
         <field name="model">riba.unsolved</field>
@@ -54,5 +57,4 @@
         <field name="target">new</field>
         <field name="view_id" ref="riba_unsolved" />
     </record>
-
 </odoo>

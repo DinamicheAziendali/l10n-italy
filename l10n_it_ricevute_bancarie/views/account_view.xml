@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Copyright 2023 Simone Rubino - Aion Tech
+  ~ License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+  -->
 <odoo>
 
     <!-- ====================================================== -->
-    <!--                     CAMPI AGGIUNTIVI                   -->
+    <!--                     EXTRA FIELDS                       -->
     <!-- ====================================================== -->
     <record id="view_riba_add_text_field" model="ir.ui.view">
         <field name="name">account.riba.add.text.field</field>
@@ -39,13 +43,12 @@
         </field>
     </record>
 
-    <!-- Riba da emettere Tree View -->
+    <!-- RiBa To Issue - Tree View -->
 
     <record model="ir.ui.view" id="view_riba_da_emettere_tree">
         <field name="name">C/O Issue</field>
         <field name="model">account.move.line</field>
         <field name="arch" type="xml">
-        <!-- mabo colors="grey:reconciled!=False;red:date_maturity&lt;current_date"-->
             <tree create="false">
                 <field name="partner_id" readonly="1" />
                 <field name="move_id" readonly="1" />
@@ -67,7 +70,7 @@
         </field>
     </record>
 
-    <!-- Riba da emettere Filtro -->
+    <!-- RiBa To Issue - Filter -->
 
     <record id="riba_filter" model="ir.ui.view">
     <field name="name">C/O filter</field>
@@ -75,6 +78,7 @@
     <field name="inherit_id" ref="account_due_list.view_payments_filter" />
     <field name="arch" type="xml">
         <xpath expr="//search" position="inside">
+            <separator />
             <filter
                     name="da_emettere"
                     string="RIBA To Issue"
@@ -95,34 +99,17 @@
                     string="To Reconcile"
                     domain="[('reconciled', '=', False)]"
                 />
-            <filter
+            <separator />
+                <filter
                     name="unsolved"
                     string="Past Due"
                     domain="[('unsolved_invoice_ids', '!=', False)]"
                 />
-            <filter
-                    name="sale_journal"
-                    string="Sale Journals"
-                    domain="[('journal_id.type', '=', 'sale')]"
-                />
-            <field name="account_id" />
-            <field name="partner_id" />
-            <field name="move_id" />
-            <!-- TODO: field name="invoice_origin"/-->
-            <field name="date_maturity" />
-            <group expand="0" string="Group By...">
-                <filter
-                        name="filter_customer"
-                        string="Group By Customer"
-                        context="{'group_by':'partner_id'}"
-                    />
-                <!-- <filter name="filter_invoice" string="Group By Invoice" context="{'group_by':'stored_invoice_id'}"/> Matteo Boscolo-->
-            </group>
-        </xpath>
-    </field>
-</record>
+            </xpath>
+        </field>
+    </record>
 
-    <!-- Riba da emettere Action -->
+    <!-- RiBa To Issue - Action -->
 
     <record model="ir.actions.act_window" id="action_riba_da_emettere">
         <field name="name">C/O Issue</field>
@@ -166,11 +153,6 @@
                     attrs="{'invisible': [('is_unsolved', '=', False)]}"
                 />
             </xpath>
-            <!-- MABO
-            <field name="tax_ids" position="after">
-                <field name="unsolved_move_line_ids" colspan="4" nolabel="1"/>
-            </field>
-            -->
         </field>
     </record>
 
@@ -180,23 +162,11 @@
         <field name="inherit_id" ref="account.view_invoice_tree" />
         <field name="arch" type="xml">
             <field name="move_type" position="after">
-                <field name="is_unsolved" string="Past Due" />
+                <field name="is_past_due" string="Past Due" />
             </field>
         </field>
     </record>
-<!-- to be ported -->
-<!--
-    <record id="view_account_invoice_filter_unsolved" model="ir.ui.view">
-        <field name="name">account.invoice.select.unsolved</field>
-        <field name="model">account.move</field>
-        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
-        <field name="arch" type="xml">
-            <filter name="unpaid" position="after">
-               <filter name="unsolved" string="Past Due" domain="[('is_unsolved','=',True)]" help="Past Due Invoices"/>
-            </filter>
-        </field>
-    </record>
- -->
+
     <record id="action_invoice_tree1" model="ir.actions.act_window">
         <field name="name">Past Due Invoices</field>
         <field name="res_model">account.move</field>
