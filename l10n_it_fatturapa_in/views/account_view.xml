@@ -440,8 +440,8 @@
                                     <group>
                                         <field name="payment_terms" />
                                     </group>
-                                    <group string="Payments Details">
-                                        <field
+                                    <label for="payment_methods" string="Payments Details">
+                                    <field
                                         name="payment_methods"
                                         nolabel="1"
                                         readonly="1"
@@ -498,7 +498,7 @@
                                                </group>
                                            </form>
                                         </field>
-                                    </group>
+                                    </label>
                                 </sheet>
                             </form>
                         </field>

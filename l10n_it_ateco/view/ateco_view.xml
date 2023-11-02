@@ -12,9 +12,8 @@
                     <field name="name" />
                     <field name="parent_id" />
                 </group>
-                <group name="Partner" colspan="4">
-                    <field name="partner_ids" nolabel="1" colspan="4" />
-                </group>
+                <label for="partner_ids" />
+                <field name="partner_ids" nolabel="1" />
             </form>
         </field>
     </record>
