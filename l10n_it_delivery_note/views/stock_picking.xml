@@ -325,8 +325,7 @@
                                         />
                                     </group>
                                 </group>
-                                <label
-                                    for="delivery_note_note"
+                                <separator
                                     string="Delivery Notes"
                                     attrs="{'invisible': [('delivery_note_exists', '=', False)]}"
                                 />

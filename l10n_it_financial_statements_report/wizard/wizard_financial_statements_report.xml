@@ -56,28 +56,42 @@
                             />
                         </group>
                     </group>
-                    <label for="partner_ids" attrs="{'invisible':[('show_partner_details','=',False)]}" />
-                    <field
-                        name="partner_ids"
-                        nolabel="1"
-                        widget="many2many_tags"
-                        options="{'no_create': True}"
+                    <group
+                        name="partner_filter"
+                        col="4"
                         attrs="{'invisible':[('show_partner_details','=',False)]}"
-                    />
-                    <label for="journal_ids" />
-                    <field
-                        name="journal_ids"
-                        nolabel="1"
-                        widget="many2many_tags"
-                        options="{'no_create': True}"
-                    />
-                    <label for="account_ids" />
-                    <field
-                        name="account_ids"
-                        nolabel="1"
-                        widget="many2many_tags"
-                        options="{'no_create': True}"
-                    />
+                    >
+                        <label for="partner_ids" colspan="4" />
+                        <field
+                            name="partner_ids"
+                            nolabel="1"
+                            widget="many2many_tags"
+                            options="{'no_create': True}"
+                            colspan="4"
+                        />
+                        <div />
+                    </group>
+                    <group name="journal_filter" col="4">
+                        <label for="journal_ids" colspan="4" />
+                        <field
+                            name="journal_ids"
+                            nolabel="1"
+                            widget="many2many_tags"
+                            options="{'no_create': True}"
+                            colspan="4"
+                        />
+                        <div />
+                    </group>
+                    <group name="account_filter" col="4">
+                        <label for="account_ids" colspan="4" />
+                        <field
+                            name="account_ids"
+                            nolabel="1"
+                            widget="many2many_tags"
+                            options="{'no_create': True}"
+                            colspan="4"
+                        />
+                    </group>
                 </div>
                 <div
                     attrs="{'invisible': [('not_only_one_unaffected_earnings_account', '=', False)]}"

@@ -9,7 +9,6 @@
             <field name="arch" type="xml">
                 <notebook position="inside">
                     <page string="Ateco">
-                        <label for="ateco_category_ids" />
                         <field
                             name="ateco_category_ids"
                             nolabel="1"

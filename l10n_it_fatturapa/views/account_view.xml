@@ -30,7 +30,7 @@
                         <field name="admin_ref" />
                     </group>
                 </div>
-                <label for="related_documents" />
+                <separator string="Related Documents" />
                 <field name="related_documents" nolabel="1" />
             </xpath>
         </field>
