@@ -281,3 +281,140 @@ class TestWithholdingTax(TransactionCase):
         payment_register.with_context(
             default_move_type="in_invoice"
         ).action_create_payments()
+
+    def _get_statements(self, move):
+        """Get statements linked to `move`."""
+        statements = self.env["withholding.tax.statement"].search(
+            [
+                ("move_id", "=", move.id),
+            ],
+        )
+        return statements
+
+    def _assert_recreate_statements(self, move, statements_count):
+        """Post a `move` that is Withholding Tax and has no statements,
+        it creates `statements_count` statements."""
+        # Arrange
+        statements = self._get_statements(move)
+        # pre-condition
+        self.assertFalse(statements)
+        self.assertTrue(move.withholding_tax)
+
+        # Act
+        move.action_post()
+
+        # Assert
+        posted_move_statements_count = len(self._get_statements(move))
+        self.assertEqual(posted_move_statements_count, statements_count)
+
+    def test_draft_recreate_statements(self):
+        """Set to draft and re-confirm a move: the Tax Statements are recreated."""
+        # Arrange
+        move = self.invoice
+        statements = self._get_statements(move)
+        statements_count = len(statements)
+        # pre-condition: There is a statement(s)
+        self.assertTrue(statements)
+
+        # Act
+        move.button_draft()
+
+        # Assert: The original statement is deleted and there are no statements
+        self.assertFalse(statements.exists())
+        self._assert_recreate_statements(move, statements_count)
+
+    def test_cancel_recreate_statements(self):
+        """Cancel and re-confirm a move: the Tax Statements are recreated."""
+        # Arrange
+        move = self.invoice
+        statements = self._get_statements(move)
+        statements_count = len(statements)
+        # pre-condition: There is a statement(s)
+        self.assertTrue(statements)
+
+        # Act
+        move.button_cancel()
+
+        # Assert: The original statement is deleted and there are no statements
+        self.assertFalse(statements.exists())
+        self._assert_recreate_statements(move, statements_count)
+
+    def _get_payment_wizard(self, invoice):
+        wizard_action = invoice.action_register_payment()
+        wizard_model = wizard_action["res_model"]
+        wizard_context = wizard_action["context"]
+        wizard = self.env[wizard_model].with_context(**wizard_context).create({})
+        return wizard
+
+    def test_payment_reset_net_pay_residual(self):
+        """The amount to pay is reset to the Residual Net To Pay
+        when amount and Journal are changed."""
+        # Arrange: Pay an invoice
+        invoice = self.invoice
+        wizard = self._get_payment_wizard(invoice)
+        user_set_amount = 20
+        # pre-condition
+        self.assertEqual(
+            wizard.amount,
+            invoice.amount_net_pay_residual,
+        )
+        self.assertTrue(
+            invoice.withholding_tax_amount,
+        )
+
+        # Act: Change amount
+        wizard.amount = user_set_amount
+
+        # Assert: User's change is kept
+        self.assertEqual(
+            wizard.amount,
+            user_set_amount,
+        )
+
+        # Act: Change Journal
+        wizard.journal_id = self.journal_bank
+
+        # Assert: Amount is reset to the Residual Net To Pay
+        self.assertEqual(
+            wizard.amount,
+            invoice.amount_net_pay_residual,
+        )
+
+    def test_wt_after_repost(self):
+        wt_statement_ids = self.env["withholding.tax.statement"].search(
+            [
+                ("invoice_id", "=", self.invoice.id),
+                ("withholding_tax_id", "=", self.wt1040.id),
+            ]
+        )
+        self.assertEqual(len(wt_statement_ids), 1)
+        ctx = {
+            "active_model": "account.move",
+            "active_ids": [self.invoice.id],
+            "active_id": self.invoice.id,
+            "default_reconciled_invoice_ids": [(4, self.invoice.id, None)],
+        }
+        register_payment_form = Form(
+            self.payment_register_model.with_context(**ctx), view=self.register_view_id
+        )
+        register_payment_form.amount = 600
+        register_payment = register_payment_form.save()
+        register_payment.action_create_payments()
+        partials = self.invoice._get_reconciled_invoices_partials()[0]
+        self.assertTrue({p[1] for p in partials} == {600, 150})
+
+        self.invoice.button_draft()
+        self.invoice.action_post()
+        wt_statement_ids = self.env["withholding.tax.statement"].search(
+            [
+                ("invoice_id", "=", self.invoice.id),
+                ("withholding_tax_id", "=", self.wt1040.id),
+            ]
+        )
+        self.assertEqual(len(wt_statement_ids), 1)
+        debit_line_id = partials[0][2].move_id.line_ids.filtered(lambda l: l.debit)
+        self.invoice.js_assign_outstanding_line(debit_line_id.id)
+        self.assertEqual(self.invoice.amount_net_pay, 800)
+        self.assertEqual(self.invoice.amount_net_pay_residual, 200)
+        self.assertEqual(self.invoice.amount_residual, 250)
+        self.assertEqual(self.invoice.state, "posted")
