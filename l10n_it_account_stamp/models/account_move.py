@@ -21,7 +21,7 @@ class AccountMove(models.Model):
             raise UserError(_("Missing tax stamp product in company settings!"))
         total_tax_base = sum(
             (
-                inv_tax.price_subtotal
+                abs(inv_tax.balance)
                 for inv_tax in self.line_ids.filtered(
                     lambda line: set(line.tax_ids.ids)
                     & set(stamp_product_id.stamp_apply_tax_ids.ids)
@@ -32,14 +32,13 @@ class AccountMove(models.Model):
         return total_tax_base >= stamp_product_id.stamp_apply_min_total_base
 
     @api.depends(
-        "invoice_line_ids.price_subtotal",
-        "line_ids.price_total",
+        "line_ids.balance",
         "currency_id",
         "company_id",
         "invoice_date",
         "move_type",
         "manually_apply_tax_stamp",
-        "invoice_line_ids.tax_ids",
+        "line_ids.tax_ids",
     )
     def _compute_tax_stamp(self):
         for invoice in self:
