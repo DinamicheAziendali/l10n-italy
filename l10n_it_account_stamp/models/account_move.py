@@ -70,13 +70,16 @@ class AccountMove(models.Model):
                     _("Missing account income configuration for %s")
                     % stamp_product_id.name
                 )
+            price_unit = inv.company_currency_id._convert(
+                stamp_product_id.list_price, inv.currency_id, inv.company_id, inv.date
+            )
             invoice_line_vals = {
                 "move_id": inv.id,
                 "product_id": stamp_product_id.id,
                 "name": stamp_product_id.description_sale,
                 "sequence": 99999,
                 "account_id": stamp_account.id,
-                "price_unit": stamp_product_id.list_price,
+                "price_unit": price_unit,
                 "quantity": 1,
                 "display_type": "product",
                 "product_uom_id": stamp_product_id.uom_id.id,
@@ -106,6 +109,9 @@ class AccountMove(models.Model):
             raise UserError(
                 _("Product %s must have income and expense accounts") % product.name
             )
+        list_price = self.company_currency_id._convert(
+            product.list_price, self.currency_id, self.company_id, self.date
+        )
 
         income_vals = {
             "name": _("Tax Stamp Income"),
@@ -115,12 +121,12 @@ class AccountMove(models.Model):
             "journal_id": self.journal_id.id,
             "date": self.invoice_date,
             "debit": 0,
-            "credit": product.list_price,
+            "credit": list_price,
             "display_type": "cogs",
             "currency_id": self.currency_id.id,
         }
         if self.move_type == "out_refund":
-            income_vals["debit"] = product.list_price
+            income_vals["debit"] = list_price
             income_vals["credit"] = 0
 
         expense_vals = {
@@ -130,14 +136,14 @@ class AccountMove(models.Model):
             "account_id": product.property_account_expense_id.id,
             "journal_id": self.journal_id.id,
             "date": self.invoice_date,
-            "debit": product.list_price,
+            "debit": list_price,
             "credit": 0,
             "display_type": "cogs",
             "currency_id": self.currency_id.id,
         }
         if self.move_type == "out_refund":
             income_vals["debit"] = 0
-            income_vals["credit"] = product.list_price
+            income_vals["credit"] = list_price
 
         return income_vals, expense_vals
 
