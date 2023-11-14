@@ -109,9 +109,6 @@ class AccountMove(models.Model):
             raise UserError(
                 _("Product %s must have income and expense accounts") % product.name
             )
-        list_price = self.company_currency_id._convert(
-            product.list_price, self.currency_id, self.company_id, self.date
-        )
 
         income_vals = {
             "name": _("Tax Stamp Income"),
@@ -121,12 +118,12 @@ class AccountMove(models.Model):
             "journal_id": self.journal_id.id,
             "date": self.invoice_date,
             "debit": 0,
-            "credit": list_price,
+            "credit": product.list_price,
             "display_type": "cogs",
             "currency_id": self.currency_id.id,
         }
         if self.move_type == "out_refund":
-            income_vals["debit"] = list_price
+            income_vals["debit"] = product.list_price
             income_vals["credit"] = 0
 
         expense_vals = {
@@ -136,14 +133,14 @@ class AccountMove(models.Model):
             "account_id": product.property_account_expense_id.id,
             "journal_id": self.journal_id.id,
             "date": self.invoice_date,
-            "debit": list_price,
+            "debit": product.list_price,
             "credit": 0,
             "display_type": "cogs",
             "currency_id": self.currency_id.id,
         }
         if self.move_type == "out_refund":
             income_vals["debit"] = 0
-            income_vals["credit"] = list_price
+            income_vals["credit"] = product.list_price
 
         return income_vals, expense_vals
 
