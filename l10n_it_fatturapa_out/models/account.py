@@ -279,6 +279,17 @@ class AccountInvoice(models.Model):
         self.check_DatiGeneraliDocumento(new_xml, original_xml)
         self.check_DatiBeniServizi(new_xml, original_xml)
 
+    def check_move_confirmable(self):
+        self.ensure_one()
+
+        if not self.state == "posted" and not (
+            request
+            and request.params.get("method", False)
+            and request.params["method"] == "action_post"
+        ):
+            return True
+        return False
+
     def write(self, vals):
         is_draft = {}
         for move in self:
