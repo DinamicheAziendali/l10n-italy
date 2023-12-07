@@ -322,7 +322,7 @@ class AccountInvoice(models.Model):
                 new_xml = etree.fromstring(new_xml_content, parser)
                 original_xml = etree.fromstring(original_xml_content, parser)
                 move.elements_equal(new_xml, original_xml)
-                if not move.state == "posted":
+                if move.check_move_confirmable():
                     move.with_context(skip_check_xml=True).action_post()
         return res
 
