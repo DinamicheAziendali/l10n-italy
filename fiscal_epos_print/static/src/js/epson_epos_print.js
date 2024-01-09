@@ -633,7 +633,7 @@ odoo.define("fiscal_epos_print.epson_epos_print", function (require) {
                     msg +
                     '" font="1" index="' +
                     index.toString() +
-                    " />";
+                    "' />";
             });
             return tag;
         },
