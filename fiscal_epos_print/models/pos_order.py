@@ -1,4 +1,8 @@
+import logging
+
 from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
 
 
 class PosOrder(models.Model):
@@ -69,7 +73,7 @@ class PosOrder(models.Model):
             )
 
         fiscal_operator_number = pos_order.get("fiscal_operator_number")
-        
+
         if po:
             po.write(
                 {
@@ -86,6 +90,13 @@ class PosOrder(models.Model):
     @api.model
     def create_from_ui(self, orders, draft=False):
         order_ids = super(PosOrder, self).create_from_ui(orders, draft)
+        all_orders = self.sudo().browse([o["id"] for o in order_ids])
+        _logger.info(
+            "I'm creating with these orders: %s", "; ".join(filter(None, set(all_orders.mapped("display_name"))))
+        )
+        _logger.info(
+            "These are pos references: %s", "; ".join(filter(None, set(all_orders.mapped("pos_reference"))))
+        )
         for order in orders:
             if order["data"].get("fiscal_receipt_number"):
                 self.update_fiscal_receipt_values(order["data"])
