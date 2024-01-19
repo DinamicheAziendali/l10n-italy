@@ -97,6 +97,9 @@ class PosOrder(models.Model):
         _logger.info(
             "These are pos references: %s", "; ".join(filter(None, set(all_orders.mapped("pos_reference"))))
         )
+        _logger.info(
+            "This is order values in args: %s", str(orders)
+        )
         for order in orders:
             if order["data"].get("fiscal_receipt_number"):
                 self.update_fiscal_receipt_values(order["data"])
