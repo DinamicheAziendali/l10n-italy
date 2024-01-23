@@ -12,7 +12,7 @@ class PosOrder(models.Model):
     refund_report = fields.Integer(string="Closure reference")
     refund_doc_num = fields.Integer(string="Document Number")
     refund_cash_fiscal_serial = fields.Char(string="Refund Cash Serial")
-    refund_full_refund = fields.Boolean(strin="Full Refund", default=False)
+    refund_full_refund = fields.Boolean(string="Full Refund", default=False)
     fiscal_receipt_number = fields.Integer(
         string="Fiscal receipt number",
     )
@@ -70,8 +70,7 @@ class PosOrder(models.Model):
         fiscal_printer_serial = (
             pos_order.get("fiscal_printer_serial")
             or self.config_id.fiscal_printer_serial
-            )
-
+        )
         fiscal_operator_number = pos_order.get("fiscal_operator_number")
 
         if po:

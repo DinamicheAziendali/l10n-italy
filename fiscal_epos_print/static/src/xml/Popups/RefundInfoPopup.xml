@@ -53,7 +53,7 @@
                         t-ref="inputRefundCashFiscalSerial"
                         placeholder="RT Serial"
                     />
-                </div>                
+                </div>
                 <div class='client-detail'>
                     <div class='label'>Full Refund</div>
                     <input

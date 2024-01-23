@@ -28,9 +28,17 @@ odoo.define("fiscal_epos_print.models", function (require) {
                 const selectedOrder = this.get_order();
                 selectedOrder.lottery_code = lottery_code;
             }
-            
+
             reset_cashier() {
-                this.cashier = {name: null, id: null, barcode: null, user_id: null, pin: null, role: null, fiscal_operator_number: null};
+                this.cashier = {
+                    name: null,
+                    id: null,
+                    barcode: null,
+                    user_id: null,
+                    pin: null,
+                    role: null,
+                    fiscal_operator_number: null,
+                };
             }
         };
     Registries.Model.extend(PosGlobalState, FiscalEposPrintPosGlobalState);
@@ -53,16 +61,15 @@ odoo.define("fiscal_epos_print.models", function (require) {
                 this.fiscal_printer_serial =
                     this.pos.config.fiscal_printer_serial || null;
                 this.fiscal_printer_debug_info = null;
-                try{
+                try {
                     if (this.pos.config.module_pos_hr) {
-                        this.fiscal_operator_number = this.pos.cashier.fiscal_operator_number || null;
+                        this.fiscal_operator_number =
+                            this.pos.cashier.fiscal_operator_number || null;
+                    } else {
+                        this.fiscal_operator_number = "1";
                     }
-                    else{
-                        this.fiscal_operator_number = "1"
-                    }
-                }
-                catch (error){
-                    this.fiscal_operator_number = "1"
+                } catch (error) {
+                    this.fiscal_operator_number = "1";
                 }
             }
 
@@ -108,17 +115,16 @@ odoo.define("fiscal_epos_print.models", function (require) {
                 this.fiscal_receipt_date = json.fiscal_receipt_date;
                 this.fiscal_z_rep_number = json.fiscal_z_rep_number;
                 this.fiscal_printer_serial = this.pos.config.fiscal_printer_serial;
-                this.fiscal_printer_debug_info = json.fiscal_printer_debug_info;  
-                try{              
+                this.fiscal_printer_debug_info = json.fiscal_printer_debug_info;
+                try {
                     if (this.pos.config.module_pos_hr && json.employee_id) {
-                        this.fiscal_operator_number = this.pos.employee_by_id[json.employee_id].fiscal_operator_number || null
+                        this.fiscal_operator_number =
+                            this.pos.employee_by_id[json.employee_id]
+                                .fiscal_operator_number || null;
+                    } else {
+                        this.fiscal_operator_number = "1";
                     }
-                    else{
-                        this.fiscal_operator_number = "1"
-                    }
-                }
-                catch(error){}
-
+                } catch (error) {}
             }
 
             export_as_JSON() {
@@ -136,16 +142,15 @@ odoo.define("fiscal_epos_print.models", function (require) {
                 json.fiscal_receipt_date = this.fiscal_receipt_date || null;
                 json.fiscal_z_rep_number = this.fiscal_z_rep_number || null;
                 json.fiscal_printer_serial = this.fiscal_printer_serial || null;
-                json.fiscal_printer_debug_info = this.fiscal_printer_debug_info || null;  
-                try{  
+                json.fiscal_printer_debug_info = this.fiscal_printer_debug_info || null;
+                try {
                     if (this.pos.config.module_pos_hr) {
-                        json.fiscal_operator_number = this.pos.cashier.fiscal_operator_number || null;
+                        json.fiscal_operator_number =
+                            this.pos.cashier.fiscal_operator_number || null;
+                    } else {
+                        json.fiscal_operator_number = "1";
                     }
-                    else {
-                        json.fiscal_operator_number = "1"
-                    }
-                }
-                catch(error){}
+                } catch (error) {}
                 return json;
             }
 
@@ -162,11 +167,11 @@ odoo.define("fiscal_epos_print.models", function (require) {
                 json.fiscal_receipt_date = this.fiscal_receipt_date;
                 json.fiscal_z_rep_number = this.fiscal_z_rep_number;
                 json.fiscal_printer_serial = this.fiscal_printer_serial;
-                json.fiscal_printer_debug_info = this.fiscal_printer_debug_info;                 
-                try{  
-                    json.fiscal_operator_number = this.pos.cashier.fiscal_operator_number || null                
-                }
-                catch(error){}
+                json.fiscal_printer_debug_info = this.fiscal_printer_debug_info;
+                try {
+                    json.fiscal_operator_number =
+                        this.pos.cashier.fiscal_operator_number || null;
+                } catch (error) {}
                 return json;
             }
 

@@ -41,14 +41,14 @@ odoo.define("fiscal_epos_print.RefundInfoPopup", function (require) {
                 var refund_cash_fiscal_serial = this.$el
                     .find("#refund_cash_fiscal_serial")
                     .val();
-                var refund_full_refund = this.$el.find('#refund_full_refund').val()
+                var refund_full_refund = this.$el.find("#refund_full_refund").val();
                 this.env.pos.context = {
                     refund_details: true,
                     refund_date: refund_date,
                     refund_report: refund_report,
                     refund_doc_num: refund_doc_num,
                     refund_cash_fiscal_serial: refund_cash_fiscal_serial,
-                    refund_full_refund: refund_full_refund
+                    refund_full_refund: refund_full_refund,
                 };
                 this.env.pos.set_refund_data(
                     refund_date,
