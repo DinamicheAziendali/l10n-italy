@@ -50,7 +50,10 @@ class PosOrder(models.Model):
         draft = True
         order_ids = super(PosOrder, self).create_from_ui(orders, draft)
         for order in orders:
-            if order["data"].get("fiscal_receipt_number"):
+            if (
+                order["data"].get("fiscal_receipt_number")
+                and self.env.company.country_id.id == self.env.ref("base.it").id
+            ):
                 existing_draft_orders = self.search([
                     ("pos_reference", "=", order["data"].get("name")),
                     ("state", "=", "draft"),
