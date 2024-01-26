@@ -442,10 +442,10 @@
                                     </group>
                                     <separator string="Payments Details" />
                                     <field
-                                        name="payment_methods"
-                                        nolabel="1"
-                                        readonly="1"
-                                    >
+                                    name="payment_methods"
+                                    nolabel="1"
+                                    readonly="1"
+                                >
                                        <tree>
                                            <field name="payment_due_date" />
                                            <field name="payment_amount" />
@@ -456,9 +456,7 @@
                                                <group>
                                                    <field name="recipient" />
                                                    <field name="fatturapa_pm_id" />
-                                                   <field
-                                                    name="payment_term_start"
-                                                />
+                                                   <field name="payment_term_start" />
                                                    <field name="payment_days" />
                                                    <field name="payment_due_date" />
                                                    <field name="payment_amount" />
@@ -472,28 +470,20 @@
                                            </group>
                                            <group>
                                                <group>
-                                                   <field
-                                                    name="payment_bank_name"
-                                                />
-                                                   <field
-                                                    name="payment_bank_iban"
-                                                />
+                                                   <field name="payment_bank_name" />
+                                                   <field name="payment_bank_iban" />
                                                    <field name="payment_bank_abi" />
                                                    <field name="payment_bank_cab" />
                                                    <field name="payment_bank_bic" />
                                                    <field name="payment_bank" />
                                                </group>
                                                <group>
-                                                   <field
-                                                    name="prepayment_discount"
-                                                />
+                                                   <field name="prepayment_discount" />
                                                    <field name="max_payment_date" />
                                                    <field name="penalty_amount" />
                                                    <field name="penalty_date" />
                                                    <field name="payment_code" />
-                                                   <field
-                                                    name="account_move_line_id"
-                                                />
+                                                   <field name="account_move_line_id" />
                                                </group>
                                            </group>
                                        </form>

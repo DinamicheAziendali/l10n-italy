@@ -10,10 +10,10 @@
                 <notebook position="inside">
                     <page string="Ateco">
                         <field
-                            name="ateco_category_ids"
-                            nolabel="1"
-                            options="{'no_create': True}"
-                        />
+                        name="ateco_category_ids"
+                        nolabel="1"
+                        options="{'no_create': True}"
+                    />
                     </page>
                 </notebook>
             </field>

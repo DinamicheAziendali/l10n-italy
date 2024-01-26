@@ -48,7 +48,11 @@
         <field name="inherit_id" ref="account.view_move_line_form" />
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
-                <page name="assets" string="Assets" groups="l10n_it_asset_management.group_asset_user">
+                <page
+                    name="assets"
+                    string="Assets"
+                    groups="l10n_it_asset_management.group_asset_user"
+                >
                     <label for="asset_ids" />
                     <field name="asset_ids" nolabel="1">
                         <tree>

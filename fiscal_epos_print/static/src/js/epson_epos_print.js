@@ -594,13 +594,19 @@ odoo.define("fiscal_epos_print.epson_epos_print", function (require) {
                 if (msg.includes("Nome prof.:") || msg.includes("Pref. name:")) {
                     return true;
                 }
-                if (msg.includes("metodo di pagamento:") || msg.includes("Payment Method:")) {
+                if (
+                    msg.includes("metodo di pagamento:") ||
+                    msg.includes("Payment Method:")
+                ) {
                     return true;
                 }
                 if (msg.includes("Payment variant:")) {
                     return true;
                 }
-                if (msg.includes("Modalità immissione:") || msg.includes("Entry mode:")) {
+                if (
+                    msg.includes("Modalità immissione:") ||
+                    msg.includes("Entry mode:")
+                ) {
                     return true;
                 }
                 if (msg.includes("AID:")) {

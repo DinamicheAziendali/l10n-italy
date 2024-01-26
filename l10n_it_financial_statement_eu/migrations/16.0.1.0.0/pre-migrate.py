@@ -1,4 +1,3 @@
-
 from odoo.addons.l10n_it_financial_statements_eu import hooks
 
 

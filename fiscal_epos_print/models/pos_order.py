@@ -1,4 +1,3 @@
-
 from odoo import api, fields, models
 
 
@@ -52,16 +51,15 @@ class PosOrder(models.Model):
         order_ids = super(PosOrder, self).create_from_ui(orders, draft)
         for order in orders:
             if (
-                (
-                    order["data"].get("fiscal_receipt_number", False)
-                    or order["data"].get("to_invoice", False)
+                order["data"].get("fiscal_receipt_number", False)
+                or order["data"].get("to_invoice", False)
+            ) and self.env.company.country_id.id == self.env.ref("base.it").id:
+                existing_draft_orders = self.search(
+                    [
+                        ("pos_reference", "=", order["data"].get("name")),
+                        ("state", "=", "draft"),
+                    ]
                 )
-                and self.env.company.country_id.id == self.env.ref("base.it").id
-            ):
-                existing_draft_orders = self.search([
-                    ("pos_reference", "=", order["data"].get("name")),
-                    ("state", "=", "draft"),
-                ])
                 for existing_draft_order in existing_draft_orders:
                     self._process_order(order, False, existing_draft_order)
         return order_ids

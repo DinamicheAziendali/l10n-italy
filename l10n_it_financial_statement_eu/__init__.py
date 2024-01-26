@@ -5,6 +5,7 @@
 from . import models
 from . import report
 from . import wizard
+
 # from .hooks import pre_absorb_old_module
 
 from odoo import api, SUPERUSER_ID
