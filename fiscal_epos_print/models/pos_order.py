@@ -52,7 +52,10 @@ class PosOrder(models.Model):
         order_ids = super(PosOrder, self).create_from_ui(orders, draft)
         for order in orders:
             if (
-                order["data"].get("fiscal_receipt_number", False)
+                (
+                    order["data"].get("fiscal_receipt_number", False)
+                    or order["data"].get("to_invoice", False)
+                )
                 and self.env.company.country_id.id == self.env.ref("base.it").id
             ):
                 existing_draft_orders = self.search([
