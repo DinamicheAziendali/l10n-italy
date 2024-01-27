@@ -1,4 +1,8 @@
+import logging
+
 from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
 
 
 class PosOrder(models.Model):
@@ -49,19 +53,34 @@ class PosOrder(models.Model):
         if self.env.company.country_id.id == self.env.ref("base.it").id:
             draft = True
         order_ids = super(PosOrder, self).create_from_ui(orders, draft)
+        process_order_ids = []
         for order in orders:
             if (
-                order["data"].get("fiscal_receipt_number", False)
-                or order["data"].get("to_invoice", False)
-            ) and self.env.company.country_id.id == self.env.ref("base.it").id:
-                existing_draft_orders = self.search(
-                    [
-                        ("pos_reference", "=", order["data"].get("name")),
-                        ("state", "=", "draft"),
-                    ]
+                (
+                    order["data"].get("fiscal_receipt_number", False)
+                    or order["data"].get("to_invoice", False)
                 )
-                for existing_draft_order in existing_draft_orders:
-                    self._process_order(order, False, existing_draft_order)
+                and self.env.company.country_id.id == self.env.ref("base.it").id
+            ):
+                order_name = order["data"].get("name")
+                try:
+                    existing_draft_orders = self.search([
+                        ("pos_reference", "=", order_name),
+                        ("state", "=", "draft"),
+                    ])
+                    for existing_draft_order in existing_draft_orders:
+                        process_order_ids.append(self._process_order(order, False, existing_draft_order))
+                except Exception as e:
+                    _logger.exception("An error occurred when processing the PoS order %s", order_name)
+                    pos_session = self.env["pos.session"].browse(order["data"].get("pos_session_id", 0))
+                    pos_session._handle_order_process_fail(order, e, draft)
+                    raise
+        if process_order_ids:
+            order_ids = self.env["pos.order"].search_read(
+                domain=[("id", "in", process_order_ids)],
+                fields=["id", "pos_reference", "account_move"],
+                load=False,
+            )
         return order_ids
 
     def _export_for_ui(self, order):
