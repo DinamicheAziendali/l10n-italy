@@ -1,6 +1,7 @@
 import logging
 
 from odoo import api, fields, models
+from odoo.tools import float_is_zero
 
 _logger = logging.getLogger(__name__)
 
@@ -55,10 +56,16 @@ class PosOrder(models.Model):
         order_ids = super(PosOrder, self).create_from_ui(orders, draft)
         process_order_ids = []
         for order in orders:
+            if order["data"].get("pricelist_id", False):
+                pricelist_id = self.env["product.pricelist"].browse(order["data"]["pricelist_id"])
+                precision = pricelist_id.currency_id.decimal_places
+            else:
+                precision = self.env.company.currency_id.decimal_places
             if (
                 (
                     order["data"].get("fiscal_receipt_number", False)
                     or order["data"].get("to_invoice", False)
+                    or float_is_zero(order["data"].get("amount_total", 0), precision)
                 )
                 and self.env.company.country_id.id == self.env.ref("base.it").id
             ):
