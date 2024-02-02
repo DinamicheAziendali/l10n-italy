@@ -14,13 +14,14 @@ def migrate(env, version):
         """
             SELECT constraint_name
             FROM information_schema.table_constraints
-            WHERE constraint_type = 'FOREIGN KEY' AND table_name = '%s'
-            AND constraint_name = '%s'
+            WHERE constraint_type = 'FOREIGN KEY' AND table_name = %s
+            AND constraint_name = s%
         """,
         (table_name, constraint_name),
     )
 
-    if env.cr.fetchall() and env.cr.fetchall()[:1]:
+    res = env.cr.fetchall()
+    if res and res[0]:
         alter_table_sql = sql.SQL("ALTER TABLE {} DROP CONSTRAINT {}").format(
             sql.Identifier(table_name), sql.Identifier(constraint_name)
         )
