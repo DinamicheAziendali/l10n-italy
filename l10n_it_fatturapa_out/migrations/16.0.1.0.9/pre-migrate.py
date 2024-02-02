@@ -15,7 +15,7 @@ def migrate(env, version):
             SELECT constraint_name
             FROM information_schema.table_constraints
             WHERE constraint_type = 'FOREIGN KEY' AND table_name = %s
-            AND constraint_name = s%
+            AND constraint_name = %s
         """,
         (table_name, constraint_name),
     )
