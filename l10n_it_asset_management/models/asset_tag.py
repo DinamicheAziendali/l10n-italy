@@ -11,7 +11,7 @@ class AssetTag(models.Model):
 
     @api.model
     def get_default_company_id(self):
-        return self.env.user.company_id
+        return self.env.company
 
     company_id = fields.Many2one(
         "res.company", default=get_default_company_id, string="Company"

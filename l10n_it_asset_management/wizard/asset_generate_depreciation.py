@@ -11,12 +11,12 @@ class WizardAssetsGenerateDepreciations(models.TransientModel):
 
     @api.model
     def get_default_company_id(self):
-        return self.env.user.company_id
+        return self.env.company
 
     @api.model
     def get_default_date_dep(self):
         fiscal_year = self.env["account.fiscal.year"].get_fiscal_year_by_date(
-            fields.Date.today(), company=self.env.user.company_id, miss_raise=False
+            fields.Date.today(), company=self.env.company, miss_raise=False
         )
         if fiscal_year:
             return fiscal_year.date_to
