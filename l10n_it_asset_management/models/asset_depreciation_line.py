@@ -1,9 +1,11 @@
 # Author(s): Silvio Gregorini (silviogregorini@openforce.it)
 # Copyright 2019 Openforce Srls Unipersonale (www.openforce.it)
+# Copyright 2023 Simone Rubino - Aion Tech
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Command
 
 
 class AssetDepreciationLine(models.Model):
@@ -25,7 +27,10 @@ class AssetDepreciationLine(models.Model):
         string="Asset",
     )
 
-    balance = fields.Monetary(compute="_compute_balance", store=True)
+    balance = fields.Monetary(
+        compute="_compute_balance",
+        store=True,
+    )
 
     base = fields.Float()
 
@@ -41,7 +46,9 @@ class AssetDepreciationLine(models.Model):
         related="depreciation_id.currency_id",
     )
 
-    date = fields.Date(required=True)
+    date = fields.Date(
+        required=True,
+    )
 
     depreciation_id = fields.Many2one(
         "asset.depreciation",
@@ -88,7 +95,9 @@ class AssetDepreciationLine(models.Model):
         required=True,
     )
 
-    name = fields.Char(required=True)
+    name = fields.Char(
+        required=True,
+    )
 
     partial_dismissal = fields.Boolean()
 
@@ -117,10 +126,12 @@ class AssetDepreciationLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        lines = super().create(vals_list)
-        for line in lines:
+        lines = self.browse()
+        for vals in vals_list:
+            line = super().create(vals)
             if line.need_normalize_depreciation_nr():
                 line.normalize_depreciation_nr(force=True)
+            lines |= line
         return lines
 
     def write(self, vals):
@@ -131,7 +142,10 @@ class AssetDepreciationLine(models.Model):
                 line.normalize_depreciation_nr(force=True)
         return res
 
-    def unlink(self):
+    @api.ondelete(
+        at_uninstall=False,
+    )
+    def _unlink_except_open_move(self):
         if any([m.state != "draft" for m in self.mapped("move_id")]):
             lines = self.filtered(
                 lambda line: line.move_id and line.move_id.state != "draft"
@@ -144,6 +158,8 @@ class AssetDepreciationLine(models.Model):
                 )
                 + name_list
             )
+
+    def unlink(self):
         self.mapped("asset_accounting_info_ids").unlink()
         self.mapped("move_id").unlink()
         return super().unlink()
@@ -157,9 +173,10 @@ class AssetDepreciationLine(models.Model):
             if len(comp) > 1 or (comp and comp != dep_line.company_id):
                 raise ValidationError(
                     _(
-                        "`{}`: cannot change depreciation line's company once"
-                        " it's already related to an asset."
-                    ).format(dep_line.make_name())
+                        "`%(dep_line)s`: cannot change depreciation line's company once"
+                        " it's already related to an asset.",
+                        dep_line=dep_line.make_name(),
+                    )
                 )
 
     @api.constrains("depreciation_nr")
@@ -340,7 +357,7 @@ class AssetDepreciationLine(models.Model):
 
         line_vals = self.get_account_move_line_vals()
         for v in line_vals:
-            vals["line_ids"].append((0, 0, v))
+            vals["line_ids"].append(Command.create(v))
 
         self.move_id = am_obj.create(vals)
 

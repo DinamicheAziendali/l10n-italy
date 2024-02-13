@@ -1,8 +1,10 @@
 # Author(s): Silvio Gregorini (silviogregorini@openforce.it)
 # Copyright 2019 Openforce Srls Unipersonale (www.openforce.it)
+# Copyright 2023 Simone Rubino - Aion Tech
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from odoo import api, fields, models
+from odoo.fields import Command
 
 
 class WizardAssetsGenerateDepreciations(models.TransientModel):
@@ -24,7 +26,7 @@ class WizardAssetsGenerateDepreciations(models.TransientModel):
 
     @api.model
     def get_default_type_ids(self):
-        return [(6, 0, self.env["asset.depreciation.type"].search([]).ids)]
+        return [Command.set(self.env["asset.depreciation.type"].search([]).ids)]
 
     asset_ids = fields.Many2many(
         "asset.asset",

@@ -1,5 +1,6 @@
 # Author(s): Silvio Gregorini (silviogregorini@openforce.it)
 # Copyright 2019 Openforce Srls Unipersonale (www.openforce.it)
+# Copyright 2023 Simone Rubino - Aion Tech
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from odoo import api, fields, models
@@ -23,7 +24,9 @@ class AssetDepreciationModeLine(models.Model):
         "res.company", readonly=True, related="mode_id.company_id", string="Company"
     )
 
-    from_nr = fields.Integer(required=True)
+    from_nr = fields.Integer(
+        required=True,
+    )
 
     mode_id = fields.Many2one(
         "asset.depreciation.mode",

@@ -1,5 +1,6 @@
 # Author(s): Silvio Gregorini (silviogregorini@openforce.it)
 # Copyright 2019 Openforce Srls Unipersonale (www.openforce.it)
+# Copyright 2023 Simone Rubino - Aion Tech
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 {
@@ -43,12 +44,18 @@
         "wizard/asset_journal_report_view.xml",
         "wizard/asset_previsional_report_view.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "l10n_it_asset_management/static/src/js/*",
+            "l10n_it_asset_management/static/src/xml/*",
+        ],
+    },
+    "development_status": "Beta",
+    "installable": True,
     "external_dependencies": {
         "python": [
             "openupgradelib",
         ],
     },
     "pre_init_hook": "pre_absorb_old_module",
-    "development_status": "Beta",
-    "installable": True,
 }
