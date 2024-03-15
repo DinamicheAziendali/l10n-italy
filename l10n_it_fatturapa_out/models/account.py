@@ -292,7 +292,7 @@ class AccountInvoice(models.Model):
         is_draft = {}
         for move in self:
             is_draft[move.id] = True if move.state == "draft" else False
-        res = super(AccountInvoice, self).write(vals)
+        res = super().write(vals)
         for move in self:
             if (
                 move.is_sale_document()

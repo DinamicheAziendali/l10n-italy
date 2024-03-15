@@ -78,10 +78,11 @@ class AccountInvoice(models.Model):
         return {
             "sequence": sequence,
             "display_type": "line_note",
-            "name": _("""Delivery Note "{}" of {}""").format(
-                delivery_note_id.name,
-                delivery_note_id.date.strftime(DATE_FORMAT),
-            ),
+            "name": _("""Delivery Note "%(ddt_name)s" of %(ddt_date)s""")
+            % {
+                "ddt_name": delivery_note_id.name,
+                "ddt_date": delivery_note_id.date.strftime(DATE_FORMAT),
+            },
             "note_dn": True,
             "delivery_note_id": delivery_note_id.id,
             "quantity": 0,
@@ -92,9 +93,7 @@ class AccountInvoice(models.Model):
 
         for invoice in self.filtered(lambda i: i.delivery_note_ids):
             new_lines = []
-            old_lines = invoice.invoice_line_ids.filtered(
-                lambda inv_line: inv_line.note_dn
-            )
+            old_lines = invoice.invoice_line_ids.filtered(lambda line: line.note_dn)
             old_lines.unlink()
 
             #
@@ -125,42 +124,23 @@ class AccountInvoice(models.Model):
                     )
                 )
             else:
-                sequence = 1
-                done_invoice_lines = self.env["account.move.line"]
-                for dn in invoice.mapped(
-                    "invoice_line_ids.sale_line_ids.delivery_note_line_ids."
-                    "delivery_note_id"
-                ).sorted(key="name"):
-                    dn_invoice_lines = invoice.invoice_line_ids.filtered(
-                        lambda x: x not in done_invoice_lines
-                        and dn
-                        in x.mapped(
-                            "sale_line_ids.delivery_note_line_ids.delivery_note_id"
+                for line in invoice.invoice_line_ids:
+                    sequence = line.sequence - 1
+                    delivery_note_line = invoice.mapped(
+                        "delivery_note_ids.line_ids"
+                    ) & line.mapped("sale_line_ids.delivery_note_line_ids")
+                    for delivery_note_id in delivery_note_line.filtered(
+                        lambda l: l.invoice_status  # noqa: E741
+                        == DOMAIN_INVOICE_STATUSES[2]
+                    ).mapped("delivery_note_id"):
+                        line.delivery_note_id = delivery_note_id.id
+                        new_lines.append(
+                            (
+                                0,
+                                False,
+                                self._prepare_note_dn_value(sequence, delivery_note_id),
+                            )
                         )
-                        # fixme test invoice from 2 sale lines
-                    )
-                    done_invoice_lines |= dn_invoice_lines
-                    for note_line in dn.line_ids.filtered(
-                        lambda l: l.invoice_status == DOMAIN_INVOICE_STATUSES[2]
-                    ):
-                        for invoice_line in dn_invoice_lines:
-                            if (
-                                note_line
-                                in invoice_line.sale_line_ids.delivery_note_line_ids
-                            ):
-                                invoice_line.delivery_note_id = (
-                                    note_line.delivery_note_id.id
-                                )
-                    new_lines.append(
-                        (
-                            0,
-                            False,
-                            self._prepare_note_dn_value(sequence, dn),
-                        )
-                    )
-                    for invoice_line in dn_invoice_lines:
-                        sequence += 1
-                        invoice_line.sequence = sequence
 
             invoice.write({"line_ids": new_lines})
 

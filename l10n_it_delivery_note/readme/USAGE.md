@@ -34,6 +34,11 @@ prezzi. La visibilità dei prezzi si trova nei permessi dell'utente.
 
 Le fatture generate dai DDT contengono i riferimenti al DDT stesso nelle righe nota.
 
+## Accesso da portale
+
+Gli utenti portal hanno la possibilità di scaricare i report dei DDT di cui loro o la
+loro azienda padre sono impostati come destinatari o indirizzo di spedizione.
+
 ## Migrazione dei dati da _l10n_it_ddt_
 
 Il modulo presenta una funzione di migrazione dei dati dal modulo OCA _l10n_it_ddt_ da
