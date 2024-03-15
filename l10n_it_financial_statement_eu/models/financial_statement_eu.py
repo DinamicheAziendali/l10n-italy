@@ -82,7 +82,7 @@ class FinancialStatementEU(models.Model):
                 p = line.parent_id.get_parent_path()
             else:
                 p = ""
-            line.complete_name = "[%s] %s%s" % (line.code, p, line.name)
+            line.complete_name = f"[{line.code}] {p}{line.name}"
 
     def name_get(self):
         res = []
@@ -503,19 +503,22 @@ class FinancialStatementEU(models.Model):
             financial_statement_state = "UNBALANCED"
             log_warnings = log_warnings + (
                 _(
-                    "Unbalanced financial statements: {:s} (Assets) - {:s} (Liabilities) = {:s}"
-                ).format(
-                    formatLang(
+                    "Unbalanced financial statements: "
+                    "%(tot_assets)s (Assets) - %(tot_liabilities)s (Liabilities)"
+                    " = %(diff)s"
+                )
+                % {
+                    "tot_assets": formatLang(
                         self.env,
                         financial_statement_eu_lines["PA"]["rounded_amount"],
                         currency_obj=currency_id,
                     ),
-                    formatLang(
+                    "tot_liabilities": formatLang(
                         self.env,
                         financial_statement_eu_lines["PP"]["rounded_amount"],
                         currency_obj=currency_id,
                     ),
-                    formatLang(
+                    "diff": formatLang(
                         self.env,
                         tools.float_round(
                             financial_statement_eu_lines["PA"]["rounded_amount"]
@@ -524,7 +527,7 @@ class FinancialStatementEU(models.Model):
                         ),
                         currency_obj=currency_id,
                     ),
-                )
+                }
             )
         if len(unlinked_account) > 0:
             financial_statement_state = "UNLINKED_ACCOUNTS"

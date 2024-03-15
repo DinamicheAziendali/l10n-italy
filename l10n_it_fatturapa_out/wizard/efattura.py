@@ -33,6 +33,15 @@ def format_numbers(number):
     return float_repr(number, max(2, len(cents)))
 
 
+def fpaToEur(amount, invoice, euro, rate=None):
+    currency = invoice.currency_id
+    if currency == euro:
+        return amount
+    elif rate is not None:
+        return amount * (1 / rate)
+    return currency._convert(amount, euro, invoice.company_id, invoice.date, False)
+
+
 class EFatturaOut:
     def get_template_values(self):  # noqa: C901
         """Prepare values and helper functions for the template"""
@@ -78,7 +87,7 @@ class EFatturaOut:
 
             # force EUR unless we want the original currency
             if not original_currency:
-                res = fpa_to_eur(res, line=line)
+                res = fpa_to_eur(res, line.move_id, line.currency_rate)
 
             # XXX arrotondamento?
             res = "{prezzo:.{precision}f}".format(
@@ -207,20 +216,9 @@ class EFatturaOut:
             wiz = self.env["wizard.export.fatturapa"]
             return wiz.getPayments(invoice)
 
-        def fpa_to_eur(amount, invoice=None, line=None, field=None):
-            if not invoice and not line:
-                return amount
-            if line and line.move_id:
-                invoice = line.move_id
-            currency = invoice.currency_id
+        def fpa_to_eur(amount, invoice, rate=None):
             euro = self.env.ref("base.EUR")
-            if currency == euro:
-                return amount
-            if line and field and field in line._fields is not None:
-                return line[field] if amount > 0 else -line[field]
-            return currency._convert(
-                amount, euro, invoice.company_id, invoice.date, False
-            )
+            return fpaToEur(amount, invoice, euro, rate)
 
         if self.partner_id.commercial_partner_id.is_pa:
             # check value code

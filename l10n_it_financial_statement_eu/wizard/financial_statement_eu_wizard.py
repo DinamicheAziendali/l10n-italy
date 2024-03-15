@@ -53,7 +53,8 @@ class CreateFinancialStatementWizard(models.TransientModel):
     hide_acc_amount_0 = fields.Boolean(
         string="Hide account with amount 0",
         default=True,
-        help="Financial statements lines will showed anyway, hide only accounts with balance 0",
+        help="Financial statements lines will showed anyway, "
+        "hide only accounts with balance 0",
     )
     only_posted_move = fields.Boolean(
         string="Use only posted registration", default=True
@@ -108,7 +109,6 @@ class CreateFinancialStatementWizard(models.TransientModel):
             if fs.date_to.month == fs.date_from.month:
                 fs.name = fs.name + " " + str(fs.date_from.month) + "-" + str(fs.year)
             else:
-
                 fs.name = fs.name + " " + str(fs.year)
 
     def get_data(self):

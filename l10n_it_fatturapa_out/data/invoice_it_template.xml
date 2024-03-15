@@ -170,12 +170,7 @@ e 'line' per riga di fattura (a seconda del livello in cui sono chiamati)
                 t-call="l10n_it_fatturapa_out.account_invoice_line_it_sconto_maggiorazione"
             />
                 <PrezzoTotale
-                t-if="line.credit > 0"
-                t-out="format_monetary(fpa_to_eur(line.price_subtotal, line=line, field='credit'), euro)"
-            />
-                <PrezzoTotale
-                t-if="not line.credit > 0"
-                t-out="format_monetary(fpa_to_eur(line.price_subtotal, line=line, field='debit'), euro)"
+                t-out="format_monetary(fpa_to_eur(line.price_subtotal, record, line.currency_rate), euro)"
             />
                 <AliquotaIVA
                 t-if="not line_is_section_note"
@@ -303,7 +298,10 @@ e 'line' per riga di fattura (a seconda del livello in cui sono chiamati)
                     t-out="partner_id.fiscalcode"
                 />
                     <Anagrafica>
-                        <Denominazione t-out="partner_id.display_name" />
+                        <Denominazione
+                        t-if="partner_id.is_company"
+                        t-out="partner_id.display_name"
+                    />
                         <Nome
                         t-if="not partner_id.is_company"
                         t-out="partner_id.firstname"
@@ -534,12 +532,7 @@ e 'line' per riga di fattura (a seconda del livello in cui sono chiamati)
                         <!--                            <Importo t-out=""/>-->
                         <!--                        </ScontoMaggiorazione>-->
                         <ImportoTotaleDocumento
-                        t-if="record.company_id.xml_divisa_value == 'keep_orig'"
-                        t-out="format_numbers_two(get_importo_totale(record))"
-                    />
-                        <ImportoTotaleDocumento
-                        t-if="not record.company_id.xml_divisa_value == 'keep_orig'"
-                        t-out="format_numbers_two(fpa_to_eur(get_importo_totale(record), record))"
+                        t-out="format_numbers_two(fpa_to_eur(get_importo_totale(record), invoice=record))"
                     />
                         <!--                        <Arrotondamento t-out=""/>-->
                         <t t-foreach="get_causale(record)" t-as="causale">
@@ -633,7 +626,7 @@ e 'line' per riga di fattura (a seconda del livello in cui sono chiamati)
                         />
                             <ImportoPagamento
                             t-if="not record.company_id.xml_divisa_value == 'keep_orig'"
-                            t-out="format_numbers_two(fpa_to_eur(payment.amount_currency or payment.debit, invoice=record))"
+                            t-out="format_numbers_two(fpa_to_eur(payment.amount_currency or payment.debit, record, payment.currency_rate))"
                         />
 
                             <!--                            <CodUfficioPostale t-out=""/>-->

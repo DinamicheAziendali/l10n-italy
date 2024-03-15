@@ -26,7 +26,7 @@ class StockPicking(models.Model):
         "ir.sequence", related="delivery_note_id.sequence_id"
     )
     delivery_note_state = fields.Selection(
-        string="DN State", related="delivery_note_id.state"
+        string="DN State", related="delivery_note_id.state", store=True
     )
     delivery_note_partner_ref = fields.Char(related="delivery_note_id.partner_ref")
     delivery_note_partner_shipping_id = fields.Many2one(
@@ -41,10 +41,14 @@ class StockPicking(models.Model):
     )
 
     delivery_note_type_id = fields.Many2one(
-        "stock.delivery.note.type", related="delivery_note_id.type_id"
+        "stock.delivery.note.type",
+        related="delivery_note_id.type_id",
+        check_company=True,
     )
     delivery_note_type_code = fields.Selection(related="delivery_note_type_id.code")
-    delivery_note_date = fields.Date(string="DN Date", related="delivery_note_id.date")
+    delivery_note_date = fields.Date(
+        string="DN Date", related="delivery_note_id.date", store=True
+    )
     delivery_note_note = fields.Html(related="delivery_note_id.note")
 
     transport_condition_id = fields.Many2one(
@@ -337,6 +341,7 @@ class StockPicking(models.Model):
         )
         return self.env["stock.delivery.note"].create(
             {
+                "company_id": self.company_id.id,
                 "partner_sender_id": partners[0].id,
                 "partner_id": self.sale_id.partner_id.id
                 if self.sale_id
@@ -443,7 +448,8 @@ class StockPicking(models.Model):
 
     def _create_backorder(self):
         """When we make a backorder of a picking the delivery note lines needed
-        to be updated otherwise stock_delivery_note_line_move_uniq constraint is raised"""
+        to be updated otherwise stock_delivery_note_line_move_uniq
+        constraint is raised"""
         backorders = super()._create_backorder()
         for backorder in backorders:
             backorder.backorder_id.delivery_note_id.update_detail_lines()

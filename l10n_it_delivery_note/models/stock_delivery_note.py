@@ -48,13 +48,18 @@ class StockDeliveryNote(models.Model):
     ]
     _description = "Delivery Note"
     _order = "date DESC, id DESC"
+    _check_company_auto = True
 
     def _default_company(self):
         return self.env.company
 
     def _default_type(self):
         return self.env["stock.delivery.note.type"].search(
-            [("code", "=", DOMAIN_PICKING_TYPES[1])], limit=1
+            [
+                ("code", "=", DOMAIN_PICKING_TYPES[1]),
+                ("company_id", "=", self.env.company.id),
+            ],
+            limit=1,
         )
 
     def _default_volume_uom(self):
@@ -238,12 +243,16 @@ class StockDeliveryNote(models.Model):
     )
 
     picking_ids = fields.One2many(
-        "stock.picking", "delivery_note_id", string="Pickings"
+        "stock.picking",
+        "delivery_note_id",
+        string="Pickings",
+        check_company=True,
     )
     pickings_picker = fields.Many2many(
         "stock.picking",
         compute="_compute_get_pickings",
         inverse="_inverse_set_pickings",
+        check_company=True,
     )
 
     picking_type = fields.Selection(
@@ -290,13 +299,13 @@ class StockDeliveryNote(models.Model):
             if not note.name:
                 partner_name = note.partner_id.display_name
                 create_date = note.create_date.strftime(DATETIME_FORMAT)
-                name = "{} - {}".format(partner_name, create_date)
+                name = f"{partner_name} - {create_date}"
 
             else:
                 name = note.name
 
                 if note.partner_ref and note.type_code == "incoming":
-                    name = "{} ({})".format(name, note.partner_ref)
+                    name = f"{name} ({note.partner_ref})"
             result.append((note.id, name))
 
         return result
@@ -304,7 +313,7 @@ class StockDeliveryNote(models.Model):
     @api.depends("state", "line_ids", "line_ids.invoice_status")
     def _compute_invoice_status(self):
         for note in self:
-            lines = note.line_ids.filtered(lambda l: l.sale_line_id)
+            lines = note.line_ids.filtered(lambda line: line.sale_line_id)
             invoice_status = DOMAIN_INVOICE_STATUSES[0]
             if lines:
                 if all(
@@ -546,7 +555,7 @@ class StockDeliveryNote(models.Model):
                     cache[line] = line.fix_qty_to_invoice()
 
         pickings_move_ids = self.mapped("picking_ids.move_ids")
-        for line in pickings_lines.filtered(lambda l: len(l.move_ids) > 1):
+        for line in pickings_lines.filtered(lambda line: len(line.move_ids) > 1):
             move_ids = line.move_ids & pickings_move_ids
             qty_to_invoice = sum(move_ids.mapped("quantity_done"))
 
@@ -651,6 +660,25 @@ class StockDeliveryNote(models.Model):
             "l10n_it_delivery_note.delivery_note_report_action"
         ).report_action(self)
 
+    @api.model
+    def _get_sync_fields(self):
+        """
+        Returns a list of fields that can be used to
+         synchronize the state of the Delivery Note
+        """
+        return [
+            "date",
+            "transport_datetime",
+            "transport_condition_id",
+            "goods_appearance_id",
+            "transport_reason_id",
+            "transport_method_id",
+            "gross_weight",
+            "net_weight",
+            "packages",
+            "volume",
+        ]
+
     def update_transport_datetime(self):
         self.transport_datetime = datetime.datetime.now()
 
@@ -669,7 +697,7 @@ class StockDeliveryNote(models.Model):
 
     def goto_sales(self, **kwargs):
         sales = self.mapped("sale_ids")
-        action = self.env.ref("sale.action_orders").read()[0]
+        action = self.env["ir.actions.act_window"]._for_xml_id("sale.action_orders")
         action.update(kwargs)
 
         if len(sales) > 1:
@@ -747,12 +775,12 @@ class StockDeliveryNote(models.Model):
         if warehouse and warehouse.partner_id:
             partner = warehouse.partner_id
 
-            location_address += "{}, ".format(partner.name)
+            location_address += f"{partner.name}, "
             if partner.street:
-                location_address += "{} - ".format(partner.street)
+                location_address += f"{partner.street} - "
 
-            location_address += "{} {}".format(partner.zip, partner.city)
+            location_address += f"{partner.zip} {partner.city}"
             if partner.state_id:
-                location_address += " ({})".format(partner.state_id.name)
+                location_address += f" ({partner.state_id.name})"
 
         return location_address

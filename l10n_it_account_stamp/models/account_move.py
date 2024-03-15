@@ -14,7 +14,7 @@ class AccountMove(models.Model):
     manually_apply_tax_stamp = fields.Boolean("Apply tax stamp")
 
     def is_tax_stamp_applicable(self):
-        stamp_product_id = self.env.company.with_context(
+        stamp_product_id = self.company_id.with_context(
             lang=self.partner_id.lang
         ).tax_stamp_product_id
         if not stamp_product_id:
@@ -53,7 +53,7 @@ class AccountMove(models.Model):
         for inv in self:
             if not inv.tax_stamp:
                 raise UserError(_("Tax stamp is not applicable"))
-            stamp_product_id = self.env.company.with_context(
+            stamp_product_id = inv.company_id.with_context(
                 lang=inv.partner_id.lang
             ).tax_stamp_product_id
             if not stamp_product_id:
@@ -70,7 +70,8 @@ class AccountMove(models.Model):
                     _("Missing account income configuration for %s")
                     % stamp_product_id.name
                 )
-            price_unit = inv.company_currency_id._convert(
+            currency_id = stamp_product_id.currency_id or inv.company_currency_id
+            price_unit = currency_id._convert(
                 stamp_product_id.list_price, inv.currency_id, inv.company_id, inv.date
             )
             invoice_line_vals = {
@@ -145,7 +146,7 @@ class AccountMove(models.Model):
         return income_vals, expense_vals
 
     def _post(self, soft=True):
-        res = super(AccountMove, self)._post(soft=soft)
+        res = super()._post(soft=soft)
         for inv in self:
             posted = False
             if (
@@ -157,7 +158,7 @@ class AccountMove(models.Model):
                     posted = True
                     inv.state = "draft"
                 line_model = self.env["account.move.line"]
-                stamp_product_id = self.env.company.with_context(
+                stamp_product_id = inv.company_id.with_context(
                     lang=inv.partner_id.lang
                 ).tax_stamp_product_id
                 if not stamp_product_id:
@@ -172,7 +173,7 @@ class AccountMove(models.Model):
         return res
 
     def button_draft(self):
-        res = super(AccountMove, self).button_draft()
+        res = super().button_draft()
         for account_move in self:
             move_line_tax_stamp_ids = account_move.line_ids.filtered(
                 lambda line: line.is_stamp_line

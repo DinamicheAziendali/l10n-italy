@@ -225,13 +225,20 @@ msgid "Export Financial statement EU in XLSX format"
 msgstr ""
 
 #. module: l10n_it_financial_statement_eu
+#. odoo-javascript
+#. odoo-python
 #: model_terms:ir.ui.view,arch_db:l10n_it_financial_statement_eu.financial_statement_eu_wizard_view
+#: code:addons/l10n_it_financial_statement_eu/static/src/xml/report.xml:0
 #, python-format
 msgid "Export XBRL"
 msgstr ""
 
 #. module: l10n_it_financial_statement_eu
+#. odoo-javascript
+#. odoo-python
 #: model_terms:ir.ui.view,arch_db:l10n_it_financial_statement_eu.financial_statement_eu_wizard_view
+#: code:addons/l10n_it_financial_statement_eu/static/src/xml/report.xml:0
+#, python-format
 msgid "Export XLSX"
 msgstr ""
 
@@ -474,8 +481,9 @@ msgstr ""
 #. module: l10n_it_financial_statement_eu
 #: code:addons/l10n_it_financial_statement_eu/models/financial_statement_eu.py:0
 #, python-format
-msgid ""
-"Unbalanced financial statements: {:s} (Assets) - {:s} (Liabilities) = {:s}"
+msgid "Unbalanced financial statements: "
+"%(tot_assets)s (Assets) - %(tot_liabilities)s (Liabilities)"
+" = %(diff)s"
 msgstr ""
 
 #. module: l10n_it_financial_statement_eu

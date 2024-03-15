@@ -29,7 +29,7 @@ class PosOrder(models.Model):
 
     @api.model
     def _order_fields(self, ui_order):
-        res = super(PosOrder, self)._order_fields(ui_order)
+        res = super()._order_fields(ui_order)
         res["lottery_code"] = ui_order.get("lottery_code", "")
         res["refund_date"] = ui_order.get("refund_date", False)
         res["refund_report"] = ui_order.get("refund_report", False)
@@ -53,33 +53,40 @@ class PosOrder(models.Model):
     def create_from_ui(self, orders, draft=False):
         if self.env.company.country_id.id == self.env.ref("base.it").id:
             draft = True
-        order_ids = super(PosOrder, self).create_from_ui(orders, draft)
+        order_ids = super().create_from_ui(orders, draft)
         process_order_ids = []
         for order in orders:
             if order["data"].get("pricelist_id", False):
-                pricelist_id = self.env["product.pricelist"].browse(order["data"]["pricelist_id"])
+                pricelist_id = self.env["product.pricelist"].browse(
+                    order["data"]["pricelist_id"]
+                )
                 precision = pricelist_id.currency_id.decimal_places
             else:
                 precision = self.env.company.currency_id.decimal_places
             if (
-                (
-                    order["data"].get("fiscal_receipt_number", False)
-                    or order["data"].get("to_invoice", False)
-                    or float_is_zero(order["data"].get("amount_total", 0), precision)
-                )
-                and self.env.company.country_id.id == self.env.ref("base.it").id
-            ):
+                order["data"].get("fiscal_receipt_number", False)
+                or order["data"].get("to_invoice", False)
+                or float_is_zero(order["data"].get("amount_total", 0), precision)
+            ) and self.env.company.country_id.id == self.env.ref("base.it").id:
                 order_name = order["data"].get("name")
                 try:
-                    existing_draft_orders = self.search([
-                        ("pos_reference", "=", order_name),
-                        ("state", "=", "draft"),
-                    ])
+                    existing_draft_orders = self.search(
+                        [
+                            ("pos_reference", "=", order_name),
+                            ("state", "=", "draft"),
+                        ]
+                    )
                     for existing_draft_order in existing_draft_orders:
-                        process_order_ids.append(self._process_order(order, False, existing_draft_order))
+                        process_order_ids.append(
+                            self._process_order(order, False, existing_draft_order)
+                        )
                 except Exception as e:
-                    _logger.exception("An error occurred when processing the PoS order %s", order_name)
-                    pos_session = self.env["pos.session"].browse(order["data"].get("pos_session_id", 0))
+                    _logger.exception(
+                        "An error occurred when processing the PoS order %s", order_name
+                    )
+                    pos_session = self.env["pos.session"].browse(
+                        order["data"].get("pos_session_id", 0)
+                    )
                     pos_session._handle_order_process_fail(order, e, draft)
                     raise
         if process_order_ids:
@@ -91,7 +98,7 @@ class PosOrder(models.Model):
         return order_ids
 
     def _export_for_ui(self, order):
-        result = super(PosOrder, self)._export_for_ui(order)
+        result = super()._export_for_ui(order)
         result.update(
             {
                 "lottery_code": order.lottery_code,

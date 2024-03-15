@@ -161,7 +161,6 @@ class Asset(models.Model):
             )
 
         if self.category_id:
-
             # Remove depreciation lines
             self.depreciation_ids = False
 
@@ -182,7 +181,7 @@ class Asset(models.Model):
             for dep in self.depreciation_ids:
                 dep.amount_depreciable = self.purchase_amount * dep.base_coeff
             if self.depreciation_ids.mapped("line_ids").filtered(
-                lambda l: l.move_type == "depreciated"
+                lambda line: line.move_type == "depreciated"
             ):
                 title = _("Warning!")
                 msg = _(
@@ -246,5 +245,5 @@ class Asset(models.Model):
         self.ensure_one()
         name = self.name.strip()
         if self.code:
-            return "[{}] {}".format(self.code.strip(), name)
+            return f"[{self.code.strip()}] {name}"
         return name

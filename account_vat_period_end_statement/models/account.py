@@ -1,7 +1,8 @@
 # Copyright 2011-2012 Domsense s.r.l. (<http://www.domsense.com>).
 # Copyright 2012-15 Agile Business Group sagl (<http://www.agilebg.com>)
 # Copyright 2015 Associazione Odoo Italia (<http://www.odoo-italia.org>)
-# Copyright 2023 Gianmarco Conte - Dinamiche Aziendali Srl (<www.dinamicheaziendali.it>)
+# Copyright 2021 Gianmarco Conte - Dinamiche Aziendali Srl (<www.dinamicheaziendali.it>)
+# Copyright 2022 Simone Rubino - TAKOBI
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import math
@@ -356,7 +357,7 @@ class AccountVatPeriodEndStatement(models.Model):
         for statement in self:
             if statement.state == "confirmed" or statement.state == "paid":
                 raise UserError(_("You cannot delete a confirmed or paid statement"))
-        res = super(AccountVatPeriodEndStatement, self).unlink()
+        res = super().unlink()
         return res
 
     def set_fiscal_year(self):
@@ -368,7 +369,7 @@ class AccountVatPeriodEndStatement(models.Model):
     def _write(self, vals):
         pre_not_reconciled = self.filtered(lambda statement: not statement.reconciled)
         pre_reconciled = self - pre_not_reconciled
-        res = super(AccountVatPeriodEndStatement, self)._write(vals)
+        res = super()._write(vals)
         reconciled = self.filtered(lambda statement: statement.reconciled)
         not_reconciled = self - reconciled
         (reconciled & pre_reconciled).filtered(
@@ -618,16 +619,27 @@ class AccountVatPeriodEndStatement(models.Model):
                     debit_vat_data["credit"] = math.fabs(debit_line.amount)
                 lines_to_create.append((0, 0, debit_vat_data))
 
+    def _get_previous_statements(self):
+        self.ensure_one()
+        prev_statements = self.search(
+            [
+                ("date", "<", self.date),
+                ("annual", "=", False),
+            ],
+            order="date desc",
+        )
+        prev_statements_same_accounts = prev_statements.filtered(
+            lambda s: s.account_ids == self.account_ids
+        )
+        return prev_statements_same_accounts
+
     def compute_amounts(self):
         decimal_precision_obj = self.env["decimal.precision"]
         debit_line_model = self.env["statement.debit.account.line"]
         credit_line_model = self.env["statement.credit.account.line"]
         for statement in self:
             statement.previous_debit_vat_amount = 0.0
-            prev_statements = self.search(
-                [("date", "<", statement.date), ("annual", "=", False)],
-                order="date desc",
-            )
+            prev_statements = statement._get_previous_statements()
             if prev_statements and not statement.annual:
                 prev_statement = prev_statements[0]
                 if (
@@ -744,28 +756,27 @@ class AccountVatPeriodEndStatement(models.Model):
                 ("type_tax_use", "in", ["sale", "purchase"]),
             ]
         )
-        if statement.account_ids:
-            taxes = taxes.filtered(
-                lambda tax: tax.vat_statement_account_id in statement.account_ids
-            )
         for tax in taxes:
-            # se ho una tassa padre con figli cee_type, condidero le figlie
-            if any(
-                tax_ch
-                for tax_ch in tax.children_tax_ids
-                if tax_ch.cee_type in ("sale", "purchase")
+            if (
+                tax.vat_statement_account_id.id in statement.account_ids.ids
+                or not statement.account_ids
             ):
+                # se ho una tassa padre con figli cee_type, condidero le figlie
+                if any(
+                    tax_ch
+                    for tax_ch in tax.children_tax_ids
+                    if tax_ch.cee_type in ("sale", "purchase")
+                ):
+                    for tax_ch in tax.children_tax_ids:
+                        if tax_ch.cee_type == "sale":
+                            self._set_debit_lines(tax_ch, debit_line_ids, statement)
+                        elif tax_ch.cee_type == "purchase":
+                            self._set_credit_lines(tax_ch, credit_line_ids, statement)
 
-                for tax_ch in tax.children_tax_ids:
-                    if tax_ch.cee_type == "sale":
-                        self._set_debit_lines(tax_ch, debit_line_ids, statement)
-                    elif tax_ch.cee_type == "purchase":
-                        self._set_credit_lines(tax_ch, credit_line_ids, statement)
-
-            elif tax.type_tax_use == "sale":
-                self._set_debit_lines(tax, debit_line_ids, statement)
-            elif tax.type_tax_use == "purchase":
-                self._set_credit_lines(tax, credit_line_ids, statement)
+                elif tax.type_tax_use == "sale":
+                    self._set_debit_lines(tax, debit_line_ids, statement)
+                elif tax.type_tax_use == "purchase":
+                    self._set_credit_lines(tax, credit_line_ids, statement)
 
         return credit_line_ids, debit_line_ids
 

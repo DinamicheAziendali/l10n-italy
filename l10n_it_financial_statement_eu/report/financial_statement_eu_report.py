@@ -125,14 +125,12 @@ class FinancialStatementEuXBRLReport(models.AbstractModel):
     def get_xbrl_data_tag(self, str_field, str_year, value, decimal_precision=-1):
         complete_field = "itcc-ci:" + str_field
         if decimal_precision >= 0:
-            altri_attr = ' unitRef="eur" decimals="{}"'.format(decimal_precision)
+            altri_attr = f' unitRef="eur" decimals="{decimal_precision}"'
             value = f"{value:.{decimal_precision}f}"
         else:
             altri_attr = ""
-        return """
-    <{} contextRef="{}"{}>{}</{}>""".format(
-            complete_field, str_year, altri_attr, value, complete_field
-        )
+        return f"""
+    <{complete_field} contextRef="{str_year}"{altri_attr}>{value}</{complete_field}>"""
 
     def get_financial_statement_line_tags(
         self,

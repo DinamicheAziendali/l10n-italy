@@ -17,7 +17,7 @@ from odoo.tools.translate import _
 
 from odoo.addons.l10n_it_account.tools.account_tools import encode_for_export
 
-from .efattura import EFatturaOut, format_numbers
+from .efattura import EFatturaOut, format_numbers, fpaToEur
 
 _logger = logging.getLogger(__name__)
 
@@ -56,13 +56,12 @@ class WizardExportFatturapa(models.TransientModel):
 
         attach_str = fatturapa.to_xml(self.env)
         attach_vals = {
-            "name": "{}_{}.xml".format(vat, number),
+            "name": f"{vat}_{number}.xml",
             "datas": base64.encodebytes(attach_str),
         }
         return attach_obj.create(attach_vals)
 
     def getPartnerId(self, invoice_ids):
-
         invoice_model = self.env["account.move"]
         partner = False
 
@@ -88,12 +87,13 @@ class WizardExportFatturapa(models.TransientModel):
         values w/o altering the original lines"""
 
         class _Payment:
-            __slots__ = "date_maturity", "amount_currency", "debit"
+            __slots__ = "date_maturity", "amount_currency", "debit", "currency_rate"
 
-            def __init__(self, date_maturity, amount_currency, debit):
+            def __init__(self, date_maturity, amount_currency, debit, currency_rate):
                 self.date_maturity = date_maturity
                 self.amount_currency = amount_currency
                 self.debit = debit
+                self.currency_rate = currency_rate
 
         payments = []
         for line in invoice.line_ids.filtered(
@@ -101,7 +101,12 @@ class WizardExportFatturapa(models.TransientModel):
             in ("asset_receivable", "liability_payable")
         ):
             payments.append(
-                _Payment(line.date_maturity, line.amount_currency, line.debit)
+                _Payment(
+                    line.date_maturity,
+                    line.amount_currency,
+                    line.debit,
+                    line.currency_rate,
+                )
             )
         return payments
 
@@ -116,7 +121,10 @@ class WizardExportFatturapa(models.TransientModel):
         # report (there are cases in which the partner does not have to
         # paid the VAT, yet its amount has to be printed out and included
         # in the total amount of the invoice)
-        return invoice.amount_total
+        if invoice.company_id.xml_divisa_value == "keep_orig":
+            return invoice.amount_total
+        else:
+            return abs(invoice.amount_total_signed)
 
     @api.model
     def getAllTaxes(self, invoice):
@@ -129,6 +137,7 @@ class WizardExportFatturapa(models.TransientModel):
         def _key(tax_id):
             return tax_id.id
 
+        euro = self.env.ref("base.EUR")
         out_computed = {}
         # existing tax lines
         tax_ids = invoice.line_ids.filtered(lambda line: line.tax_line_id)
@@ -163,20 +172,14 @@ class WizardExportFatturapa(models.TransientModel):
                 key = _key(tax_id)
                 if key in out_computed:
                     continue
-
-                if invoice.move_type == "out_invoice":
-                    ImponibileImporto = line.credit - line.debit
-                elif invoice.move_type == "out_refund":
-                    ImponibileImporto = line.debit - line.credit
-                else:
-                    ImponibileImporto = 0.0
-
                 if key not in out:
                     out[key] = {
                         "AliquotaIVA": aliquota,
                         "Natura": tax_id.kind_id.code,
                         # 'Arrotondamento':'',
-                        "ImponibileImporto": ImponibileImporto,
+                        "ImponibileImporto": fpaToEur(
+                            line.price_subtotal, invoice, euro, rate=line.currency_rate
+                        ),
                         "Imposta": 0.0,
                         "EsigibilitaIVA": tax_id.payability,
                     }
@@ -185,7 +188,11 @@ class WizardExportFatturapa(models.TransientModel):
                             tax_id.law_reference, 100
                         )
                 else:
-                    out[key]["ImponibileImporto"] += ImponibileImporto
+                    out[key]["ImponibileImporto"] += (
+                        fpaToEur(
+                            line.price_subtotal, invoice, euro, rate=line.currency_rate
+                        ),
+                    )
                     out[key]["Imposta"] += 0.0
         out.update(out_computed)
         return out
@@ -310,7 +317,7 @@ class WizardExportFatturapa(models.TransientModel):
         )
         att_id = self.env["ir.attachment"].create(
             {
-                "name": "{}.pdf".format(inv.name),
+                "name": f"{inv.name}.pdf",
                 "type": "binary",
                 "datas": base64.encodebytes(attachment),
                 "res_model": "account.move",

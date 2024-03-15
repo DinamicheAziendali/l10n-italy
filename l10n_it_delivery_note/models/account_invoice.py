@@ -31,9 +31,9 @@ class AccountInvoice(models.Model):
 
     def goto_delivery_notes(self, **kwargs):
         delivery_notes = self.mapped("delivery_note_ids")
-        action = self.env.ref(
+        action = self.env["ir.actions.act_window"]._for_xml_id(
             "l10n_it_delivery_note.stock_delivery_note_action"
-        ).read()[0]
+        )
         action.update(kwargs)
 
         if len(delivery_notes) > 1:
@@ -92,7 +92,9 @@ class AccountInvoice(models.Model):
 
         for invoice in self.filtered(lambda i: i.delivery_note_ids):
             new_lines = []
-            old_lines = invoice.invoice_line_ids.filtered(lambda l: l.note_dn)
+            old_lines = invoice.invoice_line_ids.filtered(
+                lambda inv_line: inv_line.note_dn
+            )
             old_lines.unlink()
 
             #

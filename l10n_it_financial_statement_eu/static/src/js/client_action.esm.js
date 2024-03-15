@@ -19,14 +19,11 @@ patch(ReportAction.prototype, "l10n_it_financial_statement_eu.ReportAction", {
             type: "ir.actions.report",
             report_type: "xlsx",
             report_name: "l10n_it_financial_statement_eu.fseu_xlsx_report",
-            report_file: this._get_xlsx_name(),
+            report_file: "Financial statement EU",
             data: this.props.data || {},
             context: this.props.context || {},
             display_name: this.title,
         });
-    },
-    _get_xlsx_name() {
-        return "Financial statement EU";
     },
 
     export_xbrl() {

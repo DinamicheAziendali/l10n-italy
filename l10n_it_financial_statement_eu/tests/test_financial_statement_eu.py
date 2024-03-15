@@ -14,7 +14,7 @@ def _get_financial_statement_line_amount(fs_lines, line_code):
 class TestFinancialStatementEU(TransactionCase):
     def setUp(self):
         # add env on cls and many other things
-        super(TestFinancialStatementEU, self).setUp()
+        super().setUp()
 
     def _find_or_create_account_account(self, company_id, code, name, code_fs_eu):
         acc_id = self.env["account.account"].search(

@@ -104,11 +104,11 @@ class AccountInvoice(models.Model):
                 )
         return
 
+    @api.model
     def check_tag(self, new_xml, original_xml, tags, precision=None):
         """
         This function check if tag in new xml generated after function write()
         is the same of original xml
-
         :param new_xml: new xml generated after function write()
         :param original_xml: original xml linked to invoice
         :param tags: tags of xml to check
@@ -166,9 +166,8 @@ class AccountInvoice(models.Model):
                     "isn't equal to tag in file e-invoice already created!"
                 )
             )
-        lr = 0
-        for new_line_ritenuta in new_xml.findall(
-            ".//DatiGeneraliDocumento/DatiRitenuta"
+        for lr, new_line_ritenuta in enumerate(
+            new_xml.findall(".//DatiGeneraliDocumento/DatiRitenuta")
         ):
             original_line_ritenuta = original_xml.findall(
                 ".//DatiGeneraliDocumento/DatiRitenuta"
@@ -190,7 +189,6 @@ class AccountInvoice(models.Model):
                 list_tag_DatiRitenuta,
                 price_precision,
             )
-            lr += 1
 
     def check_DatiBeniServizi(self, new_xml, original_xml):
         price_precision = self.env["decimal.precision"].precision_get(
@@ -209,8 +207,9 @@ class AccountInvoice(models.Model):
                     "isn't equal to tag in file e-invoice already created!"
                 )
             )
-        ld = 0
-        for new_line_details in new_xml.findall(".//DatiBeniServizi/DettaglioLinee"):
+        for ld, new_line_details in enumerate(
+            new_xml.findall(".//DatiBeniServizi/DettaglioLinee")
+        ):
             original_line_details = original_xml.findall(
                 ".//DatiBeniServizi/DettaglioLinee"
             )[ld]
@@ -245,7 +244,6 @@ class AccountInvoice(models.Model):
                 list_tag_DettaglioLinee,
                 price_precision,
             )
-            ld += 1
 
         if len(new_xml.findall(".//DatiBeniServizi/DatiRiepilogo")) != len(
             original_xml.findall(".//DatiBeniServizi/DatiRiepilogo")
@@ -256,8 +254,9 @@ class AccountInvoice(models.Model):
                     "isn't equal to tag in file e-invoice already created!"
                 )
             )
-        lr = 0
-        for new_line_riepilogo in new_xml.findall(".//DatiBeniServizi/DatiRiepilogo"):
+        for lr, new_line_riepilogo in enumerate(
+            new_xml.findall(".//DatiBeniServizi/DatiRiepilogo")
+        ):
             original_line_riepilogo = original_xml.findall(
                 ".//DatiBeniServizi/DatiRiepilogo"
             )[lr]
@@ -272,7 +271,6 @@ class AccountInvoice(models.Model):
                 list_tag_DatiRiepilogo,
                 price_precision,
             )
-            lr += 1
 
     def elements_equal(self, new_xml, original_xml):
         self.check_CessionarioCommittente(new_xml, original_xml)
@@ -342,5 +340,5 @@ class AccountInvoice(models.Model):
                     )
                     % invoice.name
                 )
-        res = super(AccountInvoice, self).button_draft()
+        res = super().button_draft()
         return res

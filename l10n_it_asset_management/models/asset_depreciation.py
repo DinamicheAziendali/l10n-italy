@@ -283,7 +283,8 @@ class AssetDepreciation(models.Model):
             raise ValidationError(
                 _(
                     "Cannot update the following assets which contain"
-                    " draft depreciation for the chosen date and types:\n%(draft_names)s",
+                    " draft depreciation for the"
+                    " chosen date and types:\n%(draft_names)s",
                     draft_names=draft_names,
                 )
             )
@@ -294,7 +295,9 @@ class AssetDepreciation(models.Model):
 
         new_lines = self.env["asset.depreciation.line"]
         for dep in self:
-            new_lines |= dep.generate_depreciation_lines_single(dep_date)
+            new_line = dep.generate_depreciation_lines_single(dep_date)
+            if new_line:
+                new_lines |= new_line
 
         return new_lines
 
@@ -306,6 +309,8 @@ class AssetDepreciation(models.Model):
         dep_nr = self.get_max_depreciation_nr() + 1
         dep = self.with_context(dep_nr=dep_nr, used_asset=self.asset_id.used)
         dep_amount = dep.get_depreciation_amount(dep_date)
+        if not dep_amount:
+            return res
         dep = dep.with_context(dep_amount=dep_amount)
 
         vals = dep.prepare_depreciation_line_vals(dep_date)
@@ -329,9 +334,9 @@ class AssetDepreciation(models.Model):
     def get_computed_amounts(self):
         self.ensure_one()
         vals = {
-            "amount_{}".format(k): abs(v)
+            f"amount_{k}": abs(v)
             for k, v in self.line_ids.get_balances_grouped().items()
-            if "amount_{}".format(k) in self._fields
+            if f"amount_{k}" in self._fields
         }
 
         if self.asset_id.sold or self.asset_id.dismissed:
