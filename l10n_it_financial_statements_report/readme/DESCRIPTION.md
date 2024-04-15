@@ -1,7 +1,7 @@
 **Italiano**
 
-Rendicontazione PDF e XLS per stato patrimoniale e conto economico a sezioni
-contrapposte.
+Rendicontazione PDF e XLS per stato patrimoniale e conto economico a
+sezioni contrapposte.
 
 **English**
 

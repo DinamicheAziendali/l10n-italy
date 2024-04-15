@@ -15,10 +15,4 @@ class FatturaElettronicaController(Controller):
         html = attach.get_fattura_elettronica_preview()
         if isinstance(html, bytes):
             html = html.decode()
-        pdf = request.env["ir.actions.report"]._run_wkhtmltopdf([html])
-
-        pdfhttpheaders = [
-            ("Content-Type", "application/pdf"),
-            ("Content-Length", len(pdf)),
-        ]
-        return request.make_response(pdf, headers=pdfhttpheaders)
+        return request.make_response(html)

@@ -1,11 +1,12 @@
 **Italiano**
 
-Qualora questo modulo venisse installato in un DB dove `l10n_it_withholding_tax_causali`
-è già installato, è necessario eseguire la seguente procedura.
+Qualora questo modulo venisse installato in un DB dove
+`l10n_it_withholding_tax_causali` è già installato, è necessario
+eseguire la seguente procedura.
 
 1.  Installare `openupgradelib`:
 
-    ```
+    ``` 
     pip3 install git+https://github.com/OCA/openupgradelib.git@master
     ```
 
@@ -13,7 +14,7 @@ Qualora questo modulo venisse installato in un DB dove `l10n_it_withholding_tax_
 
 3.  Eseguire i seguenti comandi:
 
-    ```python
+    ``` python
     >>> from openupgradelib import openupgrade
     >>> openupgrade.rename_fields(
           env,
@@ -35,12 +36,12 @@ Qualora questo modulo venisse installato in un DB dove `l10n_it_withholding_tax_
 
 **English**
 
-When `l10n_it_withholding_tax_causali` is installed in the database you need to follow
-the following steps.
+When `l10n_it_withholding_tax_causali` is installed in the database you
+need to follow the following steps.
 
 1.  Install `openupgradelib`:
 
-    ```
+    ``` 
     pip3 install git+https://github.com/OCA/openupgradelib.git@master
     ```
 
@@ -48,7 +49,7 @@ the following steps.
 
 3.  Execute the following commands:
 
-    ```python
+    ``` python
     >>> from openupgradelib import openupgrade
     >>> openupgrade.rename_fields(
           env,

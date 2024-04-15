@@ -50,7 +50,7 @@
         </xpath>
         <xpath expr="//DatiRiepilogo/Imposta" position="attributes">
             <attribute name="t-out">
-                format_monetary(get_sign(record) * tax_data['Imposta'], euro)
+                format_monetary(get_sign(record) * tax_data['Imposta'], currency)
             </attribute>
         </xpath>
     </template>

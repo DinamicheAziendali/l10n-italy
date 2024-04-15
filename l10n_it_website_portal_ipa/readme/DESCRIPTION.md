@@ -1,6 +1,7 @@
 **Italiano**
 
-Aggiunge l'indice PA (IPA) tra i dettagli dell'utente, nel portale clienti.
+Aggiunge l'indice PA (IPA) tra i dettagli dell'utente, nel portale
+clienti.
 
 **English**
 

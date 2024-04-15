@@ -41,7 +41,7 @@ class WizardExportFatturapa(models.TransientModel):
         ]
 
     def _get_selection(self):
-        reports = self.env["ir.actions.actions"].sudo().search(self._domain_ir_values())
+        reports = self.env["ir.actions.report"].sudo().search(self._domain_ir_values())
         ret = [(str(r.id), r.name) for r in reports]
         return ret
 
@@ -188,10 +188,8 @@ class WizardExportFatturapa(models.TransientModel):
                             tax_id.law_reference, 100
                         )
                 else:
-                    out[key]["ImponibileImporto"] += (
-                        fpaToEur(
-                            line.price_subtotal, invoice, euro, rate=line.currency_rate
-                        ),
+                    out[key]["ImponibileImporto"] += fpaToEur(
+                        line.price_subtotal, invoice, euro, rate=line.currency_rate
                     )
                     out[key]["Imposta"] += 0.0
         out.update(out_computed)
