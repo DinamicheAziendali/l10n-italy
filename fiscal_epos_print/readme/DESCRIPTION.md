@@ -1,7 +1,7 @@
 **Italiano**
 
-Questo modulo permette di stampare gli scontrini del punto vendita, su
-stampanti fiscali Epson, tramite protocollo EPos
+Questo modulo permette di stampare gli scontrini del punto vendita, su stampanti fiscali
+Epson, tramite protocollo EPos
 
 Stampanti supportate:
 
@@ -10,8 +10,8 @@ Stampanti supportate:
 
 **English**
 
-This module allows to print receipt of point of sale, on fiscal printers
-Epson, via EPos protocol.
+This module allows to print receipt of point of sale, on fiscal printers Epson, via EPos
+protocol.
 
 Supported printers:
 

@@ -110,7 +110,7 @@ odoo.define("fiscal_epos_print.EpsonFP81IIComponent", function (require) {
                 body: _t("Close"),
             });
             if (confirmed) {
-                fp90.resetPrinter();
+                this.resetPrinter();
             } else {
                 // TODO not exist
                 // this.chrome.loading_hide();
