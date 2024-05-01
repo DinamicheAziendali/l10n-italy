@@ -45,7 +45,8 @@ odoo.define("fiscal_epos_print.PaymentScreen", function (require) {
                     printer_options.order = order;
                     var receipt = order.export_for_printing();
                     var fp90 = new eposDriver(printer_options, this);
-                    fp90.printFiscalReceipt(receipt);
+                    await fp90.printFiscalReceipt(receipt);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
                     // This line causes problems on bill split. What's the sense of deleting the actual pos context?!
                     // It regenerates orders which are already partly paid using split function...
                     // this.env.pos.context = {};
@@ -54,7 +55,7 @@ odoo.define("fiscal_epos_print.PaymentScreen", function (require) {
 
             async _finalizeValidation() {
                 var currentOrder = this.currentOrder;
-                this.sendToFP90Printer(currentOrder);
+                await this.sendToFP90Printer(currentOrder);
                 await super._finalizeValidation();
             }
 
