@@ -3,27 +3,20 @@ odoo.define("fiscal_epos_print.SetLotteryCodeButton", function (require) {
 
     const PosComponent = require("point_of_sale.PosComponent");
     const ProductScreen = require("point_of_sale.ProductScreen");
-    const {useListener} = require("@web/core/utils/hooks");
     const Registries = require("point_of_sale.Registries");
-    const {Gui} = require("point_of_sale.Gui");
     const core = require("web.core");
     const _t = core._t;
 
     class SetLotteryCodeButton extends PosComponent {
-        constructor() {
-            super(...arguments);
-            useListener("click", this.onClick);
-        }
-
         render() {
             var color = this.lottery_get_button_color();
             $(this.el).css("background", color);
         }
 
-        async onClick() {
+        async onClickLotteryCode() {
             var self = this;
             var current_order = this.env.pos.get_order();
-            Gui.showPopup("LotteryCodePopup", {
+            this.showPopup("LotteryCodePopup", {
                 title: _t("Lottery Code"),
                 lottery_code: current_order.lottery_code,
                 update_lottery_info_button: function () {
