@@ -679,136 +679,130 @@ odoo.define("fiscal_epos_print.epson_epos_print", function (require) {
                     });
                 }
             }
-            if (receipt.refund_full_refund) {
-                xml += "</printerFiscalReceipt>";
-                this.fiscalPrinter.send(this.url, xml);
-                console.log(xml);
-            } else {
-                xml += '<beginFiscalReceipt operator="' + fiscal_operator + '" />';
+            xml += '<beginFiscalReceipt operator="' + fiscal_operator + '" />';
 
-                _.each(receipt.orderlines, function (l) {
-                    if (l.price >= 0) {
-                        if (l.quantity >= 0) {
-                            if (l.discount < 100) {
-                                xml += self.printRecItem({
-                                    description: l.product_name,
-                                    quantity: l.quantity,
-                                    unitPrice: round_pr(
-                                        l.full_price,
-                                        self.sender.env.pos.currency.rounding
-                                    ),
-                                    department: l.tax_department.code,
-                                    operator: fiscal_operator,
-                                });
-                                if (l.discount) {
-                                    xml += self.printRecItemAdjustment({
-                                        adjustmentType: 0,
-                                        description:
-                                            _t("Discount") + " " + l.discount + "%",
-                                        amount: round_pr(
-                                            l.quantity * l.full_price - l.price_display,
-                                            self.sender.env.pos.currency.rounding
-                                        ),
-                                        operator: fiscal_operator,
-                                    });
-                                }
-                            }
-                        } else {
-                            xml += self.printRecRefund({
-                                description: _t("Refund: ") + l.product_name,
-                                quantity: l.quantity * -1.0,
+            _.each(receipt.orderlines, function (l) {
+                if (l.price >= 0) {
+                    if (l.quantity >= 0) {
+                        if (l.discount < 100) {
+                            xml += self.printRecItem({
+                                description: l.product_name,
+                                quantity: l.quantity,
                                 unitPrice: round_pr(
-                                    l.price,
+                                    l.full_price,
                                     self.sender.env.pos.currency.rounding
                                 ),
                                 department: l.tax_department.code,
                                 operator: fiscal_operator,
                             });
-
-                            // TODO This line of code is added by us, check if it's right
-                            // xml += self.printRecItem({
-                            //     description: _t("Refund cash"),
-                            //     quantity: l.quantity,
-                            //     unitPrice: round_pr(
-                            //         l.price,
-                            //         self.sender.env.pos.currency.rounding
-                            //     ),
-                            //     department: l.tax_department.code,
-                            //     operator: fiscal_operator,
-                            // });
+                            if (l.discount) {
+                                xml += self.printRecItemAdjustment({
+                                    adjustmentType: 0,
+                                    description:
+                                        _t("Discount") + " " + l.discount + "%",
+                                    amount: round_pr(
+                                        l.quantity * l.full_price - l.price_display,
+                                        self.sender.env.pos.currency.rounding
+                                    ),
+                                    operator: fiscal_operator,
+                                });
+                            }
                         }
                     } else {
-                        xml += self.printRecItemAdjustment({
-                            adjustmentType: 3,
-                            description: l.product_name,
+                        xml += self.printRecRefund({
+                            description: _t("Refund: ") + l.product_name,
+                            quantity: l.quantity * -1.0,
+                            unitPrice: round_pr(
+                                l.price,
+                                self.sender.env.pos.currency.rounding
+                            ),
                             department: l.tax_department.code,
-                            amount: -l.price,
                             operator: fiscal_operator,
                         });
+
+                        // TODO This line of code is added by us, check if it's right
+                        // xml += self.printRecItem({
+                        //     description: _t("Refund cash"),
+                        //     quantity: l.quantity,
+                        //     unitPrice: round_pr(
+                        //         l.price,
+                        //         self.sender.env.pos.currency.rounding
+                        //     ),
+                        //     department: l.tax_department.code,
+                        //     operator: fiscal_operator,
+                        // });
                     }
-                });
-                // Footer can go only as promo code so within a fiscal receipt body
-                xml += this.printFiscalReceiptFooter(receipt);
-                if (receipt.lottery_code) {
-                    // TX
-                    // 1 135   OP   ID CODE   NU
-                    // Example: 113501ABCDEFGN        0000
-                    // Pad with spaces to make the code field always 16 characters.
-                    xml +=
-                        '<directIO command="1135" data="01' +
-                        receipt.lottery_code.padEnd(16, " ") +
-                        '0000" />';
-                }
-                if (receipt.rounding_applied !== 0 && !has_refund) {
-                    xml += self.printRounding({
-                        amount: Math.abs(
-                            round_pr(
-                                receipt.rounding_applied,
-                                self.sender.env.pos.currency.rounding
-                            )
-                        ),
+                } else {
+                    xml += self.printRecItemAdjustment({
+                        adjustmentType: 3,
+                        description: l.product_name,
+                        department: l.tax_department.code,
+                        amount: -l.price,
                         operator: fiscal_operator,
                     });
-                    xml +=
-                        '<printRecSubtotal operator="' +
-                        fiscal_operator +
-                        '" option="1" />';
                 }
-                // TODO is always the same Total for refund and payments?
-                receipt.ticket = "";
-                _.each(receipt.paymentlines, function (l) {
-                    // Set ticket
-                    receipt.ticket += l.ticket;
-                    // Amount always positive because it's used for refund too
-                    if (has_refund) {
-                        xml += self.printRecTotalRefund({
-                            payment: Math.abs(l.amount),
-                            paymentType: l.type,
-                            paymentIndex: l.type_index,
-                            description: l.journal,
-                            operator: fiscal_operator,
-                        });
-                    } else {
-                        xml += self.printRecTotal({
-                            payment: Math.abs(l.amount),
-                            paymentType: l.type,
-                            paymentIndex: l.type_index,
-                            description: l.journal,
-                            operator: fiscal_operator,
-                        });
-                    }
-                });
-                xml += this.printOrderId(receipt);
-                if (receipt.ticket) {
-                    xml += this.printInfoPaymentCustomer(receipt);
-                }
+            });
+            // Footer can go only as promo code so within a fiscal receipt body
+            xml += this.printFiscalReceiptFooter(receipt);
+            if (receipt.lottery_code) {
+                // TX
+                // 1 135   OP   ID CODE   NU
+                // Example: 113501ABCDEFGN        0000
+                // Pad with spaces to make the code field always 16 characters.
                 xml +=
-                    '<endFiscalReceipt operator="' +
-                    fiscal_operator +
-                    '" /></printerFiscalReceipt>';
-                this.fiscalPrinter.send(this.url, xml);
-                console.log(xml);
+                    '<directIO command="1135" data="01' +
+                    receipt.lottery_code.padEnd(16, " ") +
+                    '0000" />';
             }
+            if (receipt.rounding_applied !== 0 && !has_refund) {
+                xml += self.printRounding({
+                    amount: Math.abs(
+                        round_pr(
+                            receipt.rounding_applied,
+                            self.sender.env.pos.currency.rounding
+                        )
+                    ),
+                    operator: fiscal_operator,
+                });
+                xml +=
+                    '<printRecSubtotal operator="' +
+                    fiscal_operator +
+                    '" option="1" />';
+            }
+            // TODO is always the same Total for refund and payments?
+            receipt.ticket = "";
+            _.each(receipt.paymentlines, function (l) {
+                // Set ticket
+                receipt.ticket += l.ticket;
+                // Amount always positive because it's used for refund too
+                if (has_refund) {
+                    xml += self.printRecTotalRefund({
+                        payment: Math.abs(l.amount),
+                        paymentType: l.type,
+                        paymentIndex: l.type_index,
+                        description: l.journal,
+                        operator: fiscal_operator,
+                    });
+                } else {
+                    xml += self.printRecTotal({
+                        payment: Math.abs(l.amount),
+                        paymentType: l.type,
+                        paymentIndex: l.type_index,
+                        description: l.journal,
+                        operator: fiscal_operator,
+                    });
+                }
+            });
+            xml += this.printOrderId(receipt);
+            if (receipt.ticket) {
+                xml += this.printInfoPaymentCustomer(receipt);
+            }
+            xml +=
+                '<endFiscalReceipt operator="' +
+                fiscal_operator +
+                '" /></printerFiscalReceipt>';
+            this.fiscalPrinter.send(this.url, xml);
+            console.log(xml);
         },
 
         /*
