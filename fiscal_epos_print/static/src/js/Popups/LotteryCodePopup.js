@@ -29,7 +29,7 @@ odoo.define("fiscal_epos_print.LotteryCodePopup", function (require) {
             if (allValid()) {
                 this.$el.find("#error-message-dialog").hide();
 
-                var lottery_code = this.$el.find("#lottery_code").val();
+                var lottery_code = this.inputLotteryCode.el.value;
                 this.env.pos.context = {
                     lottery_code: lottery_code,
                 };

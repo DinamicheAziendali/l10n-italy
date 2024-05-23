@@ -61,7 +61,7 @@
                         class="detail refund_full_refund"
                         type='checkbox'
                         t-att-value="props.refund_full_refund || ''"
-                        t-ref="inputRefund_full_refund"
+                        t-ref="inputRefundFullRefund"
                     />
                 </div>
 
