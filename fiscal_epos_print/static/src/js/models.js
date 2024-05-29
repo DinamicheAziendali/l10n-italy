@@ -201,7 +201,7 @@ odoo.define("fiscal_epos_print.models", function (require) {
                         receipt.full_price = this.price;
                     } else {
                         // This strategy was used because JavaScript's Math.round rounds to the nearest integer
-                        const dec_precision = this.pos.currency.decimals;
+                        const dec_precision = this.pos.currency.decimal_places;
                         const full_price = Number(
                             (
                                 this.price *
