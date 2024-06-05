@@ -845,7 +845,7 @@ class AccountIntrastatStatement(models.Model):
             domain = [
                 ("statement_id", "=", self.id),
                 ("partner_id", "=", line.partner_id.id),
-                ("intrastat_code_id", "=", line.intrastat_code_id.id),
+                ("l10n_it_intrastat_code_id", "=", line.l10n_it_intrastat_code_id.id),
                 ("amount_euro", ">=", line.amount_euro),
             ]
             line_to_refund = to_ref_obj.search(domain, limit=1)

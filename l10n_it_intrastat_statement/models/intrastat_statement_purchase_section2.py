@@ -131,7 +131,7 @@ class IntrastatStatementPurchaseSection2(models.Model):
         # Codice della natura della transazione
         rcd += format_x(self.transaction_nature_id.code, 1)
         # Codice della nomenclatura combinata della merce
-        rcd += format_9(self.intrastat_code_id.name, 8)
+        rcd += format_9(self.l10n_it_intrastat_code_id.name, 8)
         if self.statement_id.period_type == "M":
             #  Valore statistico in euro
             rcd += format_9(self.statistic_amount_euro, 13)

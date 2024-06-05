@@ -26,12 +26,12 @@ class IntrastatStatementPurchaseSection1(models.Model):
     additional_units_required = fields.Boolean(
         string="Additional Unit Required",
         store=True,
-        related="intrastat_code_id.additional_unit_required",
+        related="l10n_it_intrastat_code_id.additional_unit_required",
     )
     additional_units_uom = fields.Char(
         string="Additional Unit of Measure",
         readonly=True,
-        related="intrastat_code_id.additional_unit_uom_id.name",
+        related="l10n_it_intrastat_code_id.additional_unit_uom_id.name",
     )
     statistic_amount_euro = fields.Integer(string="Statistic Value in Euro")
     delivery_code_id = fields.Many2one(
@@ -150,7 +150,7 @@ class IntrastatStatementPurchaseSection1(models.Model):
         # Codice della natura della transazione
         rcd += format_x(self.transaction_nature_id.code, 1)
         # Codice della nomenclatura combinata della merce
-        rcd += format_9(self.intrastat_code_id.name, 8)
+        rcd += format_9(self.l10n_it_intrastat_code_id.name, 8)
         if self.statement_id.period_type == "M":
             #  Massa netta in chilogrammi
             rcd += format_9(self.weight_kg, 10)
