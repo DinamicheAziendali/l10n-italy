@@ -117,8 +117,13 @@ def migrate(env, version):
             for old_xml_id, new_xml_id in RENAMED_XMLIDS
         ],
     )
-    # without forcing rename_tables this error occurs:
-    # Keep unexpected index account_account_deprecated_index on table account_account
+
     openupgrade.rename_tables(
         env.cr, [("account_balance_eu", "financial_statement_eu")]
+    )
+    openupgrade.rename_tables(
+        env.cr, [("account_balance_eu_log", "financial_statement_eu_log")]
+    )
+    openupgrade.rename_tables(
+        env.cr, [("account_balance_eu_wizard", "financial_statement_eu_wizard")]
     )

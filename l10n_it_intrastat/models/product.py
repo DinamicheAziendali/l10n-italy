@@ -59,7 +59,9 @@ class ProductTemplate(models.Model):
             res["intrastat_country_origin_id"] = self.intrastat_country_origin_id.id
             res["intrastat_type"] = self.intrastat_type
         elif self.categ_id and self.categ_id.l10n_it_intrastat_code_id:
-            res["l10n_it_intrastat_code_id"] = self.categ_id.l10n_it_intrastat_code_id.id
+            res[
+                "l10n_it_intrastat_code_id"
+            ] = self.categ_id.l10n_it_intrastat_code_id.id
             res[
                 "intrastat_country_origin_id"
             ] = self.categ_id.intrastat_country_origin_id.id

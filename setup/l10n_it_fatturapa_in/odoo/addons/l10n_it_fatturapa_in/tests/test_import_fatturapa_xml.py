@@ -1,3 +1,6 @@
+#  Copyright 2024 Simone Rubino - Aion Tech
+#  License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+
 from datetime import date
 
 from psycopg2 import IntegrityError
@@ -892,6 +895,36 @@ class TestFatturaPAXMLValidation(FatturapaCommon):
         invoice = self.invoice_model.browse(invoice_ids)
         self.assertTrue(invoice.fatturapa_attachment_in_id.is_self_invoice)
 
+    def test_52_xml_import(self):
+        # we test partner creation, too
+        # make sure a partner with the same vat is already in the DB
+        for partner in self.env["res.partner"].search([("vat", "=", "IT02780790107")]):
+            # references from aml may prevent partner unlinking
+            self.env["account.move.line"].search(
+                [("partner_id", "=", partner.id)]
+            ).with_context(dynamic_unlink=True).unlink()
+            self.env["account.move"].search([("partner_id", "=", partner.id)]).unlink()
+            partner.unlink()
+
+        res = self.run_wizard("test52", "IT02780790107_11009.xml")
+        invoice_ids = res.get("domain")[0][2]
+        invoice = self.invoice_model.browse(invoice_ids)
+
+        self.assertEqual(len(invoice.e_invoice_line_ids), 1)
+        self.assertEqual(invoice.e_invoice_line_ids[0].tax_kind, "N4")
+
+        self.assertEqual(len(invoice.invoice_line_ids), 1)
+        self.assertEqual(len(invoice.invoice_line_ids[0].tax_ids), 1)
+        self.assertEqual(invoice.invoice_line_ids[0].price_unit, 272.23)
+        kind = self.env.ref("l10n_it_account_tax_kind.n4")
+        self.assertEqual(invoice.invoice_line_ids[0].tax_ids[0].kind_id, kind)
+
+        self.assertEqual(invoice.amount_total, 272.23)
+
+        self.assertTrue(invoice.partner_id)
+        self.assertEqual(invoice.partner_id.firstname, "Mario")
+        self.assertEqual(invoice.partner_id.lastname, "Rossi")
+
     def test_53_xml_import(self):
         """
         Check that VAT of non-IT partner is not checked.
@@ -1069,6 +1102,29 @@ class TestFatturaPAXMLValidation(FatturapaCommon):
         attach = self.run_wizard("duplicated_vat", "IT05979361218_012.xml", mode=False)
         self.assertFalse(attach.xml_supplier_id)
         self.assertTrue(attach.inconsistencies)
+
+    def test_access_other_user_e_invoice(self):
+        """A user can see the e-invoice files created by other users."""
+        # Arrange
+        access_right_group_xmlid = "base.group_erp_manager"
+        user = self.env.user
+        user.groups_id -= self.env.ref("base.group_system")
+        user.groups_id -= self.env.ref(access_right_group_xmlid)
+        other_user = user.copy()
+        # pre-condition
+        self.assertFalse(user.has_group(access_right_group_xmlid))
+        self.assertNotEqual(user, other_user)
+
+        # Act
+        with self.with_user(other_user.login):
+            import_action = self.run_wizard(
+                "access_other_user_e_invoice", "IT01234567890_FPR03.xml"
+            )
+
+        # Assert
+        invoices = self.env[import_action["res_model"]].search(import_action["domain"])
+        e_invoice = invoices.fatturapa_attachment_in_id
+        self.assertTrue(e_invoice.ir_attachment_id.read())
 
 
 class TestFatturaPAEnasarco(FatturapaCommon):

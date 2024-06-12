@@ -13,7 +13,7 @@
                         </group>
                         <group>
                             <field
-                            name="l10n_it_intrastat_code_id"
+                            name="intrastat_code_id"
                             attrs="{'invisible':[('intrastat_type','!=', 'good'),('intrastat_type','!=', 'service')],
                                     'required':[('intrastat_type','in', ['good', 'service'])]}"
                         />
@@ -34,7 +34,7 @@
                         <group string="Intrastat" name="intrastat">
                             <field name="intrastat_type" />
                             <field
-                            name="l10n_it_intrastat_code_id"
+                            name="intrastat_code_id"
                             attrs="{'invisible':[('intrastat_type','!=', 'good'),('intrastat_type','!=', 'service')],
                                     'required':[('intrastat_type','in', ['good', 'service'])]}"
                         />

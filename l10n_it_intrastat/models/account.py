@@ -245,7 +245,9 @@ class AccountMoveLine(models.Model):
             intrastat_code = intrastat_code_model.browse(
                 intrastat_data["l10n_it_intrastat_code_id"]
             )
-        res.update({"l10n_it_intrastat_code_id": intrastat_data["l10n_it_intrastat_code_id"]})
+        res.update(
+            {"l10n_it_intrastat_code_id": intrastat_data["l10n_it_intrastat_code_id"]}
+        )
         return intrastat_code, intrastat_data
 
     def _prepare_intrastat_line_amount(self, res):

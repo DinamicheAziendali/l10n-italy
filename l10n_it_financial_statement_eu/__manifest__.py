@@ -23,7 +23,6 @@
     "assets": {
         "web.assets_backend": [
             "l10n_it_financial_statement_eu/static/src/js/client_action.esm.js",
-            "l10n_it_financial_statement_eu/static/src/js/report.esm.js",
             "l10n_it_financial_statement_eu/static/src/xml/report.xml",
         ],
     },

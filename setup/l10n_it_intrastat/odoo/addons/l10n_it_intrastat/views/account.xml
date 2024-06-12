@@ -62,7 +62,7 @@
             <field name="arch" type="xml">
                 <tree>
                     <field name="intrastat_code_type" />
-                    <field name="l10n_it_intrastat_code_id" />
+                    <field name="intrastat_code_id" />
                     <field name="transaction_nature_id" />
                     <field name="transaction_nature_b_id" />
                     <field name="transport_code_id" />
@@ -81,7 +81,7 @@
                        <group>
                            <group>
                                <field name="intrastat_code_type" />
-                               <field name="l10n_it_intrastat_code_id" />
+                               <field name="intrastat_code_id" />
                                <field name="amount_currency" />
                                <field name="amount_euro" />
                                <field name="statistic_amount_euro" />
@@ -171,7 +171,7 @@
                 <tree create="false">
                     <field name="partner_id" />
                     <field name="invoice_id" />
-                    <field name="l10n_it_intrastat_code_id" />
+                    <field name="intrastat_code_id" />
                     <field name="country_origin_id" />
                     <field name="country_destination_id" />
                     <field name="transaction_nature_id" />
@@ -190,8 +190,8 @@
             <field name="arch" type="xml">
                 <search string="Intrastat Search">
                     <field
-                    name="l10n_it_intrastat_code_id"
-                    filter_domain="[('l10n_it_intrastat_code_id','ilike',self)]"
+                    name="intrastat_code_id"
+                    filter_domain="[('intrastat_code_id','ilike',self)]"
                 />
                     <field
                     name="partner_id"
@@ -216,7 +216,7 @@
                         name="intrastat_code"
                         string="Nomenclature Code"
                         domain="[]"
-                        context="{'group_by':'l10n_it_intrastat_code_id'}"
+                        context="{'group_by':'intrastat_code_id'}"
                     />
                     </group>
                 </search>

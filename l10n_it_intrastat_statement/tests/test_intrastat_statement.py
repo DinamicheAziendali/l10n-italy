@@ -61,7 +61,7 @@ class TestIntrastatStatement(TransactionCase):
         self.service01.update(
             {
                 "intrastat_type": "service",
-                "l10n_it_intrastat_code_id": self.env.ref(
+                "intrastat_code_id": self.env.ref(
                     "l10n_it_intrastat.intrastat_intrastat_01012100"
                 ),
             }

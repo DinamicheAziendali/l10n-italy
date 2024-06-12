@@ -43,10 +43,9 @@
                         <button special="cancel" string="Cancel" class="oe_link" />
                         <div
                             attrs="{'invisible': [('log_warnings', '=', '')]}"
-                            style="border: solid 1px;
-                                color: #721c24;
+                            style="flex-basis: 100%; border: solid 1px; color: #721c24;
                                 background-color: #f8d7da; border-color: #f5c6cb;
-                                padding-left: 10px;padding-top:5px;margin-top: 10px;"
+                                padding-left: 10px;padding-top:5px;padding-bottom:5px; margin-top: 10px;"
                         >
                             <field name="log_warnings" readonly="1" />
                         </div>

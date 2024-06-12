@@ -548,11 +548,6 @@ msgid "Wizard for Financial statement EU calculation"
 msgstr "Wizard per calcolo bilancio UE"
 
 #. module: l10n_it_financial_statement_eu
-#: model:ir.actions.report,name:l10n_it_financial_statement_eu.action_report_financial_statement_eu_xbrl
-msgid "XBRL-financial-statements"
-msgstr "XBRL-bilancio-esercizio"
-
-#. module: l10n_it_financial_statement_eu
 #: code:addons/l10n_it_financial_statement_eu/report/financial_statement_eu_report.py:0
 #, python-format
 msgid "YES"
