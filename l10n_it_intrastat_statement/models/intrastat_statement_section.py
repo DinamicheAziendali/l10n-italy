@@ -25,7 +25,7 @@ class IntrastatStatementSection(models.AbstractModel):
     invoice_id = fields.Many2one(
         comodel_name="account.move", string="Invoice", readonly=True
     )
-    intrastat_code_id = fields.Many2one(comodel_name="report.intrastat.code")
+    l10n_it_intrastat_code_id = fields.Many2one(comodel_name="report.intrastat.code")
 
     def apply_partner_data(self, partner_data):
         self.ensure_one()
@@ -59,7 +59,7 @@ class IntrastatStatementSection(models.AbstractModel):
             "country_partner_id": inv_intra_line.country_partner_id.id,
             "vat_code": partner_id.vat and partner_id.vat[2:],
             "amount_euro": amount_euro,
-            "intrastat_code_id": inv_intra_line.intrastat_code_id.id,
+            "l10n_it_intrastat_code_id": inv_intra_line.l10n_it_intrastat_code_id.id,
         }
 
     def _export_line_checks(self, section_label, section_number):

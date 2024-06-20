@@ -230,11 +230,11 @@ class AccountMoveLine(models.Model):
         intrastat_data = product_template.get_intrastat_data()
         intrastat_code_model = self.env["report.intrastat.code"]
         intrastat_code = intrastat_code_model.browse()
-        if intrastat_data["intrastat_code_id"]:
+        if intrastat_data["l10n_it_intrastat_code_id"]:
             intrastat_code = intrastat_code_model.browse(
-                intrastat_data["intrastat_code_id"]
+                intrastat_data["l10n_it_intrastat_code_id"]
             )
-        res.update({"intrastat_code_id": intrastat_data["intrastat_code_id"]})
+        res.update({"l10n_it_intrastat_code_id": intrastat_data["l10n_it_intrastat_code_id"]})
         return intrastat_code, intrastat_data
 
     def _prepare_intrastat_line_amount(self, res):
@@ -394,7 +394,7 @@ class AccountMove(models.Model):
             product_template = line.product_id.product_tmpl_id
             intrastat_data = product_template.get_intrastat_data()
             if (
-                "intrastat_code_id" not in intrastat_data
+                "l10n_it_intrastat_code_id" not in intrastat_data
                 or intrastat_data["intrastat_type"] == "exclude"
             ):
                 continue
@@ -405,12 +405,12 @@ class AccountMove(models.Model):
             if intrastat_data["intrastat_type"] == "misc":
                 lines_to_split.append(line)
                 continue
-            if not intrastat_data["intrastat_code_id"]:
+            if not intrastat_data["l10n_it_intrastat_code_id"]:
                 continue
 
             # Group by intrastat code
             intra_line = line._prepare_intrastat_line()
-            i_code_id = intra_line["intrastat_code_id"]
+            i_code_id = intra_line["l10n_it_intrastat_code_id"]
             i_code_type = intra_line["intrastat_code_type"]
 
             if i_code_id in i_line_by_code:
@@ -556,7 +556,7 @@ class AccountInvoiceIntrastat(models.Model):
         required=True,
         default="good",
     )
-    intrastat_code_id = fields.Many2one(
+    l10n_it_intrastat_code_id = fields.Many2one(
         comodel_name="report.intrastat.code", string="Nomenclature Code", required=True
     )
     statement_section = fields.Selection(
@@ -594,7 +594,7 @@ class AccountInvoiceIntrastat(models.Model):
     additional_units_uom = fields.Char(
         string="Additional Unit of Measure",
         readonly=True,
-        related="intrastat_code_id.additional_unit_uom_id.name",
+        related="l10n_it_intrastat_code_id.additional_unit_uom_id.name",
     )
     statistic_amount_euro = fields.Float(
         string="Statistic Value in Euro", digits="Account"
@@ -664,7 +664,7 @@ class AccountInvoiceIntrastat(models.Model):
     @api.onchange("intrastat_code_type")
     def change_intrastat_code_type(self):
         self.statement_section = self._compute_statement_section()
-        self.intrastat_code_id = False
+        self.l10n_it_intrastat_code_id = False
 
 
 class AccountPaymentTerm(models.Model):
