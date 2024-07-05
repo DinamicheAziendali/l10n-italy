@@ -108,7 +108,7 @@ class IntrastatStatementSaleSection4(models.Model):
             invoice_date_ddmmyy = self.invoice_date.strftime("%d%m%y")
         rcd += format_x(modifying and invoice_date_ddmmyy, 6)
         # Codice del servizio
-        rcd += format_9(modifying and self.l10n_it_intrastat_code_id.name, 6)
+        rcd += format_9(modifying and self.intrastat_code_id.name, 6)
         # Modalità di erogazione
         rcd += format_x(modifying and self.supply_method, 1)
         # Modalità di incasso

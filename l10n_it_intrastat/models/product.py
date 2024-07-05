@@ -7,7 +7,7 @@ from odoo import fields, models
 class ProductCategory(models.Model):
     _inherit = "product.category"
 
-    l10n_it_intrastat_code_id = fields.Many2one(
+    intrastat_code_id = fields.Many2one(
         "report.intrastat.code", string="Nomenclature Code"
     )
     intrastat_country_origin_id = fields.Many2one(
@@ -26,7 +26,7 @@ class ProductCategory(models.Model):
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    l10n_it_intrastat_code_id = fields.Many2one(
+    intrastat_code_id = fields.Many2one(
         comodel_name="report.intrastat.code", string="Intrastat Code"
     )
     intrastat_country_origin_id = fields.Many2one(
@@ -49,19 +49,17 @@ class ProductTemplate(models.Model):
         - Intrastat Code on product category
         """
         res = {
-            "l10n_it_intrastat_code_id": False,
+            "intrastat_code_id": False,
             "intrastat_country_origin_id": False,
             "intrastat_type": False,
         }
         # From Product
         if self.intrastat_type:
-            res["l10n_it_intrastat_code_id"] = self.l10n_it_intrastat_code_id.id
+            res["intrastat_code_id"] = self.intrastat_code_id.id
             res["intrastat_country_origin_id"] = self.intrastat_country_origin_id.id
             res["intrastat_type"] = self.intrastat_type
-        elif self.categ_id and self.categ_id.l10n_it_intrastat_code_id:
-            res[
-                "l10n_it_intrastat_code_id"
-            ] = self.categ_id.l10n_it_intrastat_code_id.id
+        elif self.categ_id and self.categ_id.intrastat_code_id:
+            res["intrastat_code_id"] = self.categ_id.intrastat_code_id.id
             res[
                 "intrastat_country_origin_id"
             ] = self.categ_id.intrastat_country_origin_id.id

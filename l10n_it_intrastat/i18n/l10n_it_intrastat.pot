@@ -30169,8 +30169,8 @@ msgid "Intrastat"
 msgstr ""
 
 #. module: l10n_it_intrastat
-#: model:ir.model.fields,field_description:l10n_it_intrastat.field_product_product__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat.field_product_template__l10n_it_intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat.field_product_product__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat.field_product_template__intrastat_code_id
 #: model:ir.model.fields,field_description:l10n_it_intrastat.field_report_intrastat_code__name
 #: model_terms:ir.ui.view,arch_db:l10n_it_intrastat.view_form_report_intrastat_code
 msgid "Intrastat Code"
@@ -40446,8 +40446,8 @@ msgid ""
 msgstr ""
 
 #. module: l10n_it_intrastat
-#: model:ir.model.fields,field_description:l10n_it_intrastat.field_account_invoice_intrastat__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat.field_product_category__l10n_it_intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat.field_account_invoice_intrastat__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat.field_product_category__intrastat_code_id
 #: model_terms:ir.ui.view,arch_db:l10n_it_intrastat.view_invoice_intrastat_search
 msgid "Nomenclature Code"
 msgstr ""

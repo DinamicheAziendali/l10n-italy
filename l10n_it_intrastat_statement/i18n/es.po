@@ -442,17 +442,17 @@ msgid "Instant"
 msgstr "Instantánea"
 
 #. module: l10n_it_intrastat_statement
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section1__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section2__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section3__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section4__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section1__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section2__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section3__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section4__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section__l10n_it_intrastat_code_id
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_section__l10n_it_intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section1__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section2__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section3__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section4__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section1__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section2__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section3__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section4__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section__intrastat_code_id
+#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_section__intrastat_code_id
 msgid "Intrastat Code"
 msgstr "Código Intrastat"
 
@@ -971,11 +971,6 @@ msgid "Progressive to Adjust"
 msgstr "Progresivo para ajustar"
 
 #. module: l10n_it_intrastat_statement
-#: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section4__progressive_to_modify_id
-msgid "Progressive to Adjust ID"
-msgstr "Progresivo para ajustar ID"
-
-#. module: l10n_it_intrastat_statement
 #: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_purchase_section4__protocol
 #: model:ir.model.fields,field_description:l10n_it_intrastat_statement.field_account_intrastat_statement_sale_section4__protocol
 msgid "Protocol Number"
@@ -1349,6 +1344,9 @@ msgstr "Año"
 #: model_terms:ir.ui.view,arch_db:l10n_it_intrastat_statement.wizard_account_intrastat_export_file
 msgid "or"
 msgstr "ó"
+
+#~ msgid "Progressive to Adjust ID"
+#~ msgstr "Progresivo para ajustar ID"
 
 #, python-format
 #~ msgid "Missing vat code for %s on '%s - Section %s'"

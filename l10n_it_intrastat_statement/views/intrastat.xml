@@ -286,7 +286,7 @@
                    <field name="invoice_id" />
                    <field name="partner_id" string="Buyer" />
                    <field name="country_partner_id" string="Buyer State" />
-                   <field name="l10n_it_intrastat_code_id" string="Goods Code" />
+                   <field name="intrastat_code_id" string="Goods Code" />
                    <field name="weight_kg" />
                    <field name="country_destination_id" />
                    <field name="province_origin_id" />
@@ -323,7 +323,7 @@
                     <group>
                         <group>
                             <field
-                            name="l10n_it_intrastat_code_id"
+                            name="intrastat_code_id"
                             string="Goods Code"
                             required="1"
                         />
@@ -362,7 +362,7 @@
                    <field name="country_partner_id" string="Buyer State" />
                    <field name="partner_id" string="Buyer" />
                    <field name="vat_code" string="Buyer VAT Code" />
-                   <field name="l10n_it_intrastat_code_id" string="Goods Code" />
+                   <field name="intrastat_code_id" string="Goods Code" />
                    <field name="sign_variation" />
                    <field name="amount_euro" sum="Total" />
                 </tree>
@@ -395,7 +395,7 @@
                     <group>
                         <group>
                             <field
-                            name="l10n_it_intrastat_code_id"
+                            name="intrastat_code_id"
                             string="Goods Code"
                             required="1"
                         />
@@ -424,7 +424,7 @@
                    <field name="country_partner_id" string="Buyer State" />
                    <field name="partner_id" string="Buyer" />
                    <field name="vat_code" string="Buyer VAT Code" />
-                   <field name="l10n_it_intrastat_code_id" string="Service Code" />
+                   <field name="intrastat_code_id" string="Service Code" />
                    <field name="invoice_number" />
                    <field name="invoice_date" />
                    <field name="amount_euro" sum="Total" />
@@ -457,7 +457,7 @@
                     <group>
                         <group>
                             <field
-                            name="l10n_it_intrastat_code_id"
+                            name="intrastat_code_id"
                             string="Service Code"
                             required="1"
                         />
@@ -487,7 +487,7 @@
                     <field name="country_partner_id" string="Buyer State" />
                     <field name="partner_id" string="Buyer" />
                     <field name="vat_code" string="Buyer VAT Code" />
-                    <field name="l10n_it_intrastat_code_id" string="Service Code" />
+                    <field name="intrastat_code_id" string="Service Code" />
                     <field name="invoice_number" />
                     <field name="invoice_date" />
                     <field name="cancellation" />
@@ -530,7 +530,7 @@
                     <group>
                         <group attrs="{'invisible':[('cancellation','=', True)]}">
                             <field
-                            name="l10n_it_intrastat_code_id"
+                            name="intrastat_code_id"
                             string="Service Code"
                             attrs="{
                                 'required':[('cancellation','=', False)]}"
@@ -561,7 +561,7 @@
                    <field name="invoice_id" />
                    <field name="partner_id" string="Supplier" />
                    <field name="country_partner_id" string="Supplier State" />
-                   <field name="l10n_it_intrastat_code_id" string="Goods Code" />
+                   <field name="intrastat_code_id" string="Goods Code" />
                    <field name="weight_kg" />
                    <field name="country_origin_id" />
                    <field name="province_destination_id" />
@@ -598,7 +598,7 @@
                     <group>
                         <group>
                             <field
-                            name="l10n_it_intrastat_code_id"
+                            name="intrastat_code_id"
                             string="Goods Code"
                             required="1"
                         />
@@ -639,7 +639,7 @@
                    <field name="country_partner_id" string="Supplier State" />
                    <field name="partner_id" string="Supplier" />
                    <field name="vat_code" string="Supplier VAT Code" />
-                   <field name="l10n_it_intrastat_code_id" string="Goods Code" />
+                   <field name="intrastat_code_id" string="Goods Code" />
                    <field name="sign_variation" />
                    <field name="amount_euro" sum="Total" />
                </tree>
@@ -672,7 +672,7 @@
                     <group>
                         <group>
                             <field
-                            name="l10n_it_intrastat_code_id"
+                            name="intrastat_code_id"
                             string="Goods Code"
                             required="1"
                         />
@@ -702,7 +702,7 @@
                    <field name="country_partner_id" string="Supplier State" />
                    <field name="partner_id" string="Supplier" />
                    <field name="vat_code" string="Supplier VAT Code" />
-                   <field name="l10n_it_intrastat_code_id" string="Service Code" />
+                   <field name="intrastat_code_id" string="Service Code" />
                    <field name="invoice_number" />
                    <field name="invoice_date" />
                    <field name="amount_euro" sum="Total" />
@@ -726,7 +726,7 @@
                     <newline />
                     <group>
                         <group>
-                            <field name="l10n_it_intrastat_code_id" string="Service Code" />
+                            <field name="intrastat_code_id" string="Service Code" />
                             <field name="amount_euro" />
                             <field name="amount_currency" />
                         </group>
@@ -754,7 +754,7 @@
                     <field name="country_partner_id" string="Supplier State" />
                     <field name="partner_id" string="Supplier" />
                     <field name="vat_code" string="Supplier VAT Code" />
-                    <field name="l10n_it_intrastat_code_id" string="Service Code" />
+                    <field name="intrastat_code_id" string="Service Code" />
                     <field name="invoice_number" />
                     <field name="invoice_date" />
                     <field name="amount_euro" sum="Total" />
@@ -791,7 +791,7 @@
                     <group>
                         <group>
                             <field
-                            name="l10n_it_intrastat_code_id"
+                            name="intrastat_code_id"
                             string="Service Code"
                             required="1"
                         />

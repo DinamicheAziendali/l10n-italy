@@ -159,7 +159,7 @@
                                                 <td
                                                     t-esc="l.transaction_nature_id.code"
                                                 />
-                                                <td t-esc="l.l10n_it_intrastat_code_id.name" />
+                                                <td t-esc="l.intrastat_code_id.name" />
                                                 <td t-esc="l.statistic_amount_euro" />
                                                 <t
                                                     t-set="total"
