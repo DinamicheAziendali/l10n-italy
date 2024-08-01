@@ -50,7 +50,7 @@ class StockDeliveryNoteType(models.Model):
 
     transport_reason_inconsistency_ids = fields.Many2many(
         "stock.picking.transport.reason",
-        string="Reason of transport (Inconsistency)",
+        string="Inconsistent reasons of transport",
     )
 
     sequence_id = fields.Many2one("ir.sequence", string="Numeration", required=True)
