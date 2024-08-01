@@ -50,5 +50,7 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
     )
     delivery_note_group_by_quantity = fields.Boolean(
-        string="Group Delivery note invoices by quantity"
+        string="Group Delivery note invoices by quantity",
+        related = "company_id.delivery_note_group_by_quantity",
+        readonly = False,
     )
