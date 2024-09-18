@@ -1,4 +1,5 @@
 # Copyright 2019 Simone Rubino - Agile Business Group
+# Copyright 2024 Simone Rubino - Aion Tech
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import _, api, fields, models
@@ -33,7 +34,7 @@ class AccountMoveLine(models.Model):
         self._prepare_intrastat_line_amount(res)
 
         # Weight
-        weight_kg = self._prepare_intrastat_line_weight(product_template, res)
+        weight_kg = self._prepare_intrastat_line_weight(self.product_id, res)
 
         # Additional Units
         self._prepare_intrastat_line_additional_units(
@@ -217,16 +218,16 @@ class AccountMoveLine(models.Model):
                 additional_units = self.quantity
         res.update({"additional_units": additional_units})
 
-    def _prepare_intrastat_line_weight(self, product_template, res):
+    def _prepare_intrastat_line_weight(self, product, res):
         self.ensure_one()
         intrastat_uom_kg = self.move_id.company_id.intrastat_uom_kg_id
         # ...Weight compute in Kg
         # ...If Uom has the same category of kg -> Convert to Kg
         # ...Else the weight will be product weight * qty
-        product_weight = product_template.weight or 0
+        product_weight = product.weight or 0
         if (
             intrastat_uom_kg
-            and product_template.uom_id.category_id == intrastat_uom_kg.category_id
+            and product.uom_id.category_id == intrastat_uom_kg.category_id
         ):
             weight_kg = self.product_uom_id._compute_quantity(
                 qty=self.quantity, to_unit=intrastat_uom_kg
@@ -323,7 +324,7 @@ class AccountMove(models.Model):
         for invoice in self:
             if not invoice.intrastat_line_ids and invoice.intrastat:
                 invoice.compute_intrastat_lines()
-        super().action_post()
+        res = super().action_post()
         precision_digits = self.env["decimal.precision"].precision_get("Account")
         for invoice in self:
             if invoice.intrastat:
@@ -347,7 +348,7 @@ class AccountMove(models.Model):
                     raise UserError(
                         _("Intrastat total must be equal to invoice untaxed total")
                     )
-        return True
+        return res
 
     def compute_intrastat_lines(self):
         for inv in self:
@@ -480,7 +481,9 @@ class AccountInvoiceIntrastat(models.Model):
                 if not line.invoice_id.payment_reference:
                     continue
                 line.invoice_number = (
-                    line.invoice_id.payment_reference or line.invoice_id.name
+                    line.invoice_id.ref
+                    or line.invoice_id.payment_reference
+                    or line.invoice_id.name
                 )
                 if line.invoice_id.invoice_date:
                     line.invoice_date = line.invoice_id.invoice_date

@@ -403,15 +403,18 @@ modalità Odoo di gestire ordini di vendita, prelievi e fatture.</p>
 <li><a class="reference internal" href="#configuration" id="toc-entry-1">Configuration</a></li>
 <li><a class="reference internal" href="#usage" id="toc-entry-2">Usage</a><ul>
 <li><a class="reference internal" href="#funzionalita-base" id="toc-entry-3">Funzionalità base</a></li>
-<li><a class="reference internal" href="#funzionalita-avanzata" id="toc-entry-4">Funzionalità avanzata</a></li>
-<li><a class="reference internal" href="#accesso-da-portale" id="toc-entry-5">Accesso da portale</a></li>
+<li><a class="reference internal" href="#funzionalita-avanzata" id="toc-entry-4">Funzionalità avanzata</a><ul>
+<li><a class="reference internal" href="#raggruppa-righe-fattura-per-ddt" id="toc-entry-5">Raggruppa righe fattura per DDT</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#bug-tracker" id="toc-entry-6">Bug Tracker</a></li>
-<li><a class="reference internal" href="#credits" id="toc-entry-7">Credits</a><ul>
-<li><a class="reference internal" href="#authors" id="toc-entry-8">Authors</a></li>
-<li><a class="reference internal" href="#contributors" id="toc-entry-9">Contributors</a></li>
-<li><a class="reference internal" href="#maintainers" id="toc-entry-10">Maintainers</a></li>
+<li><a class="reference internal" href="#accesso-da-portale" id="toc-entry-6">Accesso da portale</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bug-tracker" id="toc-entry-7">Bug Tracker</a></li>
+<li><a class="reference internal" href="#credits" id="toc-entry-8">Credits</a><ul>
+<li><a class="reference internal" href="#authors" id="toc-entry-9">Authors</a></li>
+<li><a class="reference internal" href="#contributors" id="toc-entry-10">Contributors</a></li>
+<li><a class="reference internal" href="#maintainers" id="toc-entry-11">Maintainers</a></li>
 </ul>
 </li>
 </ul>
@@ -422,7 +425,10 @@ modalità Odoo di gestire ordini di vendita, prelievi e fatture.</p>
 <ol class="arabic">
 <li><p class="first"><em>Inventory → Configuration → Settings - Delivery Notes</em></p>
 <p>Checking ‘Use Advanced DN Features’ allows you to manage more picking
-on one delivery note.</p>
+on one delivery note. Checking ‘Group Invoice Lines by Delivery Note
+which generated them’ too, you will have invoice lines grouped and it
+can be useful if you invoice many DNs with same product and you want
+to show the details to your customer.</p>
 <p>Checking ‘Display Ref. Order in Delivery Note Report’ or ‘Display
 Ref. Customer in Delivery Note Report” enables in report fields
 relating DN line to SO (if applicable).</p>
@@ -487,16 +493,22 @@ indicata la stampa prezzi. La visibilità dei prezzi si trova nei
 permessi dell’utente.</p>
 <p>Le fatture generate dai DDT contengono i riferimenti al DDT stesso nelle
 righe nota.</p>
+<div class="section" id="raggruppa-righe-fattura-per-ddt">
+<h3><a class="toc-backref" href="#toc-entry-5">Raggruppa righe fattura per DDT</a></h3>
+<p>Attivando le funzionalità avanzate viene mostrata l’opzione per
+abilitare il raggruppamento delle righe fattura in base al DDT che le ha
+generate (“Raggruppa righe fattura per le DN che le hanno generate”).</p>
+</div>
 </div>
 <div class="section" id="accesso-da-portale">
-<h2><a class="toc-backref" href="#toc-entry-5">Accesso da portale</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-6">Accesso da portale</a></h2>
 <p>Gli utenti portal hanno la possibilità di scaricare i report dei DDT di
 cui loro o la loro azienda padre sono impostati come destinatari o
 indirizzo di spedizione.</p>
 </div>
 </div>
 <div class="section" id="bug-tracker">
-<h1><a class="toc-backref" href="#toc-entry-6">Bug Tracker</a></h1>
+<h1><a class="toc-backref" href="#toc-entry-7">Bug Tracker</a></h1>
 <p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/l10n-italy/issues">GitHub Issues</a>.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
@@ -504,9 +516,9 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 <p>Do not contact contributors directly about support or help with technical issues.</p>
 </div>
 <div class="section" id="credits">
-<h1><a class="toc-backref" href="#toc-entry-7">Credits</a></h1>
+<h1><a class="toc-backref" href="#toc-entry-8">Credits</a></h1>
 <div class="section" id="authors">
-<h2><a class="toc-backref" href="#toc-entry-8">Authors</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-9">Authors</a></h2>
 <ul class="simple">
 <li>Marco Calcagni</li>
 <li>Gianmarco Conte</li>
@@ -514,7 +526,7 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 </ul>
 </div>
 <div class="section" id="contributors">
-<h2><a class="toc-backref" href="#toc-entry-9">Contributors</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-10">Contributors</a></h2>
 <ul>
 <li><p class="first">Riccardo Bellanova &lt;<a class="reference external" href="mailto:r.bellanova&#64;apuliasoftware.it">r.bellanova&#64;apuliasoftware.it</a>&gt;</p>
 </li>
@@ -555,7 +567,7 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 </ul>
 </div>
 <div class="section" id="maintainers">
-<h2><a class="toc-backref" href="#toc-entry-10">Maintainers</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-11">Maintainers</a></h2>
 <p>This module is maintained by the OCA.</p>
 <a class="reference external image-reference" href="https://odoo-community.org">
 <img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" />

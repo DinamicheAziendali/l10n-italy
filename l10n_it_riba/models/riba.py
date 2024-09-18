@@ -8,7 +8,6 @@
 # Copyright 2024 Nextev Srl
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from datetime import date
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -36,7 +35,7 @@ class RibaList(models.Model):
                 move_lines |= line.payment_ids
             riba.payment_ids = move_lines
 
-    def _compute_total_values(self):
+    def _compute_total_amount(self):
         for riba in self:
             riba.total_amount = 0.0
             for line in riba.line_ids:
@@ -132,7 +131,7 @@ class RibaList(models.Model):
     )
     total_amount = fields.Float(
         string="Amount",
-        compute="_compute_total_values",
+        compute="_compute_total_amount",
     )
 
     def action_riba_export(self):
@@ -497,7 +496,7 @@ class RibaListLine(models.Model):
                     "journal_id": (
                         riba_line.slip_id.config_id.settlement_journal_id.id
                     ),
-                    "date": date.today().strftime("%Y-%m-%d"),
+                    "date": riba_line.due_date.strftime("%Y-%m-%d"),
                     "ref": move_ref,
                 }
             )

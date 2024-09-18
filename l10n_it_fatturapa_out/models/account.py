@@ -109,6 +109,7 @@ class AccountInvoice(models.Model):
         """
         This function check if tag in new xml generated after function write()
         is the same of original xml
+
         :param new_xml: new xml generated after function write()
         :param original_xml: original xml linked to invoice
         :param tags: tags of xml to check
