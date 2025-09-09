@@ -5,8 +5,11 @@ from openupgradelib import openupgrade
 
 from odoo.addons.l10n_it_account_vat_period_end_settlement import hooks
 
+from odoo import SUPERUSER_ID, api
+
 
 @openupgrade.migrate()
-def migrate(env, version):
+def migrate(cr, version):
+    env = api.Environment(cr, SUPERUSER_ID, {})
     # Used by OpenUpgrade when module is in `apriori`
     hooks.pre_absorb_old_module(env)
