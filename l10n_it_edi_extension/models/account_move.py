@@ -239,7 +239,7 @@ class AccountMoveInherit(models.Model):
             text = text.replace(bad, good)
 
         # Remove any character outside Basic Latin + Latin-1 Supplement range
-        text = re.sub(r"[^\u0000-\u00FF]", "", text)
+        text = re.sub(r"[^\u0000-\u00FF]", "?", text)
 
         return text
 
