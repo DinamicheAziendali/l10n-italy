@@ -7,7 +7,7 @@
 
 <!-- /!\ do not modify above this line -->
 
-# Odoo Italia Modules
+# Odoo Italia Modules.
 
 Addons concerning Odoo Italian Localization.
 
