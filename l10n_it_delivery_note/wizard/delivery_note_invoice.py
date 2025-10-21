@@ -35,6 +35,11 @@ class StockDeliveryNoteInvoiceWizard(models.TransientModel):
             self._context.get("active_ids", [])
         )
         delivery_note_ids.action_invoice(self.invoice_method)
-        for invoice in delivery_note_ids.mapped("invoice_ids"):
+        invoices = delivery_note_ids.mapped("invoice_ids")
+        for invoice in invoices:
             invoice.invoice_date = self.invoice_date
-        return True
+
+        action_ref = "account.action_move_out_invoice_type"
+        action = self.env["ir.actions.actions"]._for_xml_id(action_ref)
+        action["domain"] = [("id", "in", invoices.ids)]
+        return action
