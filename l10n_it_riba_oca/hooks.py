@@ -1,6 +1,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from openupgradelib import openupgrade
+from odoo import SUPERUSER_ID, api
 
 OLD_MODULE_NAME = "l10n_it_ricevute_bancarie"
 NEW_MODULE_NAME = "l10n_it_riba_oca"
@@ -255,7 +256,8 @@ RENAMED_XMLIDS = [
 ]
 
 
-def pre_absorb_old_module(env):
+def pre_absorb_old_module(cr):
+    env = api.Environment(cr, SUPERUSER_ID, {})
     if openupgrade.is_module_installed(env.cr, "l10n_it_ricevute_bancarie"):
         openupgrade.copy_columns(
             env.cr,
@@ -332,7 +334,8 @@ def pre_absorb_old_module(env):
         )
 
 
-def post_absorb_old_module(env):
+def post_absorb_old_module(cr):
+    env = api.Environment(cr, SUPERUSER_ID, {})
     openupgrade.load_data(
         env,
         "l10n_it_riba_oca",
