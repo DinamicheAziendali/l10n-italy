@@ -9,7 +9,7 @@
 
 # l10n-italy
 
-l10n-italy.
+l10n-italy
 
 <!-- /!\ do not modify below this line -->
 
