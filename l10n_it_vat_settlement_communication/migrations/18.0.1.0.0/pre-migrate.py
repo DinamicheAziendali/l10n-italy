@@ -1,14 +1,12 @@
 #  Copyright 2025 Lorenzo Battistini
 #  License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from openupgradelib import openupgrade
 
 from odoo import SUPERUSER_ID, api
 
 from odoo.addons.l10n_it_account_vat_period_end_settlement import hooks
 
 
-@openupgrade.migrate()
 def migrate(cr, version):
     env = api.Environment(cr, SUPERUSER_ID, {})
     # Used by OpenUpgrade when module is in `apriori`
