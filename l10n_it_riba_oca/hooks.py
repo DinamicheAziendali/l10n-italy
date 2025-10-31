@@ -2,8 +2,6 @@
 
 from openupgradelib import openupgrade
 
-from odoo import SUPERUSER_ID, api
-
 OLD_MODULE_NAME = "l10n_it_ricevute_bancarie"
 NEW_MODULE_NAME = "l10n_it_riba_oca"
 RENAMED_MODELS = [
@@ -257,8 +255,7 @@ RENAMED_XMLIDS = [
 ]
 
 
-def pre_absorb_old_module(cr):
-    env = api.Environment(cr, SUPERUSER_ID, {})
+def pre_absorb_old_module(env):
     if openupgrade.is_module_installed(env.cr, "l10n_it_ricevute_bancarie"):
         openupgrade.copy_columns(
             env.cr,
@@ -335,40 +332,40 @@ def pre_absorb_old_module(cr):
         )
 
 
-def post_absorb_old_module(cr):
-    env = api.Environment(cr, SUPERUSER_ID, {})
-    openupgrade.load_data(
-        env,
-        "l10n_it_riba_oca",
-        "migrations/18.0.1.0.0/noupdate.xml",
-    )
+def post_absorb_old_module(env):
+    if openupgrade.is_module_installed(env.cr, "l10n_it_ricevute_bancarie"):
+        openupgrade.load_data(
+            env,
+            "l10n_it_riba_oca",
+            "migrations/18.0.1.0.0/noupdate.xml",
+        )
 
-    openupgrade.map_values(
-        env.cr,
-        openupgrade.get_legacy_name("state"),
-        "state",
-        [
-            ("draft", "draft"),
-            ("confirmed", "confirmed"),
-            ("accredited", "credited"),
-            ("paid", "paid"),
-            ("unsolved", "past_due"),
-            ("cancel", "cancel"),
-        ],
-        table="riba_slip_line",
-    )
+        openupgrade.map_values(
+            env.cr,
+            openupgrade.get_legacy_name("state"),
+            "state",
+            [
+                ("draft", "draft"),
+                ("confirmed", "confirmed"),
+                ("accredited", "credited"),
+                ("paid", "paid"),
+                ("unsolved", "past_due"),
+                ("cancel", "cancel"),
+            ],
+            table="riba_slip_line",
+        )
 
-    openupgrade.map_values(
-        env.cr,
-        openupgrade.get_legacy_name("state"),
-        "state",
-        [
-            ("draft", "draft"),
-            ("accepted", "accepted"),
-            ("accredited", "credited"),
-            ("paid", "paid"),
-            ("unsolved", "past_due"),
-            ("cancel", "cancel"),
-        ],
-        table="riba_slip",
-    )
+        openupgrade.map_values(
+            env.cr,
+            openupgrade.get_legacy_name("state"),
+            "state",
+            [
+                ("draft", "draft"),
+                ("accepted", "accepted"),
+                ("accredited", "credited"),
+                ("paid", "paid"),
+                ("unsolved", "past_due"),
+                ("cancel", "cancel"),
+            ],
+            table="riba_slip",
+        )
