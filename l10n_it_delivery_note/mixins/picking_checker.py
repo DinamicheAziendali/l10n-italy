@@ -11,7 +11,6 @@ PICKING_TYPES = [
     ("outgoing", "Outgoing"),
     ("internal", "Internal"),
     ("mrp_operation", "Manufacturing Operation"),
-    ("dropship", "Dropship"),
 ]
 DOMAIN_PICKING_TYPES = [t[0] for t in PICKING_TYPES]
 

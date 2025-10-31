@@ -12,8 +12,7 @@
     "version": "18.0.1.0.0",
     "category": "Localization/Italy",
     "author": "Odoo Community Association (OCA), Openforce",
-    "website": "https://github.com/OCA/l10n-italy"
-    "/tree/16.0/l10n_it_financial_statements_report",
+    "website": "https://github.com/OCA/l10n-italy",
     "license": "AGPL-3",
     "depends": [
         "account_financial_report",

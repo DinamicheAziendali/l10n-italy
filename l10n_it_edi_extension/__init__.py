@@ -368,20 +368,6 @@ def _l10n_it_fatturapa_post_migration_delivery_data(env):
             am.ftpa_incoterms
         FROM account_move am
         LEFT JOIN res_partner rp ON am.carrier_id = rp.id
-        WHERE
-            rp.license_number IS NOT NULL
-            OR am.transport_vehicle IS NOT NULL
-            OR am.transport_reason IS NOT NULL
-            OR am.number_items IS NOT NULL
-            OR am.description IS NOT NULL
-            OR am.unit_weight IS NOT NULL
-            OR am.gross_weight IS NOT NULL
-            OR am.net_weight IS NOT NULL
-            OR am.pickup_datetime IS NOT NULL
-            OR am.transport_date IS NOT NULL
-            OR am.delivery_address IS NOT NULL
-            OR am.delivery_datetime IS NOT NULL
-            OR am.ftpa_incoterms IS NOT NULL;
     """)
     rows = env.cr.fetchall()
     invoice_map = {}
@@ -501,29 +487,6 @@ def _l10n_it_fatturapa_post_migration_payment_data(env):
         LEFT JOIN fatturapa_payment_term fpt ON fpd.payment_terms = fpt.id
         LEFT JOIN fatturapa_payment_detail fpdl ON fpd.id = fpdl.payment_data_id
         LEFT JOIN fatturapa_payment_method fpm ON fpdl.fatturapa_pm_id = fpm.id
-        WHERE
-            fpt.code IS NOT NULL
-            OR fpdl.recipient IS NOT NULL
-            OR fpm.code IS NOT NULL
-            OR fpdl.payment_term_start IS NOT NULL
-            OR fpdl.payment_days IS NOT NULL
-            OR fpdl.payment_due_date IS NOT NULL
-            OR fpdl.payment_amount IS NOT NULL
-            OR fpdl.post_office_code IS NOT NULL
-            OR fpdl.recepit_surname IS NOT NULL
-            OR fpdl.recepit_name IS NOT NULL
-            OR fpdl.recepit_cf IS NOT NULL
-            OR fpdl.recepit_title IS NOT NULL
-            OR fpdl.payment_bank_name IS NOT NULL
-            OR fpdl.payment_bank_iban IS NOT NULL
-            OR fpdl.payment_bank_abi IS NOT NULL
-            OR fpdl.payment_bank_cab IS NOT NULL
-            OR fpdl.payment_bank_bic IS NOT NULL
-            OR fpdl.prepayment_discount IS NOT NULL
-            OR fpdl.max_payment_date IS NOT NULL
-            OR fpdl.penalty_amount IS NOT NULL
-            OR fpdl.penalty_date IS NOT NULL
-            OR fpdl.payment_code IS NOT NULL
     """)
     rows = env.cr.fetchall()
     invoice_map = {}
@@ -875,7 +838,7 @@ def _l10n_it_fiscal_payment_term_post_migration(env):
                 "account.move",
                 "account_move",
                 "selection",
-                False,
+                "varchar",
                 "l10n_it_edi_ndd",
                 False,
             )

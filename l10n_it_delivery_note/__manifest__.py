@@ -13,7 +13,7 @@
     "author": "Marco Calcagni, Gianmarco Conte, Link IT Europe Srl, "
     "Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-italy",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.2",
     "category": "Localization/Italy",
     "license": "AGPL-3",
     "maintainers": ["MarcoCalcagni", "aleuffre", "renda-dev"],
@@ -26,7 +26,6 @@
         "stock_delivery",
         "portal",
         "product",
-        "l10n_it_edi",
     ],
     "data": [
         "security/ir.model.access.csv",
@@ -35,7 +34,6 @@
         "security/res_groups.xml",
         "security/res_users.xml",
         "data/delivery_note_data.xml",
-        "data/invoice_it_template.xml",
         "report/delivery_data.xml",
         "report/report_delivery_note.xml",
         "views/account_move.xml",
