@@ -17,13 +17,13 @@
     "summary": "Ricevute bancarie",
     "website": "https://github.com/OCA/l10n-italy",
     "license": "AGPL-3",
-    "excludes": ["l10n_it_riba"],
     "depends": [
         "account",
         "account_due_list",
         "base_iban",
         "l10n_it_abicab",
         "l10n_it_edi",
+        "l10n_it_edi_related_document",
         "account_payment_term_extension",
     ],
     "data": [
