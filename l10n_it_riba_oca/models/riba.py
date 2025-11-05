@@ -293,7 +293,7 @@ class RibaListLine(models.Model):
             for move_line in line.move_line_ids:
                 for (
                     related_document
-                ) in move_line.move_line_id.move_id.related_documents:
+                ) in move_line.move_line_id.move_id.related_document_ids:
                     if related_document.cup:
                         line.cup = str(related_document.cup)
                     if related_document.cig:
