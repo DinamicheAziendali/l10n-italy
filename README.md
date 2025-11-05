@@ -7,7 +7,7 @@
 
 <!-- /!\ do not modify above this line -->
 
-# l10n-italy
+# l10n-italy.
 
 l10n-italy
 
