@@ -15,6 +15,7 @@ OLD_MODULES = [
     "l10n_it_fatturapa",
     "l10n_it_fatturapa_in",
     "l10n_it_fatturapa_out",
+    "l10n_it_fiscal_document_type",
     "l10n_it_fiscal_payment_term",
     "l10n_it_fiscalcode",
     "l10n_it_ipa",
@@ -865,6 +866,31 @@ def _l10n_it_fatturapa_out_post_migration(env):
         attachment.res_model = "account.move"
         attachment.res_id = move.id
         attachment.res_field = "l10n_it_edi_attachment_file"
+
+
+def _l10n_it_fiscal_document_type_post_migration(env):
+    if not openupgrade.column_exists(env.cr, "account_move", "l10n_it_document_type"):
+        field_spec = [
+            (
+                "l10n_it_document_type",
+                "account.move",
+                "account_move",
+                "many2one",
+                "int4",
+                "l10n_it_edi_ndd",
+                False,
+            )
+        ]
+        openupgrade.add_fields(env, field_spec)
+
+    query = """
+        UPDATE account_move
+        SET l10n_it_document_type = lidt.id
+        FROM fiscal_document_type fdt
+        LEFT JOIN l10n_it_document_type lidt ON lidt.code = fdt.code
+        WHERE account_move.fiscal_document_type_id = fdt.id
+    """
+    openupgrade.logged_query(env.cr, query)
 
 
 def _l10n_it_fiscal_payment_term_post_migration(env):
