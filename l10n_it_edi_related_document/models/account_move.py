@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import Command, api, fields, models
 
 from odoo.addons.l10n_it_edi.models.account_move import get_text
 
@@ -67,6 +67,38 @@ class AccountMove(models.Model):
     related_document_ids = fields.One2many(
         "account.move.related_document", "invoice_id", copy=False
     )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            related_fields = [
+                "l10n_it_cig",
+                "l10n_it_cup",
+                "l10n_it_origin_document_type",
+                "l10n_it_origin_document_name",
+                "l10n_it_origin_document_date",
+            ]
+            if not any(vals.get(rf) for rf in related_fields):
+                continue
+
+            related_type = vals.get("l10n_it_origin_document_type")
+            if related_type == "purchase_order":
+                related_type = "order"
+
+            related_vals = {
+                "type": related_type,
+                "name": vals.get("l10n_it_origin_document_name"),
+                "date": vals.get("l10n_it_origin_document_date"),
+                "cup": vals.get("l10n_it_cup"),
+                "cig": vals.get("l10n_it_cig"),
+            }
+
+            if related_vals:
+                vals["related_document_ids"].append(Command.create(related_vals))
+
+            for key in related_fields:
+                vals.pop(key, None)
+        return super().create(vals_list)
 
     def _l10n_it_edi_base_export_check(self):
         errors = super()._l10n_it_edi_base_export_check()
