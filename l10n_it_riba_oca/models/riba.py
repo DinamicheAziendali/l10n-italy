@@ -290,14 +290,18 @@ class RibaListLine(models.Model):
         for line in self:
             line.cig = ""
             line.cup = ""
-            for move_line in line.move_line_ids:
-                for (
-                    related_document
-                ) in move_line.move_line_id.move_id.related_document_ids:
-                    if related_document.cup:
-                        line.cup = str(related_document.cup)
-                    if related_document.cig:
-                        line.cig = str(related_document.cig)
+            related_documents = line.mapped(
+                "move_line_ids.move_line_id.move_id.related_document_ids"
+            )
+
+            for related_document in related_documents:
+                if related_document.cup:
+                    line.cup = str(related_document.cup)
+                if related_document.cig:
+                    line.cig = str(related_document.cig)
+                # Stop if at least one value is found
+                if line.cup or line.cig:
+                    break
 
     sequence = fields.Integer("Number")
     move_line_ids = fields.One2many(
