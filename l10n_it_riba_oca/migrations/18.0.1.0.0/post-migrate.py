@@ -13,4 +13,4 @@ from odoo.addons.l10n_it_riba_oca import hooks
 
 def migrate(cr, version):
     # Used by OpenUpgrade when module is in `apriori`
-    hooks.pre_absorb_old_module(cr)
+    hooks.post_absorb_old_module(cr)
