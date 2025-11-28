@@ -818,7 +818,9 @@ class StockDeliveryNote(models.Model):
         # Add downpayment lines if final invoice
         if final:
             downpayment_lines = sale_orders.mapped("order_line").filtered(
-                lambda ol: ol.product_id and ol.is_downpayment and ol.qty_to_invoice < 0
+                lambda ol: not ol.display_type
+                and ol.is_downpayment
+                and ol.qty_to_invoice < 0
             )
             if downpayment_lines:
                 # Add downpayment section
@@ -872,10 +874,9 @@ class StockDeliveryNote(models.Model):
                 continue
 
             # Check if the user has access rights to create invoices
-            if not self.env["account.move"].check_access_rights("create", False):
+            if not self.env["account.move"].check_access("create"):
                 try:
-                    self.check_access_rights("write")
-                    self.check_access_rule("write")
+                    self.check_access("write")
                 except AccessError:
                     return self.env["account.move"]
 

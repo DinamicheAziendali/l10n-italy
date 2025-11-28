@@ -1323,8 +1323,8 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(len(first_picking), 1)
         self.assertEqual(len(first_picking.move_ids), 2)
 
-        first_picking.move_ids[0].quantity_done = 1
-        first_picking.move_ids[1].quantity_done = 1
+        first_picking.move_ids[0].quantity = 1
+        first_picking.move_ids[1].quantity = 1
 
         result = first_picking.button_validate()
         self.assertTrue(result)
@@ -1354,7 +1354,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(len(backorder), 1)
         self.assertEqual(len(backorder.move_ids), 1)
 
-        backorder.move_ids[0].quantity_done = 2
+        backorder.move_ids[0].quantity = 2
 
         result = backorder.button_validate()
         self.assertTrue(result)
