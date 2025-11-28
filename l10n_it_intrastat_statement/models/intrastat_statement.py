@@ -179,6 +179,7 @@ class AccountIntrastatStatement(models.Model):
         default=lambda self: self.env.company.id,
         required=True,
     )
+    intrastat_site_number = fields.Integer(string="Site number", default=1)
     vat_taxpayer = fields.Char(
         string="Taxpayer VAT Number",
         required=True,
@@ -555,7 +556,7 @@ class AccountIntrastatStatement(models.Model):
         vat_applicant = self.intrastat_vat_delegate or self.vat_taxpayer
         rcd += format_x(vat_applicant.replace(" ", ""), 16)
         # Progressivo sede utente autorizzato
-        prg = self._get_progressive_interchange()
+        prg = self.intrastat_site_number
         rcd += format_9(prg, 3)
         # Riservato a SDA
         rcd += format_x("", 1)
@@ -765,8 +766,8 @@ class AccountIntrastatStatement(models.Model):
 
         # Search intrastat lines
         domain = [
-            ("date", ">=", period_date_start),
-            ("date", "<=", period_date_stop),
+            (self.company_id.intrastat_date_type, ">=", period_date_start),
+            (self.company_id.intrastat_date_type, "<=", period_date_stop),
             ("intrastat", "=", True),
         ]
         inv_type = []
