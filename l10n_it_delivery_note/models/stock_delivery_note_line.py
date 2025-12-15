@@ -230,6 +230,8 @@ class StockDeliveryNoteLine(models.Model):
         }
         if optional_values.get("sequence"):
             res["sequence"] = optional_values["sequence"]
+        if optional_values.get("quantity"):
+            res["quantity"] = optional_values["quantity"]
         if (
             self.sale_line_id.analytic_distribution
             and not self.sale_line_id.display_type
