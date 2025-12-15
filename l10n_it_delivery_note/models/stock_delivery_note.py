@@ -704,58 +704,24 @@ class StockDeliveryNote(models.Model):
                     % delivery_note_id.display_name
                 )
 
-    def _get_payment_terms(self):
-        """Get list of payment terms to process"""
-        terms = [self.env["account.payment.term"]]
-        terms += [term for term in self.mapped("sale_ids.payment_term_id")]
-        return terms
-
-    def _get_sale_context(self, payment_term):
-        """Get sale context and filtered sale orders"""
-        from_so = (
-            self.env.context.get("active_id")
-            if self.env.context.get("active_model") == "sale.order"
-            else False
-        )
-
-        if from_so:
-            # if this method is called from SO, we need to include only the lines
-            # related to the SO and the payment term must be the current one in
-            # the loop
-            order = self.env["sale.order"].browse([from_so])
-            if (
-                order.payment_term_id != payment_term
-                or order.invoice_status != "to invoice"
-            ):
-                return False, False
-            return from_so, order
-        else:
-            # if this method is called from DNs, we need to include all the lines
-            # in the SOs related to the DNs and the payment term must be the current one
-            # in the loop
-            sales = self.mapped("sale_ids").filtered(
-                lambda so: so.payment_term_id == payment_term
-                and so.invoice_status == "to invoice"
-            )
-            return False, sales if sales else False
-
-    def _prepare_invoice(self, sale_orders, from_so):
+    def _prepare_invoice(self, sale_orders):
         """Create invoice header data"""
-        sale = sale_orders if from_so else sale_orders[0]
         invoice_vals = (
-            sale.with_company(sale.company_id)
-            .with_context(lang=sale.partner_invoice_id.lang)
+            sale_orders[0]
+            .with_company(sale_orders[0].company_id)
+            .with_context(lang=sale_orders[0].partner_invoice_id.lang)
             ._prepare_invoice()
         )
         return invoice_vals
 
-    def _prepare_invoice_lines(self, sale_orders, from_so, invoice_method, final):
+    def _prepare_invoice_lines(self, sale_orders, invoice_method, final):
         """Creates invoice lines from delivery note lines,
         sorting delivery notes by date and name.
         For each delivery note adds:
         - A section line with delivery note data
         - Product lines from the delivery note
-        If called from a sale order (SO):
+        If sale_orders is passed:
+        - Only includes lines related to those sale orders
         - Adds order lines not yet in delivery notes
         If requested (invoice_method == "service"):
         - Adds service type lines from orders
@@ -773,13 +739,12 @@ class StockDeliveryNote(models.Model):
             )
             sequence += 1
 
-            # Get delivery note lines
+            # Get delivery note lines, filtered by sale_orders if provided
             dn_line_ids = dn.line_ids
-            if from_so:
-                # Filter lines related to the SO if called from SO
+            if sale_orders:
                 dn_line_ids = dn_line_ids.filtered(
-                    lambda line, from_so=from_so: line.sale_line_id
-                    and line.sale_line_id.order_id.id == from_so
+                    lambda line: line.sale_line_id
+                    and line.sale_line_id.order_id in sale_orders
                 )
 
             # Add delivery note lines
@@ -788,8 +753,8 @@ class StockDeliveryNote(models.Model):
                 vals_list.append(Command.create(vals))
                 sequence += 1
 
-        # Add remaining SO lines if called from SO
-        if from_so:
+        # Add remaining SO lines not in delivery notes
+        if sale_orders:
             sale_lines = sale_orders.mapped("order_line").filtered(
                 lambda ol: not ol.delivery_note_line_ids
                 and ol.product_id.type != "service"
@@ -803,8 +768,7 @@ class StockDeliveryNote(models.Model):
 
         # Add service lines if requested
         if invoice_method == "service":
-            sale_ids = sale_orders if from_so else sale_orders
-            service_lines = sale_ids.mapped("order_line").filtered(
+            service_lines = sale_orders.mapped("order_line").filtered(
                 lambda ol: ol.product_id.type == "service"
                 and ol.qty_to_invoice > 0
                 and not ol.is_downpayment
@@ -841,17 +805,21 @@ class StockDeliveryNote(models.Model):
 
         return vals_list
 
-    def _update_invoice_statuses(self, invoice, sale_orders, from_so):
+    def _update_invoice_statuses(self, invoice, sale_orders):
         """Update invoice statuses after invoice creation"""
-        # Update delivery note lines status
-        line_ids = self.mapped("line_ids")
-        if from_so:
-            line_ids = line_ids.filtered(
-                lambda line: line.sale_line_id.order_id == sale_orders
+        # Get all delivery note lines with sale orders
+        delivery_note_lines = self.mapped("line_ids").filtered(
+            lambda line: line.sale_line_id and line.is_invoiceable
+        )
+
+        # If sale_orders specified, filter only those lines
+        if sale_orders:
+            delivery_note_lines = delivery_note_lines.filtered(
+                lambda line: line.sale_line_id.order_id in sale_orders
             )
 
-        # Set lines as invoiced
-        line_ids.write({"invoice_status": "invoiced"})
+        # Mark lines as invoiced
+        delivery_note_lines.write({"invoice_status": DOMAIN_INVOICE_STATUSES[2]})
 
         # Link invoice to delivery notes
         for delivery_note in self:
@@ -860,17 +828,32 @@ class StockDeliveryNote(models.Model):
         # Recompute overall invoice status
         self._compute_invoice_status()
 
-    def action_invoice(self, invoice_method=False, final=False):
+    def action_invoice(self, invoice_method=False, final=False, sale_orders=None):
         delivery_note_ids = self.filtered(
             lambda dn: dn.state == "confirm" and dn.invoice_status == "to invoice"
         )
         delivery_note_ids._check_delivery_notes_before_invoicing()
 
-        payment_term_ids = delivery_note_ids._get_payment_terms()
-        for payment_term_id in payment_term_ids:
-            # Get context and sale orders
-            from_so, sale_orders = delivery_note_ids._get_sale_context(payment_term_id)
-            if not sale_orders:
+        # If not passed explicitly, get all sale orders from delivery notes
+        if sale_orders is None:
+            sale_orders = delivery_note_ids.sale_ids
+
+        # Group by payment term (include empty payment term)
+        payment_terms = sale_orders.payment_term_id or [False]
+        for payment_term_id in payment_terms:
+            # Filter sale orders by payment term and invoice status
+            if payment_term_id:
+                filtered_sales = sale_orders.filtered(
+                    lambda so, pt=payment_term_id: so.payment_term_id == pt
+                    and so.invoice_status == "to invoice"
+                )
+            else:
+                # No payment term filter when payment_term_id is False
+                filtered_sales = sale_orders.filtered(
+                    lambda so: not so.payment_term_id
+                    and so.invoice_status == "to invoice"
+                )
+            if not filtered_sales:
                 continue
 
             # Check if the user has access rights to create invoices
@@ -882,18 +865,18 @@ class StockDeliveryNote(models.Model):
 
             # Filter delivery notes related to the sale orders
             filter_delivery_notes = delivery_note_ids.filtered(
-                lambda dn, so=sale_orders: all(
+                lambda dn, so=filtered_sales: all(
                     so_id in so.ids for so_id in dn.sale_ids.ids
                 )
                 or all(so_id in dn.sale_ids.ids for so_id in so.ids)
             )
 
             # Prepare invoice
-            invoice_vals = filter_delivery_notes._prepare_invoice(sale_orders, from_so)
+            invoice_vals = filter_delivery_notes._prepare_invoice(filtered_sales)
 
             # Prepare invoice lines
             vals_list = filter_delivery_notes._prepare_invoice_lines(
-                sale_orders, from_so, invoice_method, final
+                filtered_sales, invoice_method, final
             )
 
             # invoice creation
@@ -906,9 +889,7 @@ class StockDeliveryNote(models.Model):
             )
 
             # Update statuses
-            filter_delivery_notes._update_invoice_statuses(
-                invoice_id, sale_orders, from_so
-            )
+            filter_delivery_notes._update_invoice_statuses(invoice_id, filtered_sales)
 
             # Some moves might actually be refunds: convert them if the total amount is
             # negative.

@@ -270,9 +270,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(first_delivery_note.state, "confirm")
         self.assertEqual(first_delivery_note.invoice_status, "to invoice")
 
-        sales_order.with_context(
-            active_model="sale.order", active_id=sales_order.id
-        )._create_invoices()
+        sales_order._create_invoices()
 
         self.assertEqual(len(sales_order.order_line), 6)
         self.assertEqual(sales_order.invoice_status, "no")
@@ -911,18 +909,13 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(first_delivery_note.state, "confirm")
         self.assertEqual(first_delivery_note.invoice_status, "to invoice")
 
-        # TODO: questo test fallisce perche non viene per qualche motivo settato il
-        #  first_delivery_note in una delle fatture... da capire il perchè.
-
-        first_sales_order.with_context(
-            active_model="sale.order", active_id=first_sales_order.id
-        )._create_invoices()
+        # Create invoices from both sale orders separately
+        # Each SO passes itself as sale_orders parameter to filter only its lines
+        first_sales_order._create_invoices()
         self.assertEqual(len(first_sales_order.order_line), 5)
         self.assertEqual(first_sales_order.invoice_status, "no")
 
-        second_sales_order.with_context(
-            active_model="sale.order", active_id=second_sales_order.id
-        )._create_invoices()
+        second_sales_order._create_invoices()
         self.assertEqual(len(second_sales_order.order_line), 3)
         self.assertEqual(second_sales_order.invoice_status, "no")
 
@@ -1276,9 +1269,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         picking.move_ids.quantity = False
         picking.move_ids[0].quantity = 1
         picking.button_validate()
-        sales_order.with_context(
-            active_model="sale.order", active_id=sales_order.id
-        )._create_invoices()
+        sales_order._create_invoices()
         wizard = Form(
             self.env["stock.delivery.note.create.wizard"].with_context(
                 active_ids=picking.ids, active_model="stock.picking"
@@ -1323,6 +1314,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(len(first_picking), 1)
         self.assertEqual(len(first_picking.move_ids), 2)
 
+        first_picking.move_ids.quantity = False
         first_picking.move_ids[0].quantity = 1
         first_picking.move_ids[1].quantity = 1
 
@@ -1354,6 +1346,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(len(backorder), 1)
         self.assertEqual(len(backorder.move_ids), 1)
 
+        backorder.move_ids.quantity = False
         backorder.move_ids[0].quantity = 2
 
         result = backorder.button_validate()
@@ -1428,3 +1421,236 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(
             line_product_dn_3.quantity, second_delivery_note.line_ids[0].product_qty
         )
+
+    def test_analytic_distribution_from_sale_order_line(self):
+        """Test that analytic_distribution is correctly copied from sale order line."""
+        # Create analytic accounts
+        analytic_account_1 = self.env["account.analytic.account"].create(
+            {
+                "name": "Test Analytic Account 1",
+                "plan_id": self.env.ref("analytic.analytic_plan_projects").id,
+            }
+        )
+        analytic_account_2 = self.env["account.analytic.account"].create(
+            {
+                "name": "Test Analytic Account 2",
+                "plan_id": self.env.ref("analytic.analytic_plan_projects").id,
+            }
+        )
+
+        # Create sales order with analytic distribution on lines
+        sales_order = self.create_sales_order(
+            [
+                self.desk_combination_line,
+                self.large_desk_line,
+            ]
+        )
+        self.assertEqual(len(sales_order.order_line), 2)
+
+        # Set different analytic distributions on each line
+        sales_order.order_line[0].write(
+            {
+                "analytic_distribution": {
+                    str(analytic_account_1.id): 60.0,
+                    str(analytic_account_2.id): 40.0,
+                }
+            }
+        )
+        sales_order.order_line[1].write(
+            {"analytic_distribution": {str(analytic_account_1.id): 100.0}}
+        )
+
+        sales_order.action_confirm()
+
+        picking = sales_order.picking_ids
+        self.assertEqual(len(picking), 1)
+
+        # Complete the picking
+        picking.move_ids.quantity = False
+        picking.move_ids[0].quantity = 1
+        picking.move_ids[1].quantity = 1
+
+        result = picking.button_validate()
+        self.assertTrue(result)
+
+        delivery_note = self.create_delivery_note()
+        delivery_note.picking_ids = picking
+        delivery_note.action_confirm()
+
+        delivery_note.action_invoice()
+
+        invoices = sales_order.invoice_ids
+        self.assertEqual(len(invoices), 1)
+
+        # Get invoice lines (excluding display types)
+        invoice_lines = invoices.invoice_line_ids.filtered(
+            lambda line: line.display_type == "product"
+        )
+        self.assertEqual(len(invoice_lines), 2)
+
+        # Verify analytic distributions are correctly copied
+        # First line should have 60/40 distribution
+        line_1 = invoice_lines.filtered(
+            lambda line: line.product_id == sales_order.order_line[0].product_id
+        )
+        self.assertEqual(
+            line_1.analytic_distribution,
+            {
+                str(analytic_account_1.id): 60.0,
+                str(analytic_account_2.id): 40.0,
+            },
+        )
+
+        # Second line should have 100% on account 1
+        line_2 = invoice_lines.filtered(
+            lambda line: line.product_id == sales_order.order_line[1].product_id
+        )
+        self.assertEqual(
+            line_2.analytic_distribution,
+            {str(analytic_account_1.id): 100.0},
+        )
+
+    def test_dn_product_name_and_price_in_invoice(self):
+        """Test configuration options to use DN product name and price in invoice."""
+        # Create sales order with 2 lines
+        sales_order = self.create_sales_order(
+            [
+                self.desk_combination_line,
+                self.large_desk_line,
+            ]
+        )
+        self.assertEqual(len(sales_order.order_line), 2)
+
+        # Store original sale order line data
+        so_line_1_name = sales_order.order_line[0].name
+        so_line_1_price = sales_order.order_line[0].price_unit
+        so_line_2_name = sales_order.order_line[1].name
+        so_line_2_price = sales_order.order_line[1].price_unit
+
+        sales_order.action_confirm()
+
+        picking = sales_order.picking_ids
+        self.assertEqual(len(picking), 1)
+
+        # Complete the picking
+        picking.move_ids.quantity = False
+        picking.move_ids[0].quantity = 1
+        picking.move_ids[1].quantity = 1
+
+        result = picking.button_validate()
+        self.assertTrue(result)
+
+        # Create delivery note
+        delivery_note = self.create_delivery_note()
+        delivery_note.picking_ids = picking
+        delivery_note.action_confirm()
+
+        # Modify delivery note lines with different name and price
+        dn_line_1_name = "Custom DN Product Name 1"
+        dn_line_1_price = 999.99
+        dn_line_2_name = "Custom DN Product Name 2"
+        dn_line_2_price = 777.77
+
+        delivery_note.line_ids[0].write(
+            {"name": dn_line_1_name, "price_unit": dn_line_1_price}
+        )
+        delivery_note.line_ids[1].write(
+            {"name": dn_line_2_name, "price_unit": dn_line_2_price}
+        )
+
+        # Test 1: Default behavior (use sale order data)
+        delivery_note.action_invoice()
+
+        invoices = sales_order.invoice_ids
+        self.assertEqual(len(invoices), 1)
+
+        invoice_lines = invoices.invoice_line_ids.filtered(
+            lambda line: line.display_type == "product"
+        )
+        self.assertEqual(len(invoice_lines), 2)
+
+        # Verify sale order data is used by default
+        inv_line_1 = invoice_lines.filtered(
+            lambda line: line.product_id == sales_order.order_line[0].product_id
+        )
+        self.assertEqual(inv_line_1.name, so_line_1_name)
+        self.assertEqual(inv_line_1.price_unit, so_line_1_price)
+
+        inv_line_2 = invoice_lines.filtered(
+            lambda line: line.product_id == sales_order.order_line[1].product_id
+        )
+        self.assertEqual(inv_line_2.name, so_line_2_name)
+        self.assertEqual(inv_line_2.price_unit, so_line_2_price)
+
+        # Delete the invoice to test again with configuration enabled
+        invoices.button_cancel()
+        invoices.unlink()
+
+        # Reset delivery note status
+        delivery_note.line_ids.write({"invoice_status": "to invoice"})
+        delivery_note._compute_invoice_status()
+
+        # Test 2: Enable configuration to use DN product name
+        self.env.company.use_dn_product_name_in_invoice = True
+
+        delivery_note.action_invoice()
+
+        invoices = sales_order.invoice_ids
+        self.assertEqual(len(invoices), 1)
+
+        invoice_lines = invoices.invoice_line_ids.filtered(
+            lambda line: line.display_type == "product"
+        )
+        self.assertEqual(len(invoice_lines), 2)
+
+        # Verify DN product name is used
+        inv_line_1 = invoice_lines.filtered(
+            lambda line: line.product_id == sales_order.order_line[0].product_id
+        )
+        self.assertEqual(inv_line_1.name, dn_line_1_name)
+        self.assertEqual(inv_line_1.price_unit, so_line_1_price)  # Still from SO
+
+        inv_line_2 = invoice_lines.filtered(
+            lambda line: line.product_id == sales_order.order_line[1].product_id
+        )
+        self.assertEqual(inv_line_2.name, dn_line_2_name)
+        self.assertEqual(inv_line_2.price_unit, so_line_2_price)  # Still from SO
+
+        # Delete the invoice again
+        invoices.button_cancel()
+        invoices.unlink()
+
+        # Reset delivery note status
+        delivery_note.line_ids.write({"invoice_status": "to invoice"})
+        delivery_note._compute_invoice_status()
+
+        # Test 3: Enable both configurations (DN name and price)
+        self.env.company.use_dn_product_name_in_invoice = True
+        self.env.company.use_dn_price_unit_in_invoice = True
+
+        delivery_note.action_invoice()
+
+        invoices = sales_order.invoice_ids
+        self.assertEqual(len(invoices), 1)
+
+        invoice_lines = invoices.invoice_line_ids.filtered(
+            lambda line: line.display_type == "product"
+        )
+        self.assertEqual(len(invoice_lines), 2)
+
+        # Verify both DN product name and price are used
+        inv_line_1 = invoice_lines.filtered(
+            lambda line: line.product_id == sales_order.order_line[0].product_id
+        )
+        self.assertEqual(inv_line_1.name, dn_line_1_name)
+        self.assertEqual(inv_line_1.price_unit, dn_line_1_price)
+
+        inv_line_2 = invoice_lines.filtered(
+            lambda line: line.product_id == sales_order.order_line[1].product_id
+        )
+        self.assertEqual(inv_line_2.name, dn_line_2_name)
+        self.assertEqual(inv_line_2.price_unit, dn_line_2_price)
+
+        # Cleanup: disable configurations
+        self.env.company.use_dn_product_name_in_invoice = False
+        self.env.company.use_dn_price_unit_in_invoice = False

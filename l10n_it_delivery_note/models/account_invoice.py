@@ -148,12 +148,11 @@ class AccountInvoice(models.Model):
     def unlink(self):
         # Ripristino il valore delle delivery note
         # per poterle rifatturare
-        inv_lines = self.mapped("invoice_line_ids")
-        inv_dnls = inv_lines.mapped("delivery_note_line_id")
+        inv_dnls = self.invoice_line_ids.delivery_note_line_id
         res = super().unlink()
         inv_dnls.sync_invoice_status()
-        inv_dnls.mapped("delivery_note_id")._compute_invoice_status()
-        for dn in inv_dnls.mapped("delivery_note_id"):
+        inv_dnls.delivery_note_id._compute_invoice_status()
+        for dn in inv_dnls.delivery_note_id:
             dn.state = "confirm"
         return res
 
