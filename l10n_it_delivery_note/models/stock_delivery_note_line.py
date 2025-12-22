@@ -208,37 +208,50 @@ class StockDeliveryNoteLine(models.Model):
         """
         self.ensure_one()
 
-        product_name = self.sale_line_id.name
-        if self.company_id.use_dn_product_name_in_invoice:
-            product_name = self.name
-
-        price_unit = self.sale_line_id.price_unit
-        if self.company_id.use_dn_price_unit_in_invoice:
-            price_unit = self.price_unit
-
         res = {
             "display_type": self.display_type or "product",
-            "name": product_name,
-            "product_id": self.product_id.id,
-            "product_uom_id": self.product_uom_id.id,
-            "quantity": self.product_qty,
-            "discount": self.discount,
-            "price_unit": price_unit,
-            "tax_ids": [Command.set(self.tax_ids.ids)],
-            "sale_line_ids": [Command.link(self.sale_line_id.id)],
             "delivery_note_line_id": self.id,
         }
+
+        if self.display_type:
+            res.update(
+                {
+                    "name": self.name,
+                    "quantity": 0,
+                    "account_id": False,
+                }
+            )
+        else:
+            product_name = self.sale_line_id.name
+            if self.company_id.use_dn_product_name_in_invoice:
+                product_name = self.name
+
+            price_unit = self.sale_line_id.price_unit
+            if self.company_id.use_dn_price_unit_in_invoice:
+                price_unit = self.price_unit
+
+            res.update(
+                {
+                    "name": product_name,
+                    "product_id": self.product_id.id,
+                    "product_uom_id": self.product_uom_id.id,
+                    "quantity": self.product_qty,
+                    "discount": self.discount,
+                    "price_unit": price_unit,
+                    "tax_ids": [Command.set(self.tax_ids.ids)],
+                    "sale_line_ids": [Command.link(self.sale_line_id.id)],
+                }
+            )
+            if optional_values.get("quantity"):
+                res["quantity"] = optional_values["quantity"]
+            if (
+                self.sale_line_id.analytic_distribution
+                and not self.sale_line_id.display_type
+            ):
+                res["analytic_distribution"] = self.sale_line_id.analytic_distribution
+
         if optional_values.get("sequence"):
             res["sequence"] = optional_values["sequence"]
-        if optional_values.get("quantity"):
-            res["quantity"] = optional_values["quantity"]
-        if (
-            self.sale_line_id.analytic_distribution
-            and not self.sale_line_id.display_type
-        ):
-            res["analytic_distribution"] = self.sale_line_id.analytic_distribution
         if optional_values:
             res.update(optional_values)
-        if self.display_type:
-            res["account_id"] = False
         return res
