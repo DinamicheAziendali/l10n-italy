@@ -4,6 +4,9 @@
         id="l10n_it_edi_dn_template"
         inherit_id="l10n_it_edi.account_invoice_it_FatturaPA_export"
     >
+        <xpath expr="//DatiDDT" position="attributes">
+            <attribute name="t-if">not record.delivery_note_ids</attribute>
+        </xpath>
         <xpath expr="//DatiDDT" position="after">
             <t
                 t-if="record.delivery_note_ids"
