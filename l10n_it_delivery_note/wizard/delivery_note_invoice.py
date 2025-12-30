@@ -5,7 +5,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, fields, models
-from odoo.exceptions import UserError
 
 INVOICE_STATUSES = [
     ("no", "Nothing to invoice"),
@@ -50,13 +49,13 @@ class StockDeliveryNoteInvoiceWizard(models.TransientModel):
         delivery_note_ids = self.env["stock.delivery.note"].browse(
             self._context.get("active_ids", [])
         )
-        if len(delivery_note_ids.mapped("partner_id")) > 1:
-            raise UserError(
-                self.env._("You must select only delivery notes from one partner.")
+        for partner in delivery_note_ids.mapped("partner_id"):
+            dns_partner = delivery_note_ids.filtered(
+                lambda dn, p=partner: dn.partner_id == p
             )
-        delivery_note_ids.action_invoice(
-            invoice_method=self.invoice_method, final=self.deduct_down_payments
-        )
+            dns_partner.action_invoice(
+                invoice_method=self.invoice_method, final=self.deduct_down_payments
+            )
         invoices_ids = delivery_note_ids.mapped("invoice_ids")
         for invoice in invoices_ids:
             invoice.invoice_date = self.invoice_date
