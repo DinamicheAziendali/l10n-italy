@@ -3,8 +3,14 @@
 This module manage the Italian DDT (Delivery note).
 
 From a picking is possible to generate a Delivery Note and group more
-picking in one delivery note. It's also possible to invoice from the
-delivery note form.
+picking in one delivery note. It's also possible to invoice directly from the
+delivery note form, with configurable options to use DN data (product names, prices)
+instead of sale order data when generating invoices.
+
+This is particularly useful when:
+- Products are substituted at delivery time
+- Prices are negotiated during delivery
+- Detailed descriptions need to be added in the DN
 
 This module is alternative to `l10n_it_ddt`, it follows the Odoo way to
 process sale orders, pickings and invoices.

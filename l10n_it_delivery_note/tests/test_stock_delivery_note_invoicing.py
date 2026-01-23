@@ -61,7 +61,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(delivery_note.state, "confirm")
         self.assertEqual(delivery_note.invoice_status, "to invoice")
 
-        delivery_note.action_invoice()
+        delivery_note.action_invoice(final=True)
         self.assertEqual(len(delivery_note.line_ids), 4)
         self.assertEqual(delivery_note.state, "invoiced")
         self.assertEqual(delivery_note.invoice_status, "invoiced")
@@ -74,7 +74,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
 
         final_invoice = invoices[0]
         # in sale.advance.payment.inv the method create_invoices uses the field
-        # deduct_down_payments (default True) that includes selection lines:
+        # deduct_down_payments that includes selection lines:
         # so 4 product lines, 1 ddt note, 1 down_payment and 1 selection line
         self.assertEqual(len(final_invoice.invoice_line_ids), 7)
         self.assertEqual(final_invoice.delivery_note_ids, delivery_note)
@@ -99,7 +99,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(delivery_note_line.sale_line_id, order_line)
         self.assertEqual(delivery_note_line.product_qty, 1)
 
-        invoice_line = final_invoice.invoice_line_ids[0]
+        invoice_line = final_invoice.invoice_line_ids[1]
         self.assertEqual(invoice_line.sale_line_ids, order_line)
         self.assertEqual(invoice_line.quantity, 1)
 
@@ -121,7 +121,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(delivery_note_line.sale_line_id, order_line)
         self.assertEqual(delivery_note_line.product_qty, 2)
 
-        invoice_line = final_invoice.invoice_line_ids[1]
+        invoice_line = final_invoice.invoice_line_ids[2]
         self.assertEqual(invoice_line.sale_line_ids, order_line)
         self.assertEqual(invoice_line.quantity, 2)
 
@@ -143,7 +143,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(delivery_note_line.sale_line_id, order_line)
         self.assertEqual(delivery_note_line.product_qty, 11)
 
-        invoice_line = final_invoice.invoice_line_ids[2]
+        invoice_line = final_invoice.invoice_line_ids[3]
         self.assertEqual(invoice_line.sale_line_ids, order_line)
         self.assertEqual(invoice_line.quantity, 11)
 
@@ -165,7 +165,7 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         self.assertEqual(delivery_note_line.sale_line_id, order_line)
         self.assertEqual(delivery_note_line.product_qty, 1)
 
-        invoice_line = final_invoice.invoice_line_ids[3]
+        invoice_line = final_invoice.invoice_line_ids[4]
         self.assertEqual(invoice_line.sale_line_ids, order_line)
         self.assertEqual(invoice_line.quantity, 1)
 
