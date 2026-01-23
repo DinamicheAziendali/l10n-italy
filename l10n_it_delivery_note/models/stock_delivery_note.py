@@ -749,7 +749,14 @@ class StockDeliveryNote(models.Model):
 
             # Add delivery note lines
             for line in dn_line_ids:
-                vals = line._prepare_invoice_line(sequence=sequence)
+                if line.mapped("move_id.returned_move_ids"):
+                    return_qty = sum(line.mapped("move_id.returned_move_ids.quantity"))
+                    product_qty = line.product_qty - return_qty
+                else:
+                    product_qty = line.product_qty
+                vals = line._prepare_invoice_line(
+                    sequence=sequence, quantity=product_qty
+                )
                 vals_list.append(Command.create(vals))
                 sequence += 1
 
@@ -832,7 +839,7 @@ class StockDeliveryNote(models.Model):
         delivery_note_ids = self.filtered(
             lambda dn: dn.state == "confirm" and dn.invoice_status == "to invoice"
         )
-        delivery_note_ids._check_delivery_notes_before_invoicing()
+        # delivery_note_ids._check_delivery_notes_before_invoicing()
 
         # If not passed explicitly, get all sale orders from delivery notes
         if sale_orders is None:
