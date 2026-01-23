@@ -1,2 +1,0 @@
-- Giuseppe Borruso - Dinamiche Aziendali srl \<<gborruso@dinamicheaziendali.it>\>
-- Andrea Barbato - Dinamiche Aziendali srl \<<abarbato@dinamicheaziendali.it>\>

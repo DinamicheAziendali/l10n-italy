@@ -46,7 +46,10 @@ class WizardGiornaleReportlab(models.TransientModel):
     date_move_line_to = fields.Date("To date", required=True)
     daterange_id = fields.Many2one("date.range", "Date Range", required=True)
     company_id = fields.Many2one(
-        related="daterange_id.company_id", readonly=True, store=True
+        comodel_name="res.company",
+        default=lambda self: self.env.company.id,
+        readonly=True,
+        store=True,
     )
     progressive_credit = fields.Float()
     progressive_debit2 = fields.Float("Progressive Debit")
@@ -181,7 +184,7 @@ class WizardGiornaleReportlab(models.TransientModel):
             "date_to": wizard.date_move_line_to,
             "target_type": tuple(target_type),
             "journal_ids": tuple(self.journal_ids.ids),
-            "company_id": self.env.company.id,
+            "company_id": wizard.company_id.id,
         }
         self.env.cr.execute(sql, params)
         list_grupped_line = self.env.cr.dictfetchall()
@@ -225,7 +228,7 @@ class WizardGiornaleReportlab(models.TransientModel):
             "date_to": wizard.date_move_line_to,
             "target_type": tuple(target_type),
             "journal_ids": tuple(self.journal_ids.ids),
-            "company_id": self.env.company.id,
+            "company_id": wizard.company_id.id,
         }
         self.env.cr.execute(sql, params)
         list_line_not_grouped = self.env.cr.dictfetchall()
@@ -386,13 +389,13 @@ class WizardGiornaleReportlab(models.TransientModel):
         for line in list_grupped_line:
             start_row += 1
             account_name = (
-                account_dict[line["account_id"]] + " - " + line["account_name"]
-                and line["account_name"][user_lang]
-                or ""
+                account_dict[line["account_id"]]
+                + " - "
+                + line["account_name"][user_lang]
                 if account_dict
                 and "line_id" in account_dict.keys()
                 and "account_id" in account_dict[line].keys()
-                else line["account_name"] and line["account_name"][user_lang] or ""
+                else line["account_name"][user_lang]
             )
             if not account_name:
                 continue
@@ -464,13 +467,13 @@ class WizardGiornaleReportlab(models.TransientModel):
         for line in list_line_not_grouped:
             start_row += 1
             account_name = (
-                account_dict[line["account_id"]] + " - " + line["account_name"]
-                and line["account_name"][user_lang]
-                or ""
+                account_dict[line["account_id"]]
+                + " - "
+                + line["account_name"][user_lang]
                 if account_dict
                 and "line_id" in account_dict.keys()
                 and "account_id" in account_dict[line].keys()
-                else line["account_name"] and line["account_name"][user_lang] or ""
+                else line["account_name"][user_lang]
             )
             if not account_name:
                 continue
@@ -486,11 +489,7 @@ class WizardGiornaleReportlab(models.TransientModel):
             # For credit/debit accounts, displays the partner name,
             # otherwise displays the entry name
             if line["account_type"] in ["asset_receivable", "liability_payable"]:
-                name = (
-                    line["partner_name"]
-                    and Paragraph(line["partner_name"], style_name)
-                    or ""
-                )
+                name = Paragraph(line["partner_name"], style_name)
             else:
                 name = Paragraph(line["name"], style_name)
 
