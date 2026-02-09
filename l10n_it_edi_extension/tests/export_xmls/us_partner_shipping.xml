@@ -66,14 +66,6 @@
                 <Numero>INV/2024/00001</Numero>
                 <ImportoTotaleDocumento>1068.11</ImportoTotaleDocumento>
             </DatiGeneraliDocumento>
-            <DatiTrasporto>
-                <IndirizzoResa>
-                    <Indirizzo>1000 Burrstone Rd</Indirizzo>
-                    <CAP>00000</CAP>
-                    <Comune>New Hartford</Comune>
-                    <Nazione>US</Nazione>
-                </IndirizzoResa>
-            </DatiTrasporto>
         </DatiGenerali>
         <DatiBeniServizi>
             <DettaglioLinee>

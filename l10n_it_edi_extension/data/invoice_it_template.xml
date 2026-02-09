@@ -47,22 +47,19 @@
             >SI</Art73>
         </xpath>
         <xpath expr="//DatiDDT" position="after">
-            <DatiTrasporto t-if="record.partner_shipping_id">
+            <DatiTrasporto
+                t-if="record.partner_shipping_id and record.partner_shipping_id.country_id.code == 'IT'"
+            >
                 <!-- 2.1.9.12 -->
                 <IndirizzoResa>
                     <Indirizzo
                         t-out="format_address(record.partner_shipping_id.street, record.partner_shipping_id.street2, 60)"
                     />
-                    <CAP
-                        t-if="record.partner_shipping_id.country_id.code == 'IT'"
-                        t-out="record.partner_shipping_id.zip"
-                    />
-                    <CAP t-else="">00000</CAP>
+                    <CAP t-out="record.partner_shipping_id.zip" />
                     <Comune
                         t-out="format_alphanumeric(record.partner_shipping_id.city, 60)"
                     />
                     <Provincia
-                        t-if="record.partner_shipping_id.country_id.code == 'IT'"
                         t-out="format_alphanumeric(record.partner_shipping_id.state_id.code, 2)"
                     />
                     <Nazione t-out="record.partner_shipping_id.country_id.code" />
