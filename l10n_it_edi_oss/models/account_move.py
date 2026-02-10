@@ -56,7 +56,7 @@ class AccountMoveInherit(models.Model):
         values_without_skip = {
             k: v
             for k, v in values_per_grouping_key.items()
-            if not v.get("grouping_key", False) or v["grouping_key"].get("skip", False)
+            if v.get("grouping_key", False) and not v["grouping_key"].get("skip", False)
         }
 
         for tax_line, values in zip(
