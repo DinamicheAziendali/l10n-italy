@@ -53,14 +53,18 @@ class AccountMoveInherit(models.Model):
             base_lines_aggregated_values, values_per_grouping_key
         )
 
-        for tax_line, values in zip(
-            tax_lines, values_per_grouping_key.values(), strict=True
-        ):
-            grouping_key = values["grouping_key"]
-            if not grouping_key or grouping_key["skip"]:
-                continue
+        values_without_skip = {
+            k: v
+            for k, v in values_per_grouping_key.items()
+            if not v.get("grouping_key", False) or v["grouping_key"].get("skip", False)
+        }
 
-            tax_line["oss_country_id"] = grouping_key.get("oss_country_id", None)
+        for tax_line, values in zip(
+            tax_lines, values_without_skip.values(), strict=True
+        ):
+            tax_line["oss_country_id"] = values["grouping_key"].get(
+                "oss_country_id", None
+            )
 
         return tax_lines
 
