@@ -43,8 +43,8 @@ Le funzionalità principali incluse sono:
 
 1. Anteprima e Download del file XML:
 
-   -  Aggiunge un pulsante ("Preview XML") direttamente nel form della
-      fattura.
+   -  Aggiunge un pulsante ("Preview") direttamente nel form della
+      fattura, sia per fatture inviate che ricevute.
    -  Dalla stessa finestra della fattura, è possibile scaricare il file
       XML generato.
 
@@ -203,7 +203,8 @@ The main features included are:
 
 1. XML File Preview and Download:
 
-   -  Adds a button ("Preview XML") directly in the invoice form.
+   -  Adds a button ("Preview") directly in the invoice form, both for
+      exported and imported invoices.
    -  From the same invoice form, you can download the generated XML
       file.
 
@@ -373,6 +374,14 @@ Le uniche configurazioni disponibili sono:
    -  ``<CedentePrestatore>``
    -  ``<RappresentanteFiscale>``
 
+-  Prodotto predefinito fatture elettroniche fornitore: è possibile
+   impostare un prodotto nel campo apposito del fornitore, nella scheda
+   "Fatturazione", sezione "Fatture cliente". Durante l'importazione di
+   livello "Massimo": questo prodotto sarà impostato nelle righe della
+   fattura importata se nessun altro prodotto viene trovato. Durante
+   l'importazione di livello "Aliquota fiscale": questo prodotto sarà
+   impostato nelle righe della fattura importata.
+
 Non sono necessarie altre configurazioni specifiche per
 l10n_it_edi_extension: una volta installato, le sue funzionalità sono
 attive e si integrano automaticamente nell'interfaccia esistente.
@@ -423,6 +432,12 @@ The only available configurations are:
    -  ``<CessionarioCommittente>``
    -  ``<CedentePrestatore>``
    -  ``<RappresentanteFiscale>``
+
+-  E-bills default product: You can set a product in the supplier's
+   field in the "Invoicing" tab, "Customer Invoices" section. During
+   "Maximum" level imports: this product will be set in the imported
+   invoice lines if no other product is found. During "Tax Rate" level
+   imports: this product will be set in the imported invoice lines.
 
 No other specific configurations are required for l10n_it_edi_extension:
 once installed, its features are active and automatically integrate into
