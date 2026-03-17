@@ -498,7 +498,10 @@ class RibaListLine(models.Model):
             ]
         )
 
-        settlement_move_amount = sum(self.mapped("amount"))
+        # Reduce settlement amount by amounts already matched (partial payments)
+        settlement_move_amount = settlement_move_line.debit - sum(
+            settlement_move_line.mapped("matched_credit_ids.amount")
+        )
 
         # Prepare settlement move data
         move_ref = f"Settlement RiBa {self.slip_id.name}"

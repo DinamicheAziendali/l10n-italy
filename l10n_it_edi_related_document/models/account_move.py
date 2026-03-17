@@ -1,4 +1,5 @@
-from odoo import Command, api, fields, models
+from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 from odoo.addons.l10n_it_edi.models.account_move import get_text
 
@@ -58,7 +59,55 @@ class AccountMoveRelatedDocumentType(models.Model):
                 )
                 if line:
                     vals["invoice_line_id"] = line.id
-        return super().create(vals_list)
+        ret = super().create(vals_list)
+        # after creating documents, check if one should is eligible
+        # to become the standard_related_document_id
+        for record in ret.filtered(
+            lambda r: r.type == "order"
+            and r.invoice_id
+            and not r.invoice_id.standard_related_document_id
+        ):
+            invoice = record.invoice_id.with_context(
+                l10n_it_edi_related_loop_avoid=True
+            )
+            invoice.standard_related_document_id = record
+            invoice.l10n_it_origin_document_type = "purchase_order"
+            invoice.l10n_it_origin_document_name = record.name
+            invoice.l10n_it_origin_document_date = record.date
+            invoice.l10n_it_cig = record.cig
+            record.invoice_id.l10n_it_cup = record.cup
+
+        return ret
+
+    def _l10n_it_sync_related_document(self):
+        for record in self:
+            if record == record.invoice_id.standard_related_document_id:
+                document_type = record.type
+                if document_type == "order":
+                    document_type = "purchase_order"
+                elif document_type == "reception":
+                    # unsupported type
+                    record.invoice_id.standard_related_document_id = False
+                    continue
+                elif document_type == "invoice":
+                    # unsupported type
+                    record.invoice_id.standard_related_document_id = False
+                    continue
+                record.invoice_id.l10n_it_origin_document_type = document_type
+                record.invoice_id.l10n_it_origin_document_name = record.name
+                record.invoice_id.l10n_it_origin_document_date = record.date
+                record.invoice_id.l10n_it_cig = record.cig
+                record.invoice_id.l10n_it_cup = record.cup
+
+    def write(self, vals):
+        ret = super().write(vals)
+        if self._context.get("l10n_it_edi_related_loop_avoid"):
+            return ret
+        if vals.keys() & {"type", "name", "date", "cig", "cup"}:
+            self.with_context(
+                l10n_it_edi_related_loop_avoid=True
+            )._l10n_it_sync_related_document()
+        return ret
 
 
 class AccountMove(models.Model):
@@ -68,85 +117,79 @@ class AccountMove(models.Model):
         "account.move.related_document", "invoice_id", copy=False
     )
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            related_fields = [
-                "l10n_it_cig",
-                "l10n_it_cup",
-                "l10n_it_origin_document_type",
-                "l10n_it_origin_document_name",
-                "l10n_it_origin_document_date",
-            ]
-            if not any(vals.get(rf) for rf in related_fields):
+    standard_related_document_id = fields.Many2one(
+        comodel_name="account.move.related_document",
+        string="Standard Related Document",
+        help="Technical field to store the document corresponding to standard fields",
+    )
+
+    # override
+    l10n_it_origin_document_type = fields.Selection(
+        inverse="_inverse_original_related_document_fields"
+    )
+    l10n_it_origin_document_name = fields.Char(
+        inverse="_inverse_original_related_document_fields"
+    )
+    l10n_it_origin_document_date = fields.Date(
+        inverse="_inverse_original_related_document_fields"
+    )
+    l10n_it_cig = fields.Char(inverse="_inverse_original_related_document_fields")
+    l10n_it_cup = fields.Char(inverse="_inverse_original_related_document_fields")
+
+    def _inverse_original_related_document_fields(self):
+        for record in self:
+            if record._context.get("l10n_it_edi_related_loop_avoid"):
                 continue
-
-            related_type = vals.get("l10n_it_origin_document_type")
-            if related_type == "purchase_order":
-                related_type = "order"
-
-            related_vals = {
-                "type": related_type,
-                "name": vals.get("l10n_it_origin_document_name"),
-                "date": vals.get("l10n_it_origin_document_date"),
-                "cup": vals.get("l10n_it_cup"),
-                "cig": vals.get("l10n_it_cig"),
-            }
-
-            if related_vals:
-                vals["related_document_ids"] = [Command.create(related_vals)]
-
-            for key in related_fields:
-                vals.pop(key, None)
-        return super().create(vals_list)
-
-    def _l10n_it_edi_base_export_check(self):
-        errors = super()._l10n_it_edi_base_export_check()
-
-        errors.pop("move_missing_origin_document", None)
-        errors.pop("l10n_it_edi_move_future_origin_document_date", None)
-        errors.pop("move_missing_origin_document_field", None)
-
-        def build_error(message, records):
-            return {
-                "message": message,
-                **(
-                    {
-                        "action_text": self.env._("View invoice(s)"),
-                        "action": records._get_records_action(
-                            name=self.env._("Invoice(s) to check")
-                        ),
-                    }
-                    if len(self) > 1
-                    else {}
-                ),
-            }
-
-        if pa_moves := self.filtered(
-            lambda move: move.commercial_partner_id._l10n_it_edi_is_public_administration()  # noqa: E501
-        ):
-            if moves := pa_moves.filtered(lambda move: not move.related_document_ids):
-                message = self.env._(
-                    "Partner(s) belongs to the Public Administration, "
-                    "please fill out Origin Document Type field in "
-                    "the Electronic Invoicing tab."
-                )
-                errors["move_missing_origin_document"] = build_error(
-                    message=message, records=moves
-                )
-            if moves := pa_moves.filtered(
-                lambda move: any(
-                    rd.date and rd.date > fields.Date.today()
-                    for rd in move.related_document_ids
-                )
+            if (
+                not record.l10n_it_origin_document_type
+                or not record.l10n_it_origin_document_name
             ):
-                message = self.env._(
-                    "The Origin Document Date cannot be in the future."
+                if record.standard_related_document_id:
+                    # deleted reference
+                    record.related_document_ids = [
+                        fields.Command.unlink(record.standard_related_document_id.id)
+                    ]
+                    record.standard_related_document_id.unlink()
+                    record.standard_related_document_id = False
+                continue
+            # type map
+            # purchase_order -> order
+            # contract -> contract
+            # agreement -> agreement
+            # ? -> reception
+            # ? -> invoice
+            document_type = record.l10n_it_origin_document_type
+            if document_type == "purchase_order":
+                document_type = "order"
+
+            if (
+                document_type
+                not in dict(
+                    self.env["account.move.related_document"]._fields["type"].selection
+                ).keys()
+            ):
+                raise UserError(
+                    self.env._("Unknown document type %s") % (document_type,)
                 )
-                errors["l10n_it_edi_move_future_origin_document_date"] = build_error(
-                    message=message, records=moves
-                )
-        return errors
+
+            vals = {
+                "type": document_type,
+                "name": record.l10n_it_origin_document_name,
+                "date": record.l10n_it_origin_document_date,
+                "cig": record.l10n_it_cig,
+                "cup": record.l10n_it_cup,
+            }
+            if not record.standard_related_document_id:
+                record.standard_related_document_id = self.env[
+                    "account.move.related_document"
+                ].create(vals)
+                record.related_document_ids = [
+                    fields.Command.link(record.standard_related_document_id.id)
+                ]
+            else:
+                record.standard_related_document_id.with_context(
+                    l10n_it_edi_related_loop_avoid=True
+                ).update(vals)
 
     def _l10n_it_edi_get_values(self, pdf_values=None):
         res = super()._l10n_it_edi_get_values(pdf_values=pdf_values)

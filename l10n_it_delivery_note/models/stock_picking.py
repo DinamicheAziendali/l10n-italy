@@ -114,8 +114,6 @@ class StockPicking(models.Model):
             }
         )
 
-        type(self)._delivery_note_fields = fields
-
         return fields
 
     def _compute_boolean_flags(self):
@@ -241,17 +239,7 @@ class StockPicking(models.Model):
     def action_delivery_note_invoice(self):
         self.ensure_one()
 
-        return {
-            "name": self.env._("Create invoices"),
-            "type": "ir.actions.act_window",
-            "res_model": "stock.delivery.note.invoice.wizard",
-            "view_mode": "form",
-            "target": "new",
-            "context": {
-                "active_ids": self.delivery_note_id.ids,
-                "active_model": "stock.delivery.note",
-            },
-        }
+        return self.delivery_note_id.action_invoice()
 
     def action_delivery_note_done(self):
         self.ensure_one()

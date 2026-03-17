@@ -316,39 +316,37 @@ def _l10n_it_fatturapa_pre_migration(env):
 
 
 def _l10n_it_fatturapa_post_migration_related_ddt(env):
-    if openupgrade_tools.table_exists(env.cr, "fatturapa_related_ddt"):
-        env.cr.execute("""
-            SELECT invoice_id, invoice_line_id, name, date
-            FROM fatturapa_related_ddt
-            WHERE invoice_id IS NOT NULL OR invoice_line_id IS NOT NULL
-        """)
-        rows = env.cr.fetchall()
-        invoice_map = {}
-        for row in rows:
-            invoice_id, invoice_line_id, name, date = row
-            move_id = (
-                invoice_id
-                or env["account.move.line"].browse(invoice_line_id).move_id.id
-            )
-            if move_id:
-                invoice_map.setdefault(move_id, []).append((name, date))
+    env.cr.execute("""
+        SELECT invoice_id, invoice_line_id, name, date
+        FROM fatturapa_related_ddt
+        WHERE invoice_id IS NOT NULL OR invoice_line_id IS NOT NULL
+    """)
+    rows = env.cr.fetchall()
+    invoice_map = {}
+    for row in rows:
+        invoice_id, invoice_line_id, name, date = row
+        move_id = (
+            invoice_id or env["account.move.line"].browse(invoice_line_id).move_id.id
+        )
+        if move_id:
+            invoice_map.setdefault(move_id, []).append((name, date))
 
-        moves = env["account.move"].browse(invoice_map.keys())
-        for move in moves:
-            for name, date in invoice_map[move.id]:
-                ddt_tags = Markup('<ul class="mb-0">{}</ul>').format(
-                    Markup().join(
-                        nl2br_enclose(" ".join(tag.split()), "li")
-                        for tag in [
-                            f"NumeroDDT: {name}",
-                            f'DataDDT: {date or "N/A"}',
-                        ]
-                    )
+    moves = env["account.move"].browse(invoice_map.keys())
+    for move in moves:
+        for name, date in invoice_map[move.id]:
+            ddt_tags = Markup('<ul class="mb-0">{}</ul>').format(
+                Markup().join(
+                    nl2br_enclose(" ".join(tag.split()), "li")
+                    for tag in [
+                        f"NumeroDDT: {name}",
+                        f'DataDDT: {date or "N/A"}',
+                    ]
                 )
-                message = Markup("{} {}<br/>{}").format(
-                    "DatiDDT", env._("from XML file:"), ddt_tags
-                )
-                move.sudo().message_post(body=message)
+            )
+            message = Markup("{} {}<br/>{}").format(
+                "DatiDDT", env._("from XML file:"), ddt_tags
+            )
+            move.sudo().message_post(body=message)
 
 
 def _l10n_it_fatturapa_post_migration_delivery_data(env):
@@ -371,20 +369,6 @@ def _l10n_it_fatturapa_post_migration_delivery_data(env):
             am.ftpa_incoterms
         FROM account_move am
         LEFT JOIN res_partner rp ON am.carrier_id = rp.id
-        WHERE
-            rp.license_number IS NOT NULL
-            OR am.transport_vehicle IS NOT NULL
-            OR am.transport_reason IS NOT NULL
-            OR am.number_items IS NOT NULL
-            OR am.description IS NOT NULL
-            OR am.unit_weight IS NOT NULL
-            OR am.gross_weight IS NOT NULL
-            OR am.net_weight IS NOT NULL
-            OR am.pickup_datetime IS NOT NULL
-            OR am.transport_date IS NOT NULL
-            OR am.delivery_address IS NOT NULL
-            OR am.delivery_datetime IS NOT NULL
-            OR am.ftpa_incoterms IS NOT NULL
     """)
     rows = env.cr.fetchall()
     invoice_map = {}
@@ -475,126 +459,102 @@ def _l10n_it_fatturapa_post_migration_vehicle_data(env):
 
 
 def _l10n_it_fatturapa_post_migration_payment_data(env):
-    if openupgrade_tools.table_exists(env.cr, "fatturapa_payment_data"):
-        env.cr.execute("""
-            SELECT
-                fpd.invoice_id,
-                fpt.code AS term_code,
-                fpdl.recipient,
-                fpm.code AS method_code,
-                fpdl.payment_term_start,
-                fpdl.payment_days,
-                fpdl.payment_due_date,
-                fpdl.payment_amount,
-                fpdl.post_office_code,
-                fpdl.recepit_surname,
-                fpdl.recepit_name,
-                fpdl.recepit_cf,
-                fpdl.recepit_title,
-                fpdl.payment_bank_name,
-                fpdl.payment_bank_iban,
-                fpdl.payment_bank_abi,
-                fpdl.payment_bank_cab,
-                fpdl.payment_bank_bic,
-                fpdl.prepayment_discount,
-                fpdl.max_payment_date,
-                fpdl.penalty_amount,
-                fpdl.penalty_date,
-                fpdl.payment_code
-            FROM fatturapa_payment_data fpd
-            LEFT JOIN fatturapa_payment_term fpt ON fpd.payment_terms = fpt.id
-            LEFT JOIN fatturapa_payment_detail fpdl ON fpd.id = fpdl.payment_data_id
-            LEFT JOIN fatturapa_payment_method fpm ON fpdl.fatturapa_pm_id = fpm.id
-            WHERE
-                fpt.code IS NOT NULL
-                OR fpdl.recipient IS NOT NULL
-                OR fpm.code IS NOT NULL
-                OR fpdl.payment_term_start IS NOT NULL
-                OR fpdl.payment_days IS NOT NULL
-                OR fpdl.payment_due_date IS NOT NULL
-                OR fpdl.payment_amount IS NOT NULL
-                OR fpdl.post_office_code IS NOT NULL
-                OR fpdl.recepit_surname IS NOT NULL
-                OR fpdl.recepit_name IS NOT NULL
-                OR fpdl.recepit_cf IS NOT NULL
-                OR fpdl.recepit_title IS NOT NULL
-                OR fpdl.payment_bank_name IS NOT NULL
-                OR fpdl.payment_bank_iban IS NOT NULL
-                OR fpdl.payment_bank_abi IS NOT NULL
-                OR fpdl.payment_bank_cab IS NOT NULL
-                OR fpdl.payment_bank_bic IS NOT NULL
-                OR fpdl.prepayment_discount IS NOT NULL
-                OR fpdl.max_payment_date IS NOT NULL
-                OR fpdl.penalty_amount IS NOT NULL
-                OR fpdl.penalty_date IS NOT NULL
-                OR fpdl.payment_code IS NOT NULL
-        """)
-        rows = env.cr.fetchall()
-        invoice_map = {}
-        for row in rows:
-            invoice_id, *payment_data = row
-            invoice_map.setdefault(invoice_id, []).append(tuple(payment_data))
+    env.cr.execute("""
+        SELECT
+            fpd.invoice_id,
+            fpt.code AS term_code,
+            fpdl.recipient,
+            fpm.code AS method_code,
+            fpdl.payment_term_start,
+            fpdl.payment_days,
+            fpdl.payment_due_date,
+            fpdl.payment_amount,
+            fpdl.post_office_code,
+            fpdl.recepit_surname,
+            fpdl.recepit_name,
+            fpdl.recepit_cf,
+            fpdl.recepit_title,
+            fpdl.payment_bank_name,
+            fpdl.payment_bank_iban,
+            fpdl.payment_bank_abi,
+            fpdl.payment_bank_cab,
+            fpdl.payment_bank_bic,
+            fpdl.prepayment_discount,
+            fpdl.max_payment_date,
+            fpdl.penalty_amount,
+            fpdl.penalty_date,
+            fpdl.payment_code
+        FROM fatturapa_payment_data fpd
+        LEFT JOIN fatturapa_payment_term fpt ON fpd.payment_terms = fpt.id
+        LEFT JOIN fatturapa_payment_detail fpdl ON fpd.id = fpdl.payment_data_id
+        LEFT JOIN fatturapa_payment_method fpm ON fpdl.fatturapa_pm_id = fpm.id
+    """)
+    rows = env.cr.fetchall()
+    invoice_map = {}
+    for row in rows:
+        invoice_id, *payment_data = row
+        invoice_map.setdefault(invoice_id, []).append(tuple(payment_data))
 
-        moves = env["account.move"].browse(invoice_map.keys())
-        for move in moves:
-            for payment_data in invoice_map[move.id]:
-                (
-                    term_code,
-                    recipient,
-                    method_code,
-                    payment_term_start,
-                    payment_days,
-                    payment_due_date,
-                    payment_amount,
-                    post_office_code,
-                    recepit_surname,
-                    recepit_name,
-                    recepit_cf,
-                    recepit_title,
-                    payment_bank_name,
-                    payment_bank_iban,
-                    payment_bank_abi,
-                    payment_bank_cab,
-                    payment_bank_bic,
-                    prepayment_discount,
-                    max_payment_date,
-                    penalty_amount,
-                    penalty_date,
-                    payment_code,
-                ) = payment_data
-                payment_tags = Markup('<ul class="mb-0">{}</ul>').format(
-                    Markup().join(
-                        nl2br_enclose(" ".join(tag.split()), "li")
-                        for tag in [
-                            f'CondizioniPagamento: {term_code or "N/A"}',
-                            f'Beneficiario: {recipient or "N/A"}',
-                            f'ModalitaPagamento: {method_code or "N/A"}',
-                            f'DataRiferimentoTerminiPagamento: {payment_term_start or "N/A"}',  # noqa: E501
-                            f'GiorniTerminiPagamento: {payment_days or "N/A"}',
-                            f'DataScadenzaPagamento: {payment_due_date or "N/A"}',
-                            f'ImportoPagamento: {payment_amount or "N/A"}',
-                            f'CodUfficioPostale: {post_office_code or "N/A"}',
-                            f'CognomeQuietanzante: {recepit_surname or "N/A"}',
-                            f'NomeQuietanzante: {recepit_name or "N/A"}',
-                            f'CFQuietanzante: {recepit_cf or "N/A"}',
-                            f'TitoloQuietanzante: {recepit_title or "N/A"}',
-                            f'IstitutoFinanziario: {payment_bank_name or "N/A"}',
-                            f'IBAN: {payment_bank_iban or "N/A"}',
-                            f'ABI: {payment_bank_abi or "N/A"}',
-                            f'CAB: {payment_bank_cab or "N/A"}',
-                            f'BIC: {payment_bank_bic or "N/A"}',
-                            f'ScontoPagamentoAnticipato: {prepayment_discount or "N/A"}',  # noqa: E501
-                            f'DataLimitePagamentoAnticipato: {max_payment_date or "N/A"}',  # noqa: E501
-                            f'PenalitaPagamentiRitardati: {penalty_amount or "N/A"}',
-                            f'DataDecorrenzaPenale: {penalty_date or "N/A"}',
-                            f'CodicePagamento: {payment_code or "N/A"}',
-                        ]
-                    )
+    moves = env["account.move"].browse(invoice_map.keys())
+    for move in moves:
+        for payment_data in invoice_map[move.id]:
+            (
+                term_code,
+                recipient,
+                method_code,
+                payment_term_start,
+                payment_days,
+                payment_due_date,
+                payment_amount,
+                post_office_code,
+                recepit_surname,
+                recepit_name,
+                recepit_cf,
+                recepit_title,
+                payment_bank_name,
+                payment_bank_iban,
+                payment_bank_abi,
+                payment_bank_cab,
+                payment_bank_bic,
+                prepayment_discount,
+                max_payment_date,
+                penalty_amount,
+                penalty_date,
+                payment_code,
+            ) = payment_data
+            payment_tags = Markup('<ul class="mb-0">{}</ul>').format(
+                Markup().join(
+                    nl2br_enclose(" ".join(tag.split()), "li")
+                    for tag in [
+                        f'CondizioniPagamento: {term_code or "N/A"}',
+                        f'Beneficiario: {recipient or "N/A"}',
+                        f'ModalitaPagamento: {method_code or "N/A"}',
+                        f'DataRiferimentoTerminiPagamento: {payment_term_start or "N/A"}',  # noqa: E501
+                        f'GiorniTerminiPagamento: {payment_days or "N/A"}',
+                        f'DataScadenzaPagamento: {payment_due_date or "N/A"}',
+                        f'ImportoPagamento: {payment_amount or "N/A"}',
+                        f'CodUfficioPostale: {post_office_code or "N/A"}',
+                        f'CognomeQuietanzante: {recepit_surname or "N/A"}',
+                        f'NomeQuietanzante: {recepit_name or "N/A"}',
+                        f'CFQuietanzante: {recepit_cf or "N/A"}',
+                        f'TitoloQuietanzante: {recepit_title or "N/A"}',
+                        f'IstitutoFinanziario: {payment_bank_name or "N/A"}',
+                        f'IBAN: {payment_bank_iban or "N/A"}',
+                        f'ABI: {payment_bank_abi or "N/A"}',
+                        f'CAB: {payment_bank_cab or "N/A"}',
+                        f'BIC: {payment_bank_bic or "N/A"}',
+                        f'ScontoPagamentoAnticipato: {prepayment_discount or "N/A"}',
+                        f'DataLimitePagamentoAnticipato: {max_payment_date or "N/A"}',
+                        f'PenalitaPagamentiRitardati: {penalty_amount or "N/A"}',
+                        f'DataDecorrenzaPenale: {penalty_date or "N/A"}',
+                        f'CodicePagamento: {payment_code or "N/A"}',
+                    ]
                 )
-                message = Markup("{} {}<br/>{}").format(
-                    "DatiPagamento", env._("from XML file:"), payment_tags
-                )
-                move.sudo().message_post(body=message)
+            )
+            message = Markup("{} {}<br/>{}").format(
+                "DatiPagamento", env._("from XML file:"), payment_tags
+            )
+            move.sudo().message_post(body=message)
 
 
 def _l10n_it_fatturapa_post_migration(env):
@@ -818,62 +778,60 @@ def _l10n_it_fatturapa_in_post_migration(env):
                 """,
             )
 
-    query = """
-        UPDATE ir_attachment ia
-        SET
-            res_model = 'account.move',
-            res_id = am.id,
-            res_field = 'l10n_it_edi_attachment_file'
+    env.cr.execute("""
+        SELECT
+            am.id,
+            fai.ir_attachment_id AS attachment_id
         FROM account_move am
         JOIN fatturapa_attachment_in fai ON fai.id = am.fatturapa_attachment_in_id
-        WHERE am.fatturapa_attachment_in_id IS NOT NULL AND ia.id = fai.ir_attachment_id
-    """
-    openupgrade.logged_query(env.cr, query)
+        WHERE am.fatturapa_attachment_in_id IS NOT NULL
+    """)
+    rows = env.cr.fetchall()
+    for row in rows:
+        invoice_id, attachment_id = row
+        move = env["account.move"].browse(invoice_id)
+        attachment = env["ir.attachment"].browse(attachment_id)
+        attachment.res_model = "account.move"
+        attachment.res_id = move.id
+        attachment.res_field = "l10n_it_edi_attachment_file"
 
 
 def _l10n_it_fatturapa_out_post_migration(env):
-    query = """
-        UPDATE account_move
-        SET l10n_it_edi_state = CASE fatturapa_state
-            WHEN 'ready' THEN 'being_sent'
-            WHEN 'sent' THEN 'processing'
-            WHEN 'delivered' THEN 'forwarded'
-            WHEN 'accepted' THEN 'accepted_by_pa_partner'
-            WHEN 'error' THEN 'forward_failed'
-            ELSE l10n_it_edi_state
-        END
-        WHERE fatturapa_state IN ('ready', 'sent', 'delivered', 'accepted', 'error')
-    """
-    openupgrade.logged_query(env.cr, query)
+    updates = {
+        "ready": "being_sent",
+        "sent": "processing",
+        "delivered": "forwarded",
+        "accepted": "accepted_by_pa_partner",
+        "error": "forward_failed",
+    }
 
-    query = """
-        UPDATE ir_attachment ia
-        SET
-            res_model = 'account.move',
-            res_id = am.id,
-            res_field = 'l10n_it_edi_attachment_file'
+    for fatturapa_state, l10n_it_edi_state in updates.items():
+        query = f"""
+            UPDATE account_move
+            SET l10n_it_edi_state = '{l10n_it_edi_state}'
+            WHERE fatturapa_state = '{fatturapa_state}'
+        """
+        openupgrade.logged_query(env.cr, query)
+
+    env.cr.execute("""
+        SELECT
+            am.id,
+            fao.ir_attachment_id AS attachment_id
         FROM account_move am
         JOIN fatturapa_attachment_out fao ON fao.id = am.fatturapa_attachment_out_id
-        WHERE am.fatturapa_attachment_out_id IS NOT NULL AND ia.id = fao.ir_attachment_id
-    """  # noqa: E501
-    openupgrade.logged_query(env.cr, query)
+        WHERE am.fatturapa_attachment_out_id IS NOT NULL
+    """)
+    rows = env.cr.fetchall()
+    for row in rows:
+        invoice_id, attachment_id = row
+        move = env["account.move"].browse(invoice_id)
+        attachment = env["ir.attachment"].browse(attachment_id)
+        attachment.res_model = "account.move"
+        attachment.res_id = move.id
+        attachment.res_field = "l10n_it_edi_attachment_file"
 
 
 def _l10n_it_fiscal_document_type_post_migration(env):
-    if not openupgrade.column_exists(env.cr, "account_move", "l10n_it_document_type"):
-        field_spec = [
-            (
-                "l10n_it_document_type",
-                "account.move",
-                "account_move",
-                "many2one",
-                "int4",
-                "l10n_it_edi_ndd",
-                False,
-            )
-        ]
-        openupgrade.add_fields(env, field_spec)
-
     query = """
         UPDATE account_move
         SET l10n_it_document_type = lidt.id
@@ -885,20 +843,6 @@ def _l10n_it_fiscal_document_type_post_migration(env):
 
 
 def _l10n_it_fiscal_payment_term_post_migration(env):
-    if not openupgrade.column_exists(env.cr, "account_move", "l10n_it_payment_method"):
-        field_spec = [
-            (
-                "l10n_it_payment_method",
-                "account.move",
-                "account_move",
-                "selection",
-                "varchar",
-                "l10n_it_edi_ndd",
-                False,
-            )
-        ]
-        openupgrade.add_fields(env, field_spec)
-
     query = """
         UPDATE account_move
         SET l10n_it_payment_method = fpm.code
@@ -976,17 +920,19 @@ def _l10n_it_rea_post_migration(env):
 
 
 def _l10n_it_vat_payability_pre_migration(env):
-    query = """
-        UPDATE account_tax
-        SET tax_exigibility = CASE payability
-            WHEN 'D' THEN 'on_payment'
-            WHEN 'I' THEN 'on_invoice'
-            WHEN 'S' THEN 'on_invoice'
-            ELSE tax_exigibility
-        END
-        WHERE payability IN ('D', 'I', 'S')
-    """
-    openupgrade.logged_query(env.cr, query)
+    updates = {
+        "D": "on_payment",
+        "I": "on_invoice",
+        "S": "on_invoice",
+    }
+
+    for payability, tax_exigibility in updates.items():
+        query = f"""
+            UPDATE account_tax
+            SET tax_exigibility = '{tax_exigibility}'
+            WHERE payability = '{payability}'
+        """
+        openupgrade.logged_query(env.cr, query)
 
 
 def _l10n_it_edi_extension_pre_init_hook(env):

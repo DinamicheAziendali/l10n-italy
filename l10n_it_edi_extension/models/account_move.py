@@ -2,12 +2,9 @@
 # Copyright 2025 Simone Rubino
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import re
-import unicodedata
-
-from odoo import api, fields, models
+from odoo import api, fields, models, osv
 from odoo.exceptions import UserError
-from odoo.tools import float_compare, html2plaintext, is_html_empty
+from odoo.tools import float_compare, html2plaintext
 
 from odoo.addons.base.models.ir_qweb_fields import Markup
 from odoo.addons.l10n_it_edi.models.account_move import get_date, get_float, get_text
@@ -26,6 +23,15 @@ class AccountMoveInherit(models.Model):
     l10n_it_edi_attachment_preview_link = fields.Char(
         string="Preview link",
         compute="_compute_l10n_it_edi_attachment_preview_link",
+    )
+    l10n_it_edi_ext_attachment_in_id = fields.Many2one(
+        comodel_name="ir.attachment",
+        string="Imported Electronic Bill",
+        readonly=True,
+    )
+    l10n_it_edi_ext_attachment_in_preview_link = fields.Char(
+        string="Preview link for imported Electronic Bill",
+        compute="_compute_l10n_it_edi_ext_attachment_in_preview_link",
     )
     l10n_it_edi_line_ids = fields.One2many(
         "l10n_it_edi.line",
@@ -137,6 +143,15 @@ class AccountMoveInherit(models.Model):
             else:
                 move.l10n_it_edi_attachment_preview_link = ""
 
+    @api.depends("l10n_it_edi_ext_attachment_in_id")
+    def _compute_l10n_it_edi_ext_attachment_in_preview_link(self):
+        for move in self:
+            if attachment := move.l10n_it_edi_ext_attachment_in_id:
+                link = f"{move.get_base_url()}/fatturapa/preview/{attachment.id}"
+            else:
+                link = ""
+            move.l10n_it_edi_ext_attachment_in_preview_link = link
+
     @api.depends(
         "l10n_it_edi_amount_untaxed", "l10n_it_edi_amount_tax", "l10n_it_edi_rounding"
     )
@@ -149,6 +164,14 @@ class AccountMoveInherit(models.Model):
                     move.l10n_it_edi_rounding,
                 ]
             )
+
+    def _l10n_it_edi_is_to_validate(self):
+        self.ensure_one()
+        return (
+            self.is_purchase_document()
+            or self.env.context.get("l10n_it_validate_all_invoices")
+            and self.is_sale_document()
+        )
 
     @api.depends(
         "move_type",
@@ -165,7 +188,7 @@ class AccountMoveInherit(models.Model):
         self.l10n_it_edi_validation_message = ""
 
         invoices_to_check = self.filtered(
-            lambda inv: inv.is_purchase_document()
+            lambda inv: inv._l10n_it_edi_is_to_validate()
             and inv.state in ["draft", "posted"]
             and inv.l10n_it_edi_attachment_id
         )
@@ -199,6 +222,16 @@ class AccountMoveInherit(models.Model):
             "target": "new",
         }
 
+    def action_l10n_it_edi_ext_attachment_in_preview(self):
+        self.ensure_one()
+
+        return {
+            "type": "ir.actions.act_url",
+            "name": "Show preview",
+            "url": self.l10n_it_edi_ext_attachment_in_preview_link,
+            "target": "new",
+        }
+
     # -------------------------------------------------------------------------
     # Helpers
     # -------------------------------------------------------------------------
@@ -218,36 +251,11 @@ class AccountMoveInherit(models.Model):
             )
         return res
 
-    @api.model
-    def _sanitize_causale(self, text):
-        # Normalize text into NFC
-        text = unicodedata.normalize("NFC", text)
-
-        # Mapping of "fancy" or typographic characters to ASCII-friendly equivalents
-        replacements = {
-            "\u2018": "'",  # left single quotation mark → straight apostrophe
-            "\u2019": "'",  # right single quotation mark → straight apostrophe
-            "\u201c": '"',  # left double quotation mark → straight quote
-            "\u201d": '"',  # right double quotation mark → straight quote
-            "\u2013": "-",  # en dash → hyphen
-            "\u2014": "-",  # em dash → hyphen
-            "\u2026": "...",  # ellipsis → three dots
-            "\u20ac": "EUR",  # euro sign → EUR text
-        }
-
-        for bad, good in replacements.items():
-            text = text.replace(bad, good)
-
-        # Remove any character outside Basic Latin + Latin-1 Supplement range
-        text = re.sub(r"[^\u0000-\u00FF]", "?", text)
-
-        return text
-
     def _l10n_it_edi_get_values(self, pdf_values=None):
         res = super()._l10n_it_edi_get_values(pdf_values)
 
         causale_list = []
-        if not is_html_empty(self.narration):
+        if self.narration:
             try:
                 narration_text = html2plaintext(self.narration)
             except Exception:
@@ -255,11 +263,8 @@ class AccountMoveInherit(models.Model):
 
             # max length of Causale is 200
             for causale in narration_text.split("\n"):
-                # Skip if causale is empty or only spaces
-                if not causale.strip():
+                if not causale:
                     continue
-
-                causale = self._sanitize_causale(causale)
                 causale_list_200 = [
                     causale[i : i + 200] for i in range(0, len(causale), 200)
                 ]
@@ -399,6 +404,42 @@ class AccountMoveInherit(models.Model):
         partner.update(vals)
         return partner
 
+    def _l10n_it_edi_search_tax_for_import(
+        self, company, percentage, extra_domain=None, l10n_it_exempt_reason=None
+    ):
+        # Check if a tax of the default product fits what is requested
+        partner_default_product = self.partner_id.l10n_it_edi_ext_default_product_id
+        if default_product_taxes := partner_default_product.supplier_taxes_id:
+            product_extra_domain = osv.expression.AND(
+                [
+                    extra_domain,
+                    [
+                        ("id", "in", default_product_taxes.ids),
+                    ],
+                ]
+            )
+            tax = super()._l10n_it_edi_search_tax_for_import(
+                company,
+                percentage,
+                product_extra_domain,
+                l10n_it_exempt_reason=l10n_it_exempt_reason,
+            )
+            if not tax:
+                tax = super()._l10n_it_edi_search_tax_for_import(
+                    company,
+                    percentage,
+                    extra_domain,
+                    l10n_it_exempt_reason=l10n_it_exempt_reason,
+                )
+        else:
+            tax = super()._l10n_it_edi_search_tax_for_import(
+                company,
+                percentage,
+                extra_domain,
+                l10n_it_exempt_reason=l10n_it_exempt_reason,
+            )
+        return tax
+
     def _l10n_it_edi_ext_import_summary_line(self, element, extra_info=None):
         messages_to_log = []
         if extra_info is None:
@@ -416,17 +457,21 @@ class AccountMoveInherit(models.Model):
             l10n_it_exempt_reason=l10n_it_exempt_reason,
         )
         if tax:
-            self.env["account.move.line"].create(
-                {
-                    "move_id": self.id,
-                    "name": self.env._(
-                        "Summary for tax amount %(percentage)s",
-                        percentage=percentage,
-                    ),
-                    "price_unit": get_float(element, ".//ImponibileImporto"),
-                    "tax_ids": tax.ids,
-                }
-            )
+            line_values = {
+                "move_id": self.id,
+                "name": self.env._(
+                    "Summary for tax amount %(percentage)s",
+                    percentage=percentage,
+                ),
+                "price_unit": get_float(element, ".//ImponibileImporto"),
+                "tax_ids": tax.ids,
+            }
+            if (
+                partner_default_product
+                := self.partner_id.l10n_it_edi_ext_default_product_id
+            ):
+                line_values["product_id"] = partner_default_product.id
+            self.env["account.move.line"].create(line_values)
         else:
             messages_to_log.append(
                 Markup("<br/>").join(
@@ -448,8 +493,9 @@ class AccountMoveInherit(models.Model):
             extra_info = dict()
         messages_to_log = []
         company = move_line.company_id
+        partner = move_line.partner_id
         import_detail_level = (
-            move_line.partner_id.l10n_it_edi_import_detail_level
+            partner.l10n_it_edi_import_detail_level
             or company.l10n_it_edi_import_detail_level
         )
         if import_detail_level == "min":
@@ -554,6 +600,23 @@ class AccountMoveInherit(models.Model):
             messages_to_log += super()._l10n_it_edi_import_line(
                 element, move_line, extra_info=extra_info
             )
+            if not move_line.product_id and (
+                partner_default_product := partner.l10n_it_edi_ext_default_product_id
+            ):
+                # If no product is found use the default one set on the partner,
+                # without recomputing what was assigned
+                with self.env.protecting(
+                    [
+                        move_line._fields[field_name]
+                        for field_name in [
+                            "price_unit",
+                            "tax_ids",
+                        ]
+                    ],
+                    move_line,
+                ):
+                    move_line.product_id = partner_default_product
+
         else:
             raise UserError(
                 self.env._(
@@ -826,5 +889,8 @@ class AccountMoveInherit(models.Model):
             "tax_representative",
         ):
             invoice.l10n_it_edi_tax_representative_id = tax_representative
+
+        if invoice and (attachment := data["attachment"]):
+            invoice.l10n_it_edi_ext_attachment_in_id = attachment.id
 
         return invoice

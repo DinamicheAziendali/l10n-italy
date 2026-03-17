@@ -306,6 +306,12 @@ msgid "E-Invoice Untaxed Amount"
 msgstr ""
 
 #. module: l10n_it_edi_extension
+#: model:ir.model.fields,field_description:l10n_it_edi_extension.field_res_partner__l10n_it_edi_ext_default_product_id
+#: model:ir.model.fields,field_description:l10n_it_edi_extension.field_res_users__l10n_it_edi_ext_default_product_id
+msgid "E-bills default Product"
+msgstr ""
+
+#. module: l10n_it_edi_extension
 #: model:ir.model.fields,field_description:l10n_it_edi_extension.field_res_company__l10n_it_edi_import_detail_level
 #: model:ir.model.fields,field_description:l10n_it_edi_extension.field_res_config_settings__l10n_it_edi_import_detail_level
 #: model:ir.model.fields,field_description:l10n_it_edi_extension.field_res_partner__l10n_it_edi_import_detail_level
@@ -427,6 +433,12 @@ msgstr ""
 msgid ""
 "Import detail level %(import_detail_level)s not supported.\n"
 "Please set an import detail level in company %(company)s."
+msgstr ""
+
+#. module: l10n_it_edi_extension
+#: model:ir.model.fields,field_description:l10n_it_edi_extension.field_account_bank_statement_line__l10n_it_edi_ext_attachment_in_id
+#: model:ir.model.fields,field_description:l10n_it_edi_extension.field_account_move__l10n_it_edi_ext_attachment_in_id
+msgid "Imported Electronic Bill"
 msgstr ""
 
 #. module: l10n_it_edi_extension
@@ -733,13 +745,19 @@ msgstr ""
 
 #. module: l10n_it_edi_extension
 #: model_terms:ir.ui.view,arch_db:l10n_it_edi_extension.account_invoice_form_l10n_it_inherit_view
-msgid "Preview FPA"
+msgid "Preview"
 msgstr ""
 
 #. module: l10n_it_edi_extension
 #: model:ir.model.fields,field_description:l10n_it_edi_extension.field_account_bank_statement_line__l10n_it_edi_attachment_preview_link
 #: model:ir.model.fields,field_description:l10n_it_edi_extension.field_account_move__l10n_it_edi_attachment_preview_link
 msgid "Preview link"
+msgstr ""
+
+#. module: l10n_it_edi_extension
+#: model:ir.model.fields,field_description:l10n_it_edi_extension.field_account_bank_statement_line__l10n_it_edi_ext_attachment_in_preview_link
+#: model:ir.model.fields,field_description:l10n_it_edi_extension.field_account_move__l10n_it_edi_ext_attachment_in_preview_link
+msgid "Preview link for imported Electronic Bill"
 msgstr ""
 
 #. module: l10n_it_edi_extension
@@ -1011,6 +1029,14 @@ msgstr ""
 msgid ""
 "Untaxed amount (%(amount_untaxed)s}) minus rounding (%(rounding)s}) does not"
 " match with e-invoice untaxed amount %(edi_amount_untaxed)s)"
+msgstr ""
+
+#. module: l10n_it_edi_extension
+#: model:ir.model.fields,help:l10n_it_edi_extension.field_res_partner__l10n_it_edi_ext_default_product_id
+#: model:ir.model.fields,help:l10n_it_edi_extension.field_res_users__l10n_it_edi_ext_default_product_id
+msgid ""
+"Used by electronic invoice XML import. If filled in, generated bill lines "
+"will use this product when no other possible product is found."
 msgstr ""
 
 #. module: l10n_it_edi_extension
