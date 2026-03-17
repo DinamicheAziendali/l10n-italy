@@ -273,6 +273,99 @@ class AccountMoveInherit(models.Model):
 
         res["causale"] = causale_list
 
+        # adding note/section
+        allows_display_type = ["product", "rounding", "line_note", "line_section"]
+        base_amls = self.line_ids.filtered(
+            lambda x: x.display_type in allows_display_type
+        ).sorted(
+            key=lambda il: (-il.sequence, il.date, il.move_name, -il.id), reverse=True
+        )
+        base_lines = res["base_lines"]
+        existing_lines_map = {bl["record"]: bl for bl in base_lines}
+        last_record = base_lines[0].copy() if base_lines else {}
+
+        for index, base_aml in enumerate(base_amls, start=1):
+            if base_aml in existing_lines_map:
+                existing_line = existing_lines_map[base_aml]
+                existing_line["it_values"]["numero_linea"] = index
+                last_record = existing_line.copy()
+                continue
+
+            record = last_record.copy()
+            record.update(
+                {
+                    "analytic_distribution": False,
+                    "deferred_end_date": False,
+                    "deferred_start_date": False,
+                    "discount": 0.0,
+                    "discount_amount_before_dispatching": 0.0,
+                    "filter_tax_function": None,
+                    "gross_price_subtotal": 0.0,
+                    "id": base_aml.id,
+                    "manual_tax_amounts": None,
+                    "manual_total_excluded": None,
+                    "manual_total_excluded_currency": None,
+                    "name": base_aml.name,
+                    "price_subtotal": 0.0,
+                    "price_unit": 0.0,
+                    "product_id": self.env["product.product"],
+                    "product_uom_id": self.env["uom.uom"],
+                    "quantity": 0.0,
+                    "rate": 1.0,
+                    "record": base_aml,
+                    "sign": -1,
+                    "special_mode": False,
+                    "special_type": False,
+                }
+            )
+            record["it_values"] = record.get("it_values", {}).copy()
+            record["it_values"].update(
+                {
+                    "admin_ref": None,
+                    "altri_dati_gestionali_list": [],
+                    "descrizione": base_aml.name,
+                    "numero_linea": index,
+                    "prezzo_totale": 0.0,
+                    "prezzo_unitario": 0.0,
+                    "quantita": 0.0,
+                    "quantita_pd": 2,
+                    "ritenuta": None,
+                    "sconto_maggiorazione_list": [],
+                },
+            )
+            record["tax_details"] = record.get("tax_details", {}).copy()
+            record["tax_details"].update(
+                {
+                    "delta_total_excluded": 0.0,
+                    "delta_total_excluded_currency": 0.0,
+                    "raw_total_excluded": 0.0,
+                    "raw_total_excluded_currency": 0.0,
+                    "raw_total_included": 0.0,
+                    "raw_total_included_currency": 0.0,
+                    "total_excluded": 0.0,
+                    "total_excluded_currency": 0.0,
+                    "total_included": 0.0,
+                    "total_included_currency": 0.0,
+                }
+            )
+            for taxes_data in record["tax_details"].get("taxes_data", []):
+                taxes_data.update(
+                    {
+                        "base_amount": 0.0,
+                        "base_amount_currency": 0.0,
+                        "raw_base_amount": 0.0,
+                        "raw_base_amount_currency": 0.0,
+                        "raw_tax_amount": 0.0,
+                        "raw_tax_amount_currency": 0.0,
+                        "tax_amount": 0.0,
+                        "tax_amount_currency": 0.0,
+                    }
+                )
+            base_lines.append(record)
+
+        base_lines = sorted(base_lines, key=lambda bl: bl["it_values"]["numero_linea"])
+        res["base_lines"] = base_lines
+
         return res
 
     def _l10n_it_edi_get_extra_info(
