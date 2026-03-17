@@ -33,7 +33,7 @@
                         string="Validate"
                     />
                     <button
-                        name="action_invoice"
+                        name="action_invoice_wizard"
                         type="object"
                         class="oe_highlight"
                         invisible="state != 'confirm' or not sale_ids"
