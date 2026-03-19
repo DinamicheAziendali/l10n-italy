@@ -73,13 +73,6 @@ class EInvoiceImportFileWizard(models.TransientModel):
                         )
                         for record, file_data in zip(records, files_data, strict=False):
                             attachment = file_data["attachment"]
-                            attachment.write(
-                                {
-                                    "res_model": record._name,
-                                    "res_id": record.id,
-                                    "res_field": "l10n_it_edi_attachment_file",
-                                }
-                            )
                             record.message_post(
                                 body=self.env._(
                                     "This invoice was imported from .zip file"
@@ -90,13 +83,6 @@ class EInvoiceImportFileWizard(models.TransientModel):
                         # Extend created moves with the related attachments.
                         for record, file_data in zip(records, files_data, strict=False):
                             record._extend_with_attachments([file_data], new=True)
-                            if record.is_sale_document():
-                                record.l10n_it_edi_attachment_name = file_data.get(
-                                    "name", ""
-                                )
-                                record.l10n_it_edi_attachment_file = base64.b64encode(
-                                    file_data.get("raw", b"")
-                                )
 
                         moves |= records
 

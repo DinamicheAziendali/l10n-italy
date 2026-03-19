@@ -2,6 +2,8 @@
 # Copyright 2025 Simone Rubino
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import base64
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Domain
@@ -129,10 +131,13 @@ class AccountMoveInherit(models.Model):
     # Computes
     # -------------------------------------------------------------------------
 
-    @api.depends("l10n_it_edi_attachment_file")
+    @api.depends("l10n_it_edi_attachment_file", "l10n_it_edi_ext_attachment_in_id")
     def _compute_l10n_it_edi_attachment_preview_link(self):
         for move in self:
-            if move.l10n_it_edi_attachment_file:
+            if (
+                move.l10n_it_edi_attachment_file
+                or move.l10n_it_edi_ext_attachment_in_id
+            ):
                 move.l10n_it_edi_attachment_preview_link = (
                     move.get_base_url() + f"/fatturapa/preview/{move.id}"
                 )
@@ -235,9 +240,24 @@ class AccountMoveInherit(models.Model):
         )
         for base_line, _aggregated_values in base_lines_aggregated_values:
             line = base_line["record"]
+            # Build other_data list from l10n_it_edi_other_data_ids
+            other_data_list = []
+            for other_data in line.l10n_it_edi_other_data_ids:
+                other_data_dict = {
+                    "tipo_dato": other_data.name,
+                    "riferimento_testo": other_data.text_ref or False,
+                    "riferimento_numero": other_data.num_ref or False,
+                    # Pass date object directly, format_date() in template handles it
+                    "riferimento_data": other_data.date_ref or False,
+                }
+                other_data_list.append(other_data_dict)
+
+            # Get existing altri_dati_gestionali_list or initialize empty list
+            existing_list = base_line["it_values"].get("altri_dati_gestionali_list", [])
             base_line["it_values"].update(
                 {
                     "admin_ref": line.l10n_it_edi_admin_ref or None,
+                    "altri_dati_gestionali_list": existing_list + other_data_list,
                 }
             )
         return res
@@ -882,6 +902,10 @@ class AccountMoveInherit(models.Model):
             invoice.l10n_it_edi_tax_representative_id = tax_representative
 
         if invoice and (attachment := data["attachment"]):
-            invoice.l10n_it_edi_ext_attachment_in_id = attachment.id
+            if invoice.is_sale_document():
+                invoice.l10n_it_edi_attachment_name = attachment.name
+                invoice.l10n_it_edi_attachment_file = base64.b64encode(attachment.raw)
+            else:
+                invoice.l10n_it_edi_ext_attachment_in_id = attachment.id
 
         return invoice
