@@ -13,7 +13,7 @@
     "external_dependencies": {
         "python": [
             "codicefiscale",
-            "openupgradelib==3.12.0",
+            "openupgradelib",
         ],
     },
     "depends": [

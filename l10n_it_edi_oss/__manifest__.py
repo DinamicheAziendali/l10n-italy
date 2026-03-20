@@ -9,7 +9,7 @@
     "website": "https://github.com/OCA/l10n-italy",
     "license": "AGPL-3",
     "external_dependencies": {
-        "python": ["openupgradelib==3.12.0"],
+        "python": ["openupgradelib"],
     },
     "depends": [
         "l10n_eu_oss_oca",

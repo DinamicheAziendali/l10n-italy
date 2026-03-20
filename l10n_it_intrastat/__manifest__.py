@@ -35,7 +35,7 @@
     "demo": ["demo/product_demo.xml"],
     "external_dependencies": {
         "python": [
-            "openupgradelib==3.12.0",
+            "openupgradelib",
         ],
     },
 }

@@ -39,7 +39,7 @@
     },
     "external_dependencies": {
         "python": [
-            "openupgradelib==3.12.0",
+            "openupgradelib",
         ],
     },
     "pre_init_hook": "pre_absorb_old_module",
