@@ -12,7 +12,7 @@
         "l10n_it_edi_extension",
     ],
     "external_dependencies": {
-        "python": ["openupgradelib"],
+        "python": ["openupgradelib==3.12.0"],
     },
     "data": [
         "views/l10n_it_sender_partner.xml",
