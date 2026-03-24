@@ -901,11 +901,24 @@ class AccountMoveInherit(models.Model):
         ):
             invoice.l10n_it_edi_tax_representative_id = tax_representative
 
-        if invoice and (attachment := data["attachment"]):
+        if (
+            invoice
+            and (attachment_name := data.get("name", ""))
+            and (attachment_raw := data.get("raw", b""))
+        ):
             if invoice.is_sale_document():
-                invoice.l10n_it_edi_attachment_name = attachment.name
-                invoice.l10n_it_edi_attachment_file = base64.b64encode(attachment.raw)
+                invoice.l10n_it_edi_attachment_name = attachment_name
+                invoice.l10n_it_edi_attachment_file = base64.b64encode(attachment_raw)
             else:
-                invoice.l10n_it_edi_ext_attachment_in_id = attachment.id
+                xml_att = self.env["ir.attachment"].create(
+                    {
+                        "name": attachment_name,
+                        "raw": attachment_raw,
+                        "res_model": invoice._name,
+                        "res_id": invoice.id,
+                        "mimetype": "application/xml",
+                    }
+                )
+                invoice.l10n_it_edi_ext_attachment_in_id = xml_att.id
 
         return invoice
