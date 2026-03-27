@@ -2,8 +2,6 @@
 # Copyright 2025 Simone Rubino
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import base64
-
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Domain
@@ -846,6 +844,8 @@ class AccountMoveInherit(models.Model):
     def _l10n_it_edi_import_invoice(self, invoice, data, is_new):
         invoice = super()._l10n_it_edi_import_invoice(invoice, data, is_new)
 
+        body_tree = data.get("xml_tree")
+        is_incoming = self.is_purchase_document(include_receipts=True)
         if invoice:
             import_detail_level = (
                 invoice.partner_id.l10n_it_edi_import_detail_level
@@ -858,24 +858,26 @@ class AccountMoveInherit(models.Model):
             elif import_detail_level == "tax":
                 # Delete all lines created by Odoo and create summary lines instead
                 invoice.invoice_line_ids.unlink()
-                body_tree = data.get("xml_tree")
                 if body_tree is not None:
+                    # Ignore these messages
+                    # because they have already been logged
+                    # when this method was executed during super's import
+                    extra_info, _messages = self._l10n_it_edi_get_extra_info(
+                        invoice.company_id,
+                        get_text(body_tree, "//DatiGeneraliDocumento/TipoDocumento"),
+                        body_tree,
+                        incoming=is_incoming,
+                    )
                     for summary_line in body_tree.xpath(
                         ".//DatiBeniServizi/DatiRiepilogo"
                     ):
                         messages = invoice._l10n_it_edi_ext_import_summary_line(
                             summary_line,
-                            extra_info={
-                                "type_tax_use_domain": [
-                                    ("type_tax_use", "=", "purchase")
-                                ]
-                            },
+                            extra_info=extra_info,
                         )
                         for message in messages:
                             invoice.sudo().message_post(body=message)
 
-        body_tree = data["xml_tree"]
-        is_incoming = self.is_purchase_document(include_receipts=True)
         partner_role = "seller" if is_incoming else "buyer"
         if (
             invoice
@@ -903,22 +905,19 @@ class AccountMoveInherit(models.Model):
 
         if (
             invoice
+            and not invoice.is_sale_document()
             and (attachment_name := data.get("name", ""))
             and (attachment_raw := data.get("raw", b""))
         ):
-            if invoice.is_sale_document():
-                invoice.l10n_it_edi_attachment_name = attachment_name
-                invoice.l10n_it_edi_attachment_file = base64.b64encode(attachment_raw)
-            else:
-                xml_att = self.env["ir.attachment"].create(
-                    {
-                        "name": attachment_name,
-                        "raw": attachment_raw,
-                        "res_model": invoice._name,
-                        "res_id": invoice.id,
-                        "mimetype": "application/xml",
-                    }
-                )
-                invoice.l10n_it_edi_ext_attachment_in_id = xml_att.id
+            xml_att = self.env["ir.attachment"].create(
+                {
+                    "name": attachment_name,
+                    "raw": attachment_raw,
+                    "res_model": invoice._name,
+                    "res_id": invoice.id,
+                    "mimetype": "application/xml",
+                }
+            )
+            invoice.l10n_it_edi_ext_attachment_in_id = xml_att.id
 
         return invoice

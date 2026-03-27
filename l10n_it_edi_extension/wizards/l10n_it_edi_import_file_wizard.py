@@ -62,6 +62,19 @@ class EInvoiceImportFileWizard(models.TransientModel):
                             }
                         )
                         files_data = self.env["account.move"]._to_files_data(attachment)
+                        files_data = [
+                            file_data
+                            for file_data in files_data
+                            if self.env["account.move"]._is_l10n_it_edi_import_file(
+                                file_data
+                            )
+                        ]
+
+                        if not files_data:
+                            _logger.info(f"Skipping {filename}, not an XML/P7M file")
+                            attachment.unlink()
+                            continue
+
                         files_data.extend(
                             self.env["account.move"]._unwrap_attachments(files_data)
                         )
@@ -83,6 +96,13 @@ class EInvoiceImportFileWizard(models.TransientModel):
                         # Extend created moves with the related attachments.
                         for record, file_data in zip(records, files_data, strict=False):
                             record._extend_with_attachments([file_data], new=True)
+                            if record.is_sale_document():
+                                record.l10n_it_edi_attachment_name = file_data.get(
+                                    "name", ""
+                                )
+                                record.l10n_it_edi_attachment_file = base64.b64encode(
+                                    file_data.get("raw", b"")
+                                )
 
                         moves |= records
 
