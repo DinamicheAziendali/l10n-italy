@@ -78,12 +78,12 @@ class Common(TestItEdi):
                     "invoice_legal_notes": "N3.2 tax law reference",
                     "type_tax_use": "sale",
                     "invoice_repartition_line_ids": cls.repartition_lines(
-                        cls.RepartitionLine(100, "base", ("+03", "+vj3")),
-                        cls.RepartitionLine(100, "tax", ("+5v",)),
-                        cls.RepartitionLine(-100, "tax", ("-4v",)),
+                        cls.RepartitionLine(100, "base", ("03", "vj3")),
+                        cls.RepartitionLine(100, "tax", ("5v",)),
+                        cls.RepartitionLine(-100, "tax", ("4v",)),
                     ),
                     "refund_repartition_line_ids": cls.repartition_lines(
-                        cls.RepartitionLine(100, "base", ("-03", "-vj3")),
+                        cls.RepartitionLine(100, "base", ("03", "vj3")),
                         cls.RepartitionLine(100, "tax", False),
                         cls.RepartitionLine(-100, "tax", False),
                     ),

@@ -336,6 +336,7 @@ class TestFatturaPAXMLValidation(Common):
         # Arrange
         company = self.company
         company.vat = "01654010345"
+        company.l10n_it_codice_fiscale = "01654010345"
         company.l10n_it_edi_import_detail_level = "tax"
         zip_name = "INV_2026_00005.zip"
 
@@ -353,6 +354,7 @@ class TestFatturaPAXMLValidation(Common):
         # Arrange
         company = self.company
         company.vat = "01654010345"
+        company.l10n_it_codice_fiscale = "01654010345"
         zip_name = "INV_2026_00005.zip"
         # pre-condition
         self.assertEqual(company.l10n_it_edi_import_detail_level, "max")
