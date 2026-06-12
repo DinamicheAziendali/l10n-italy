@@ -112,7 +112,7 @@ class PurchaseOrder(models.Model):
             order.l10n_it_edi_doi_warning = ""
             declaration = order.l10n_it_edi_doi_id
 
-            show_warning = declaration and order.state != "cancelled"
+            show_warning = declaration and order.state != "cancel"
             if not show_warning:
                 continue
 
@@ -206,7 +206,7 @@ class PurchaseOrder(models.Model):
             if not doi_tax:
                 continue
             declaration_tax_lines = order.order_line.filtered(
-                lambda line, doi_tax=doi_tax: doi_tax in line.taxes_id
+                lambda line, doi_tax=doi_tax: doi_tax in line.tax_ids
             )
             if declaration_tax_lines and not order.l10n_it_edi_doi_id:
                 errors.append(
@@ -216,7 +216,7 @@ class PurchaseOrder(models.Model):
                         doi_tax.name,
                     ),
                 )
-            if any(line.taxes_id != doi_tax for line in declaration_tax_lines):
+            if any(line.tax_ids != doi_tax for line in declaration_tax_lines):
                 errors.append(
                     self.env._(
                         "A line using tax %s should not contain any other taxes",
@@ -306,7 +306,7 @@ class PurchaseOrder(models.Model):
                 continue
 
             order_lines = order.order_line.filtered(
-                lambda line: line.taxes_id.ids == tax.ids
+                lambda line: line.tax_ids.ids == tax.ids
             )
             order_not_yet_invoiced = 0
             for line in order_lines:
