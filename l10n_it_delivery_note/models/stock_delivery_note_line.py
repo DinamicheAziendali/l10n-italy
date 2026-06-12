@@ -4,7 +4,7 @@
 # Copyright 2024 Nextev srl <odoo@nextev.it>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import Command, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 DATE_FORMAT = "%d/%m/%Y"
@@ -199,60 +199,21 @@ class StockDeliveryNoteLine(models.Model):
                 else invoice_status
             )
 
-    def _prepare_invoice_line(self, **optional_values):
-        """Prepare the values to create the new invoice line for a DN line.
-
-        :param optional_values: any parameter that should be added to the
-        returned invoice line
-        :rtype: dict
-        """
+    def _is_phantom_kit_dn_line(self):
         self.ensure_one()
 
-        res = {
-            "display_type": self.display_type or "product",
-            "delivery_note_line_id": self.id,
-        }
-
-        if self.display_type:
-            res.update(
-                {
-                    "name": self.name,
-                    "quantity": 0,
-                    "account_id": False,
-                }
+        if self.move_id and hasattr(self.move_id, "bom_line_id"):
+            return (
+                self.move_id.bom_line_id
+                and self.move_id.bom_line_id.bom_id.type == "phantom"
             )
-        else:
-            product_name = self.sale_line_id.name
-            if self.company_id.use_dn_product_name_in_invoice:
-                product_name = self.name
 
-            price_unit = self.sale_line_id.price_unit
-            if self.company_id.use_dn_price_unit_in_invoice:
-                price_unit = self.price_unit
+        return False
 
-            res.update(
-                {
-                    "name": product_name,
-                    "product_id": self.product_id.id,
-                    "product_uom_id": self.product_uom_id.id,
-                    "quantity": self.product_qty,
-                    "discount": self.discount,
-                    "price_unit": price_unit,
-                    "tax_ids": [Command.set(self.tax_ids.ids)],
-                    "sale_line_ids": [Command.link(self.sale_line_id.id)],
-                }
-            )
-            if optional_values.get("quantity"):
-                res["quantity"] = optional_values["quantity"]
-                del optional_values["quantity"]
-            if (
-                self.sale_line_id.analytic_distribution
-                and not self.sale_line_id.display_type
-            ):
-                res["analytic_distribution"] = self.sale_line_id.analytic_distribution
+    def _get_dn_line_qty(self):
+        self.ensure_one()
 
-        if optional_values.get("sequence"):
-            res["sequence"] = optional_values["sequence"]
-        if optional_values:
-            res.update(optional_values)
-        return res
+        qty = self.product_qty
+        if returned_moves := self.move_id.returned_move_ids:
+            qty -= sum(returned_moves.mapped("quantity"))
+        return qty

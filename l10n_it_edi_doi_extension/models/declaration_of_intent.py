@@ -7,6 +7,11 @@ from odoo.exceptions import UserError
 class L10nItDeclarationOfIntent(models.Model):
     _inherit = "l10n_it_edi_doi.declaration_of_intent"
 
+    number = fields.Char(
+        help="Sequential number for internal reference",
+        copy=False,
+    )
+
     purchase_order_ids = fields.One2many(
         "purchase.order",
         "l10n_it_edi_doi_id",

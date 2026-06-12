@@ -246,9 +246,11 @@ class StockDeliveryNote(models.Model):
         store=True,
     )
 
-    sale_ids = fields.Many2many("sale.order", compute="_compute_sales")
-    sale_count = fields.Integer(compute="_compute_sales")
-    sales_transport_check = fields.Boolean(compute="_compute_sales", default=True)
+    sale_ids = fields.Many2many("sale.order", compute="_compute_sales", store=True)
+    sale_count = fields.Integer(compute="_compute_sales", store=True)
+    sales_transport_check = fields.Boolean(
+        compute="_compute_sales", default=True, store=True
+    )
 
     invoice_ids = fields.Many2many(
         "account.move",
@@ -428,7 +430,14 @@ class StockDeliveryNote(models.Model):
 
             note.picking_type = picking_types[0]
 
-    @api.depends("picking_ids")
+    @api.depends(
+        "picking_ids",
+        "picking_ids.sale_id",
+        "picking_ids.sale_id.default_transport_condition_id",
+        "picking_ids.sale_id.default_goods_appearance_id",
+        "picking_ids.sale_id.default_transport_reason_id",
+        "picking_ids.sale_id.default_transport_method_id",
+    )
     def _compute_sales(self):
         for note in self:
             sales = note.mapped("picking_ids.sale_id")
@@ -702,22 +711,80 @@ class StockDeliveryNote(models.Model):
         )
         return invoice_vals
 
+    def _compute_kit_qty_from_dn_lines(self, dn_lines):
+        """Return delivered kit qty for one SO line inside one DN."""
+        bom = False
+        delivered_by_product = {}
+
+        for dn_line in dn_lines:
+            move = dn_line.move_id
+            bom_line = move.bom_line_id
+            if not bom_line or not bom_line.bom_id or bom_line.bom_id.type != "phantom":
+                continue
+
+            bom = bom_line.bom_id
+            qty = dn_line._get_dn_line_qty()
+
+            delivered_by_product.setdefault(dn_line.product_id.id, 0.0)
+            delivered_by_product[dn_line.product_id.id] += qty
+
+        if not bom:
+            return 0.0
+
+        ratios = []
+        for bom_line in bom.bom_line_ids:
+            if not bom_line.product_qty:
+                continue
+
+            delivered_qty = delivered_by_product.get(bom_line.product_id.id, 0.0)
+            ratios.append(delivered_qty / bom_line.product_qty)
+
+        return min(ratios) if ratios else 0.0
+
     def _build_dn_map(self, sale_orders):
         """Map delivery note lines by sale_line_id."""
         dn_map = {}
         for dn in self.sorted(key=lambda d: (d.date, d.name)):
+            grouped_lines = {}
             for line in dn.line_ids:
-                if line.sale_line_id and (
-                    not sale_orders or line.sale_line_id.order_id in sale_orders
-                ):
-                    dn_map.setdefault(line.sale_line_id.id, []).append((dn, line))
+                if not line.sale_line_id:
+                    continue
+
+                if sale_orders and line.sale_line_id.order_id not in sale_orders:
+                    continue
+
+                grouped_lines.setdefault(line.sale_line_id, self.env[line._name])
+                grouped_lines[line.sale_line_id] |= line
+
+            for sale_line, dn_lines in grouped_lines.items():
+                has_kit = any(dn_line._is_phantom_kit_dn_line() for dn_line in dn_lines)
+
+                if has_kit:
+                    quantity = self._compute_kit_qty_from_dn_lines(dn_lines)
+                else:
+                    quantity = sum(dn_line._get_dn_line_qty() for dn_line in dn_lines)
+
+                dn_map.setdefault(sale_line.id, []).append(
+                    {
+                        "dn": dn,
+                        "quantity": quantity,
+                        "dn_line": dn_lines[0],
+                    }
+                )
+
         return dn_map
 
-    def _append_dn_linked_lines(self, vals_list, dn_map, sequence, current_dn):
+    def _append_dn_linked_lines(
+        self, vals_list, sale_line, dn_entries, sequence, current_dn
+    ):
         """Append product lines coming from delivery notes, grouped by DN."""
         account_move = self.env["account.move"]
 
-        for dn, dn_line in dn_map:
+        for entry in dn_entries:
+            dn = entry["dn"]
+            quantity = entry["quantity"]
+            dn_line = entry.get("dn_line")
+
             if current_dn != dn:
                 vals_list.append(
                     Command.create(account_move._prepare_note_dn_value(sequence, dn))
@@ -725,16 +792,23 @@ class StockDeliveryNote(models.Model):
                 sequence += 1
                 current_dn = dn
 
-            if returned_moves := dn_line.mapped("move_id.returned_move_ids"):
-                return_qty = sum(returned_moves.mapped("quantity"))
-                product_qty = dn_line.product_qty - return_qty
-            else:
-                product_qty = dn_line.product_qty
-
-            vals = dn_line._prepare_invoice_line(
+            vals = sale_line._prepare_invoice_line(
                 sequence=sequence,
-                quantity=product_qty,
+                quantity=quantity,
             )
+            if (
+                dn.company_id.use_dn_product_name_in_invoice
+                and not dn_line._is_phantom_kit_dn_line()
+            ):
+                vals["name"] = dn_line.name
+
+            if (
+                dn.company_id.use_dn_price_unit_in_invoice
+                and not dn_line._is_phantom_kit_dn_line()
+            ):
+                vals["price_unit"] = dn_line.price_unit
+
+            vals["sale_line_ids"] = [Command.link(sale_line.id)]
             vals_list.append(Command.create(vals))
             sequence += 1
 
@@ -758,7 +832,8 @@ class StockDeliveryNote(models.Model):
                     # Add delivery note lines
                     sequence, current_dn = self._append_dn_linked_lines(
                         vals_list=vals_list,
-                        dn_map=dn_map[line.id],
+                        sale_line=line,
+                        dn_entries=dn_map[line.id],
                         sequence=sequence,
                         current_dn=current_dn,
                     )

@@ -2,7 +2,6 @@
 #  Copyright 2025 Simone Rubino
 #  License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-import base64
 from datetime import date
 from unittest.mock import patch
 
@@ -13,12 +12,6 @@ from .common import Common
 
 
 class TestFatturaPAXMLValidation(Common):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.env.company.l10n_edi_it_create_partner = True
-        cls.company.l10n_edi_it_create_partner = True
-
     def _edi_import_invoice(self, filename):
         moves = self.env["account.move"]
         path = f"l10n_it_edi_extension/tests/import_xmls/{filename}"
@@ -101,10 +94,10 @@ class TestFatturaPAXMLValidation(Common):
         self.assertEqual(move.l10n_it_edi_summary_ids[0].amount_tax, 7.48)
         self.assertEqual(move.l10n_it_edi_summary_ids[0].payability, "D")
         self.assertEqual(move.partner_id.name, "SOCIETA' ALPHA SRL")
-        self.assertEqual(move.partner_id.street, "VIALE ROMA 543")
+        self.assertEqual(move.partner_id.street, "Viale Roma 543")
         self.assertEqual(move.partner_id.state_id.code, "SS")
         self.assertEqual(move.partner_id.country_id.code, "IT")
-        self.assertEqual(move.partner_id.vat, "02780790107")
+        self.assertEqual(move.partner_id.vat, "IT02780790107")
         self.assertEqual(
             move.l10n_it_edi_tax_representative_id.name, "Rappresentante fiscale"
         )
@@ -134,24 +127,9 @@ class TestFatturaPAXMLValidation(Common):
             self.assertEqual(attachments[0].raw, orig_attachment_data)
 
     def test_import_zip(self):
-        path = "l10n_it_edi_extension/tests/import_xmls/xml_import.zip"
-        import_file_model = self.env["l10n_it_edi.import_file_wizard"].with_company(
-            self.company
-        )
+        zip_name = "xml_import.zip"
+        moves = self._import_moves_from_zip(zip_name)
 
-        with tools.file_open(path, mode="rb") as file:
-            encoded_file = base64.encodebytes(file.read())
-
-            wizard_attachment_import = import_file_model.create(
-                {
-                    "l10n_it_edi_attachment_filename": "xml_import.zip",
-                    "l10n_it_edi_attachment": encoded_file,
-                }
-            )
-            action = wizard_attachment_import.action_import()
-
-        move_ids = action.get("domain")[0][2]
-        moves = self.env["account.move"].browse(move_ids)
         out_moves = moves.filtered(lambda m: m.is_sale_document())
         in_moves = moves.filtered(lambda m: m.is_purchase_document())
         self.assertEqual(len(out_moves), 6)
@@ -237,26 +215,6 @@ class TestFatturaPAXMLValidation(Common):
         # Assert
         partner = invoice.partner_id
         self.assertEqual(partner.name, partner_name)
-
-    def test_avoid_create_partner(self):
-        """Partner is not created during import if the setting is disabled."""
-        self.env.company.l10n_edi_it_create_partner = False
-        partner_name = "SOCIETA' BETA SRL"
-        # pre-condition
-        partner = self.env["res.partner"].search(
-            [
-                ("name", "=", partner_name),
-            ],
-            limit=1,
-        )
-        self.assertFalse(partner)
-
-        # Act
-        invoice = self._assert_import_invoice("IT02780790107_11004.xml", [{}])
-
-        # Assert
-        partner = invoice.partner_id
-        self.assertFalse(partner)
 
     def test_min_import_detail_level(self):
         """If import detail level is Minimum,
@@ -382,6 +340,41 @@ class TestFatturaPAXMLValidation(Common):
 
         # Assert
         self.assertEqual(len(invoice.invoice_line_ids), 1)
+
+    def test_import_zip_tax_detail_level_sale(self):
+        """If import detail level is Tax rate,
+        and a zip containing a customer invoice is imported,
+        the used tax is for customers."""
+        # Arrange
+        company = self.company
+        company.vat = "01654010345"
+        company.l10n_it_edi_import_detail_level = "tax"
+        zip_name = "INV_2026_00005.zip"
+
+        # Act
+        moves = self._import_moves_from_zip(zip_name)
+
+        # Assert
+        self.assertEqual(moves.move_type, "out_invoice")
+        self.assertEqual(moves.invoice_line_ids.tax_ids.type_tax_use, "sale")
+
+    def test_import_zip_max_detail_level_sale(self):
+        """If import detail level is Maximum,
+        and a zip containing a customer invoice is imported,
+        the used tax is for customers."""
+        # Arrange
+        company = self.company
+        company.vat = "01654010345"
+        zip_name = "INV_2026_00005.zip"
+        # pre-condition
+        self.assertEqual(company.l10n_it_edi_import_detail_level, "max")
+
+        # Act
+        moves = self._import_moves_from_zip(zip_name)
+
+        # Assert
+        self.assertEqual(moves.move_type, "out_invoice")
+        self.assertEqual(moves.invoice_line_ids.tax_ids.type_tax_use, "sale")
 
     def test_max_import_detail_level(self):
         """If import detail level is Maximum,
@@ -525,3 +518,24 @@ class TestFatturaPAXMLValidation(Common):
                 },
             ],
         )
+
+    def test_import_wrong_company(self):
+        """If the invoice is not of current company,
+        there is no exception during parsing"""
+        # Arrange
+        company = self.company
+        company.l10n_it_codice_fiscale = False
+
+        # Act
+        invoice = self._assert_import_invoice(
+            "IT02780790107_11004.xml",
+            [
+                {},
+            ],
+        )
+
+        # Assert
+        error_message = invoice.message_ids.filtered(
+            lambda message: "Error importing attachment" in (message.body or "")
+        )
+        self.assertFalse(error_message)

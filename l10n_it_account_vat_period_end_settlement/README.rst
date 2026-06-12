@@ -1,3 +1,7 @@
+.. image:: https://odoo-community.org/readme-banner-image
+   :target: https://odoo-community.org/get-involved?utm_source=readme
+   :alt: Odoo Community Association
+
 ======================
 ITA - Liquidazione IVA
 ======================
@@ -13,7 +17,7 @@ ITA - Liquidazione IVA
 .. |badge1| image:: https://img.shields.io/badge/maturity-Beta-yellow.png
     :target: https://odoo-community.org/page/development-status
     :alt: Beta
-.. |badge2| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
+.. |badge2| image:: https://img.shields.io/badge/license-AGPL--3-blue.png
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fl10n--italy-lightgray.png?logo=github
@@ -99,14 +103,14 @@ Configuration
    Configurazione > Contabilità > Intervalli date > Generazione
    intervalli data (visibile solo in modalità debug):
 
-   -  prefisso nome intervallo: prefisso identificativo per i periodi da
-      generare (tipicamente l'anno)
-   -  durata: 1 mese
-   -  numero di intervalli da generare: 12
-   -  tipo: creare un tipo o utilizzarne uno esistente, non è richiesta
-      una configurazione particolare
-   -  data iniziale: primo giorno del primo periodo che sarà generato
-      (tipicamente il primo giorno dell'anno i.e. 01/01/2018)
+   - prefisso nome intervallo: prefisso identificativo per i periodi da
+     generare (tipicamente l'anno)
+   - durata: 1 mese
+   - numero di intervalli da generare: 12
+   - tipo: creare un tipo o utilizzarne uno esistente, non è richiesta
+     una configurazione particolare
+   - data iniziale: primo giorno del primo periodo che sarà generato
+     (tipicamente il primo giorno dell'anno i.e. 01/01/2018)
 
    Per escludere un'imposta dalla liquidazione IVA:
 
@@ -129,14 +133,14 @@ Configuration
    Configuration > Accounting > Date ranges > Generate Date Ranges
    (visible only in debug mode):
 
-   -  range name prefix: prefix identifying the periods to be generated
-      (usually the year)
-   -  duration: 1 month
-   -  number of ranges to generate: 12
-   -  type: create a type or use an existing one, no specific
-      configuration is required
-   -  date start: first day of the first period to be generated (usually
-      the first day of the year e.g. 01/01/2018)
+   - range name prefix: prefix identifying the periods to be generated
+     (usually the year)
+   - duration: 1 month
+   - number of ranges to generate: 12
+   - type: create a type or use an existing one, no specific
+     configuration is required
+   - date start: first day of the first period to be generated (usually
+     the first day of the year e.g. 01/01/2018)
 
    In order to exclude a tax from VAT settlement:
 
@@ -172,30 +176,30 @@ Authors
 Contributors
 ------------
 
--  Lorenzo Battistini <https://github.com/eLBati>
--  Elena Carlesso
--  Marco Marchiori <marcomarkiori@gmail.com>
--  Sergio Corato <sergiocorato@gmail.com>
--  Andrea Gallina <a.gallina@apuliasoftware.it>
--  Alex Comba <alex.comba@agilebg.com>
--  Alessandro Camilli <camillialex@gmail.com>
--  Simone Rubino <simone.rubino@agilebg.com>
--  Giacomo Grasso <giacomo.grasso.82@gmail.com>
--  Lara Baggio <http://linkgroup.it/>
--  Gianmarco Conte <gconte@dinamicheaziendali.it>
--  Michele Rusticucci <michele.rusticucci@agilebg.com>
--  Salvo Rapisarda <sdrapisarda@gmail.com>
--  `TAKOBI <https://takobi.online>`__:
+- Lorenzo Battistini <https://github.com/eLBati>
+- Elena Carlesso
+- Marco Marchiori <marcomarkiori@gmail.com>
+- Sergio Corato <sergiocorato@gmail.com>
+- Andrea Gallina <a.gallina@apuliasoftware.it>
+- Alex Comba <alex.comba@agilebg.com>
+- Alessandro Camilli <camillialex@gmail.com>
+- Simone Rubino <simone.rubino@agilebg.com>
+- Giacomo Grasso <giacomo.grasso.82@gmail.com>
+- Lara Baggio <http://linkgroup.it/>
+- Gianmarco Conte <gconte@dinamicheaziendali.it>
+- Michele Rusticucci <michele.rusticucci@agilebg.com>
+- Salvo Rapisarda <sdrapisarda@gmail.com>
+- `TAKOBI <https://takobi.online>`__:
 
-   -  Simone Rubino <sir@takobi.online>
+  - Simone Rubino <sir@takobi.online>
 
--  `Aion Tech <https://aiontech.company/>`__:
+- `Aion Tech <https://aiontech.company/>`__:
 
-   -  Simone Rubino <simone.rubino@aion-tech.it>
+  - Simone Rubino <simone.rubino@aion-tech.it>
 
--  `Nextev Srl <https://nextev.it/>`__:
+- `Nextev Srl <https://nextev.it/>`__:
 
-   -  <odoo@nextev.it>
+  - <odoo@nextev.it>
 
 Maintainers
 -----------

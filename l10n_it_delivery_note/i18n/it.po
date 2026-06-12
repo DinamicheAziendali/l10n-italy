@@ -2248,7 +2248,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_it_delivery_note/mixins/picking_checker.py:0
 msgid "You need to select pickings with all the same location of departure."
-msgstr "È necessario selezionare prelievi con lo stesso luogo di destinazione."
+msgstr "È necessario selezionare prelievi con lo stesso luogo di partenza."
 
 #. module: l10n_it_delivery_note
 #. odoo-python
