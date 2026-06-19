@@ -95,17 +95,6 @@ class MailThread(models.AbstractModel):
                 )
             )
             files_data = self.env["account.move"]._to_files_data(attachment)
-            files_data = [
-                file_data
-                for file_data in files_data
-                if self.env["account.move"]._is_l10n_it_edi_import_file(file_data)
-            ]
-
-            if not files_data:
-                _logger.info("Skipping %s, not an XML/P7M file", filename)
-                attachment.unlink()
-                continue
-
             files_data.extend(self.env["account.move"]._unwrap_attachments(files_data))
 
             moves = AccountMove.with_company(company).create([{}] * len(files_data))
