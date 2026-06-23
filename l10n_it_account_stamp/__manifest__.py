@@ -15,6 +15,11 @@
     "Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-italy",
     "license": "LGPL-3",
+    "external_dependencies": {
+        "python": [
+            "openupgradelib",
+        ],
+    },
     "depends": [
         "product",
         "l10n_it_edi",

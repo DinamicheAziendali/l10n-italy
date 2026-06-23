@@ -11,6 +11,9 @@
     "depends": [
         "l10n_it_edi_extension",
     ],
+    "external_dependencies": {
+        "python": ["openupgradelib"],
+    },
     "data": [
         "views/l10n_it_sender_partner.xml",
         "views/l10n_it_view.xml",
@@ -18,4 +21,5 @@
         "data/invoice_it_template.xml",
     ],
     "installable": True,
+    "pre_init_hook": "_l10n_it_fatturapa_pre_migration",
 }

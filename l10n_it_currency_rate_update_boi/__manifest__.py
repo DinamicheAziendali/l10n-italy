@@ -16,4 +16,10 @@
         "account",
         "currency_rate_update",
     ],
+    "pre_init_hook": "pre_absorb_old_module",
+    "external_dependencies": {
+        "python": [
+            "openupgradelib",
+        ],
+    },
 }

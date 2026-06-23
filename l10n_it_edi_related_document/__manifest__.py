@@ -8,6 +8,11 @@
     "author": "Nextev Srl, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-italy",
     "license": "AGPL-3",
+    "external_dependencies": {
+        "python": [
+            "openupgradelib",
+        ],
+    },
     "depends": ["l10n_it_edi"],
     "data": [
         "views/related_document_views.xml",
@@ -17,4 +22,5 @@
         "security/ir.model.access.csv",
     ],
     "installable": True,
+    "post_init_hook": "_l10n_it_edi_related_document_post_init_hook",
 }

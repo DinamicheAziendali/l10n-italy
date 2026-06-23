@@ -36,4 +36,9 @@
     },
     "installable": True,
     "post_init_hook": "_l10n_it_account_post_init",
+    "external_dependencies": {
+        "python": [
+            "openupgradelib",
+        ],
+    },
 }

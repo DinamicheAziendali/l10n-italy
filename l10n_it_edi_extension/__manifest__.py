@@ -12,6 +12,7 @@
     "license": "AGPL-3",
     "external_dependencies": {
         "python": [
+            "openupgradelib",
             "codicefiscale",
         ],
     },
@@ -32,4 +33,6 @@
         "wizards/l10n_it_edi_import_file_wizard.xml",
     ],
     "installable": True,
+    "pre_init_hook": "_l10n_it_edi_extension_pre_init_hook",
+    "post_init_hook": "_l10n_it_edi_extension_post_init_hook",
 }

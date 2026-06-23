@@ -38,3 +38,14 @@ def pre_absorb_old_module(env):
             ],
             merge_modules=True,
         )
+        openupgrade.rename_fields(
+            env,
+            [
+                (
+                    "account.fiscal.position",
+                    "account.fiscal.position",
+                    "intrastat",
+                    "l10n_it_oca_intrastat",
+                )
+            ],
+        )
