@@ -119,6 +119,15 @@ def _l10n_it_fatturapa_pec_migration(env):
         """
         UPDATE ir_module_module
         SET state = 'to install'
+        WHERE name = 'l10n_it_edi_sdi'
+        AND state = 'uninstalled'
+        """,
+    )
+    openupgrade.logged_query(
+        env.cr,
+        """
+        UPDATE ir_module_module
+        SET state = 'to install'
         WHERE name = 'l10n_it_edi_pec'
         AND state = 'uninstalled'
         """,
