@@ -419,20 +419,10 @@ class AccountMoveLine(models.Model):
 
     @api.model
     def get_view(self, view_id=None, view_type="form", **options):
-        model_data_obj = self.env["ir.model.data"]
-        ids = model_data_obj.search(
-            [
-                ("module", "=", "l10n_it_riba_oca"),
-                ("name", "=", "view_riba_to_issue_tree"),
-            ]
-        )
-        if ids:
-            view_payments_tree_id = model_data_obj.get_object_reference(
-                "l10n_it_riba_oca", "view_riba_to_issue_tree"
-            )
-        if ids and view_id == view_payments_tree_id[1]:
+        view_payments_tree_id = self.env.ref("l10n_it_riba_oca.view_riba_to_issue_tree")
+        if view_id == view_payments_tree_id.id:
             # Use RiBa slip
-            result = super(models.Model, self).fields_view_get(
+            result = super(models.Model, self).get_view(
                 view_id=view_id,
                 view_type=view_type,
                 **options,
@@ -440,7 +430,7 @@ class AccountMoveLine(models.Model):
         else:
             # Use special views for account.move.line object
             # (for ex. list view contains user defined fields)
-            result = super().fields_view_get(
+            result = super().get_view(
                 view_id=view_id,
                 view_type=view_type,
                 **options,
