@@ -12,33 +12,19 @@ class AccountTax(models.Model):
     def get_balance_domain(self, state_list, type_list):
         domain = super().get_balance_domain(state_list, type_list)
         if self.env.context.get("vat_registry_journal_ids"):
-            domain = Domain.AND(
-                [
-                    domain,
-                    [
-                        (
-                            "move_id.journal_id",
-                            "in",
-                            self.env.context["vat_registry_journal_ids"],
-                        ),
-                    ],
-                ]
+            domain &= Domain(
+                "move_id.journal_id",
+                "in",
+                self.env.context["vat_registry_journal_ids"],
             )
         return domain
 
     def get_base_balance_domain(self, state_list, type_list):
         domain = super().get_base_balance_domain(state_list, type_list)
         if self.env.context.get("vat_registry_journal_ids"):
-            domain = Domain.AND(
-                [
-                    domain,
-                    [
-                        (
-                            "move_id.journal_id",
-                            "in",
-                            self.env.context["vat_registry_journal_ids"],
-                        ),
-                    ],
-                ]
+            domain &= Domain(
+                "move_id.journal_id",
+                "in",
+                self.env.context["vat_registry_journal_ids"],
             )
         return domain

@@ -17,11 +17,6 @@
     "category": "Localization/Italy",
     "license": "AGPL-3",
     "maintainers": ["MarcoCalcagni", "aleuffre", "renda-dev"],
-    "external_dependencies": {
-        "python": [
-            "openupgradelib",
-        ],
-    },
     "depends": [
         "delivery_carrier_partner",
         "mail",

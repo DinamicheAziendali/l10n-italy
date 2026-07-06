@@ -81,12 +81,12 @@ class WizardRegistroIva(models.TransientModel):
         if self.from_date:
             self.year_footer = self.from_date.year
 
-    def _get_move_ids_domain(self):
+    def _get_move_ids_domain(self, journals):
         return Domain(
             [
                 ("date", ">=", self.from_date),
                 ("date", "<=", self.to_date),
-                ("journal_id", "in", [j.id for j in self.journal_ids]),
+                ("journal_id", "in", [j.id for j in journals]),
                 ("state", "=", "posted"),
             ]
         )
@@ -107,7 +107,7 @@ class WizardRegistroIva(models.TransientModel):
         }
         order = MAPPING[wizard.entry_order]
         moves = self.env["account.move"].search(
-            self._get_move_ids_domain(),
+            self._get_move_ids_domain(wizard.journal_ids),
             order=order,
         )
         if wizard._include_rc_journals():
@@ -118,7 +118,7 @@ class WizardRegistroIva(models.TransientModel):
             order = LAMBDA_MAPPING[wizard.entry_order]
             rc_moves = (
                 self.env["account.move"]
-                .search(self._get_move_ids_domain())
+                .search(self._get_move_ids_domain(wizard.rc_journal_ids))
                 .filtered(lambda m: m.l10n_it_edi_is_self_invoice)
             )
             moves |= rc_moves
