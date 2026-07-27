@@ -7,6 +7,7 @@ from odoo.addons.l10n_it_account.migration_tools import _remove_module
 
 OLD_MODULES = [
     "l10n_it_account_tax_kind",
+    "l10n_it_ddt",
     "l10n_it_fatturapa",
     "l10n_it_fatturapa_pec",
 ]
@@ -119,6 +120,25 @@ def _l10n_it_fatturapa_migration(env):
             state = 'to install'
         WHERE
             name = 'l10n_it_edi_extension'
+            AND state = 'uninstalled'
+        """,
+    )
+
+
+def _l10n_it_ddt_migration(env):
+    """
+    Install ``l10n_it_delivery_note`` as replacement for ``l10n_it_ddt``.
+
+    Its post-init hook migrates the old delivery-note data before Odoo
+    uninstalls the obsolete module.
+    """
+    openupgrade.logged_query(
+        env.cr,
+        """
+        UPDATE ir_module_module
+        SET state = 'to install'
+        WHERE
+            name = 'l10n_it_delivery_note'
             AND state = 'uninstalled'
         """,
     )
