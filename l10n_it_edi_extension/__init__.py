@@ -837,12 +837,22 @@ def _l10n_it_fatturapa_out_post_migration(env):
     }
 
     for fatturapa_state, l10n_it_edi_state in updates.items():
-        query = f"""
-            UPDATE account_move
-            SET l10n_it_edi_state = '{l10n_it_edi_state}'
-            WHERE fatturapa_state = '{fatturapa_state}'
+        query = """
+            UPDATE account_move am
+            SET l10n_it_edi_state = %(l10n_it_edi_state)s
+            FROM fatturapa_attachment_out fao
+            WHERE
+                fao.id = am.fatturapa_attachment_out_id
+                AND fao.state = %(fatturapa_state)s
         """
-        openupgrade.logged_query(env.cr, query)
+        openupgrade.logged_query(
+            env.cr,
+            query,
+            {
+                "fatturapa_state": fatturapa_state,
+                "l10n_it_edi_state": l10n_it_edi_state,
+            },
+        )
 
     env.cr.execute("""
         SELECT
