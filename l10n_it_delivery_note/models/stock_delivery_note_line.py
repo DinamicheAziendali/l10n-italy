@@ -95,10 +95,10 @@ class StockDeliveryNoteLine(models.Model):
     untaxed_amount = fields.Monetary(compute="_compute_amount", store=True)
     amount = fields.Monetary(compute="_compute_amount", store=True)
 
-    _move_uniq = models.Constraint(
-        "UNIQUE(move_id)",
-        "You cannot assign the same warehouse movement to different delivery notes!",
-    )
+    #_move_uniq = models.Constraint(
+    #    "UNIQUE(move_id)",
+    #    "You cannot assign the same warehouse movement to different delivery notes!",
+    #)
 
     @property
     def is_invoiceable(self):
