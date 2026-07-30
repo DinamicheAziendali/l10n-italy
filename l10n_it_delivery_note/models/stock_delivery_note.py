@@ -442,13 +442,13 @@ class StockDeliveryNote(models.Model):
             picking_types = set(note.picking_ids.mapped("picking_type_code"))
             picking_types = list(picking_types)
 
-            if len(picking_types) != 1:
-                raise ValueError(
-                    "You have just called this method on an "
-                    "heterogeneous set of pickings.\n"
-                    "All pickings should have the same "
-                    "'picking_type_code' field value."
-                )
+            #if len(picking_types) != 1:
+            #    raise ValueError(
+            #        "You have just called this method on an "
+            #        "heterogeneous set of pickings.\n"
+            #        "All pickings should have the same "
+            #        "'picking_type_code' field value."
+            #    )
 
             note.picking_type = picking_types[0]
 
