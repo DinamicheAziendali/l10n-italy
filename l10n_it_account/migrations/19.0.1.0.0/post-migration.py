@@ -8,7 +8,7 @@ from odoo.addons.l10n_it_account.migration_tools import _remove_module
 OLD_MODULES = [
     "l10n_it_account_tax_kind",
     "l10n_it_ddt",
-    "l10n_it_fatturapa",
+    #"l10n_it_fatturapa",
     #"l10n_it_fatturapa_pec",
 ]
 
