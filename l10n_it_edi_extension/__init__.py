@@ -988,4 +988,4 @@ def _l10n_it_edi_extension_post_init_hook(env):
         migration_function = globals().get(f"_{module}_post_migration")
         if openupgrade.is_module_installed(env.cr, module) and migration_function:
             migration_function(env)
-        _remove_module(env, module)
+        # _remove_module(env, module)
