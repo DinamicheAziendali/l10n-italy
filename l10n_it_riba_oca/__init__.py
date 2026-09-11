@@ -6,3 +6,5 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from . import models, wizard, report
+from .hooks import pre_absorb_old_module
+from .hooks import post_absorb_old_module

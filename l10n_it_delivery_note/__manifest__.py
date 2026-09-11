@@ -16,7 +16,12 @@
     "version": "18.0.1.1.1",
     "category": "Localization/Italy",
     "license": "AGPL-3",
-    "maintainers": ["MarcoCalcagni", "aleuffre", "renda-dev"],
+    "maintainers": [
+        "MarcoCalcagni",
+        "HekkiMelody",
+        "renda-dev",
+        "Borruso",
+    ],
     "depends": [
         "delivery_carrier_partner",
         "mail",
@@ -26,6 +31,7 @@
         "stock_delivery",
         "portal",
         "product",
+        "l10n_it_stock_ddt",
     ],
     "data": [
         "security/ir.model.access.csv",
@@ -34,6 +40,7 @@
         "security/res_groups.xml",
         "security/res_users.xml",
         "data/delivery_note_data.xml",
+        "data/l10n_it_delivery_note_template.xml",
         "report/delivery_data.xml",
         "report/report_delivery_note.xml",
         "views/account_move.xml",
