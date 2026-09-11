@@ -96,8 +96,8 @@ class StockDeliveryNoteLine(models.Model):
     amount = fields.Monetary(compute="_compute_amount", store=True)
 
     _move_uniq = models.Constraint(
-       "UNIQUE(move_id)",
-       "You cannot assign the same warehouse movement to different delivery notes!",
+        "UNIQUE(move_id)",
+        "You cannot assign the same warehouse movement to different delivery notes!",
     )
 
     @property

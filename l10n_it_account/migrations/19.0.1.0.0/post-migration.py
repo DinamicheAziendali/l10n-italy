@@ -8,8 +8,8 @@ from odoo.addons.l10n_it_account.migration_tools import _remove_module
 OLD_MODULES = [
     "l10n_it_account_tax_kind",
     "l10n_it_ddt",
-    #"l10n_it_fatturapa",
-    #"l10n_it_fatturapa_pec",
+    # "l10n_it_fatturapa",
+    # "l10n_it_fatturapa_pec",
 ]
 
 
@@ -144,7 +144,7 @@ def _l10n_it_ddt_migration(env):
     )
 
 
-#def _l10n_it_fatturapa_pec_migration(env):
+# def _l10n_it_fatturapa_pec_migration(env):
 #    """
 #    Install "l10n_it_edi_pec" which replaces the old
 #    l10n_it_fatturapa_pec module.

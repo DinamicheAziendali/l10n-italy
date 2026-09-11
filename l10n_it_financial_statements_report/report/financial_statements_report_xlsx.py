@@ -42,15 +42,10 @@ class FinancialStatementsReportXslx(models.AbstractModel):
     _description = "Financial Statements XLSX Report"
     _inherit = "report.account_financial_report.abstract_report_xlsx"
 
-    def _define_formats(self, workbook, report_data):
+    def _define_formats(self, workbook, report_data, data=None):
         """Defines new formats"""
-        res = super()._define_formats(workbook, report_data)
-        company_id = report_data.get("company_id")
-        if company_id is not None:
-            company = self.env["res.company"].browse(company_id)
-            currency = company.currency_id
-        else:
-            currency = self.env["res.company"]._default_currency_id()
+        res = super()._define_formats(workbook, report_data, data=data)
+        currency = self._get_currency_from_company(data=data)
         report_data["financial_statements_report_currency"] = currency
         report_data["formats"]["format_amount_right"] = report_data["formats"][
             "format_amount"
