@@ -24,17 +24,6 @@ class ResConfigSettings(models.TransientModel):
         config_parameter="stock.location.virtual_root",
     )
 
-    use_dn_product_name_in_invoice = fields.Boolean(
-        string="Use Delivery Note Product Name in Invoice",
-        related="company_id.use_dn_product_name_in_invoice",
-        readonly=False,
-    )
-    use_dn_price_unit_in_invoice = fields.Boolean(
-        string="Use Delivery Note Price Unit in Invoice",
-        related="company_id.use_dn_price_unit_in_invoice",
-        readonly=False,
-    )
-
     display_ref_order_dn_report = fields.Boolean(
         string="Display Ref. Order in Delivery Note Report",
         related="company_id.display_ref_order_dn_report",
@@ -53,5 +42,9 @@ class ResConfigSettings(models.TransientModel):
     display_delivery_method_dn_report = fields.Boolean(
         string="Display Delivery Method in Delivery Note Report",
         related="company_id.display_delivery_method_dn_report",
+        readonly=False,
+    )
+    display_total_in_dn_with_prices = fields.Boolean(
+        related="company_id.display_total_in_dn_with_prices",
         readonly=False,
     )

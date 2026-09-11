@@ -126,6 +126,15 @@ class L10nItDeclarationOfIntent(models.Model):
             )
         return  # W8110
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for values in vals_list:
+            if not values.get("number"):
+                values["number"] = self.env["ir.sequence"].next_by_code(
+                    "l10n_it_edi_doi.declaration_of_intent"
+                )
+        return super().create(vals_list)
+
     @api.ondelete(at_uninstall=False)
     def _unlink_except_linked_to_purchase_document(self):
         if self.purchase_order_ids:

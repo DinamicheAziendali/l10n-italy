@@ -29,7 +29,9 @@ Steps:
 
    - Creates `account.move.doi` bridge records from the old many2many relations
    - Populates `l10n_it_edi_doi_amount` on invoices that had no DOI tax lines
-   - Cleans up residual metadata from the old module
+   - Cleans up residual metadata from the old module and removes it entirely
+     (records, model metadata, and module entry — no manual uninstall is needed
+     or possible after this point)
 
 3. **Verify the migrated data:**
 
@@ -40,14 +42,6 @@ Steps:
    - **For invoices that had multiple declarations in v16: check the**
      **"Declarations of Intent" tab and assign the correct amount to each entry**
      **(they are migrated with `amount = 0`)**
-
-4. **Uninstall the old module** once everything is verified:
-
-   Go to *Settings → Technical → Modules*, search for
-   `l10n_it_declaration_of_intent` and click **Uninstall**.
-
-   ⚠️ Do not uninstall it before verifying the data — the module must remain
-   present during migration.
 
 **Data that is NOT migrated** (no equivalent in v18):
 
@@ -67,9 +61,12 @@ Steps:
   The installation of `l10n_it_edi_doi` may fail or show a warning. Remove the duplicate
   fiscal position tax mappings manually and retry.
 
-- *Invoices with multiple DOIs show amount = 0*: expected behaviour. The old many2many
-  relation did not store per-declaration amounts. Open each affected invoice and assign
-  the correct amount in the "Declarations of Intent" tab.
+- *Invoice DOI amount shows 0 or an approximate value*: in the normal migration path,
+  `l10n_it_edi_doi_amount` is derived from the sum of the v16 declaration line amounts
+  (accurate). If the declaration lines table was already absent at migration time, the
+  fallback uses `ABS(amount_untaxed)` as an approximation. If you see zero amounts,
+  open each affected invoice and assign the correct amount in the "Declarations of
+  Intent" tab.
 
 - *Yearly limits not migrated*: the concept no longer exists in v18. Review each
   declaration and set the `threshold` field to the appropriate value.
@@ -106,7 +103,9 @@ Passi:
 
    - Crea i record bridge `account.move.doi` dalle vecchie relazioni many2many
    - Popola `l10n_it_edi_doi_amount` sulle fatture prive di righe con imposta DOI
-   - Pulisce i metadati residui del vecchio modulo
+   - Pulisce i metadati residui del vecchio modulo e lo rimuove completamente
+     (record, metadati del modello e voce del modulo — non è necessaria né
+     possibile una disinstallazione manuale)
 
 3. **Verificare i dati migrati:**
 
@@ -117,14 +116,6 @@ Passi:
    - **Per le fatture che avevano più dichiarazioni in v16: controllare il tab**
      **"Dichiarazioni di Intento" e assegnare l'importo corretto a ciascuna voce**
      **(vengono migrate con `amount = 0`)**
-
-4. **Disinstallare il vecchio modulo** una volta verificati i dati:
-
-   Andare in *Impostazioni → Tecnico → Moduli*, cercare
-   `l10n_it_declaration_of_intent` e fare clic su **Disinstalla**.
-
-   ⚠️ Non disinstallarlo prima di aver verificato i dati — il modulo deve rimanere
-   presente durante la migrazione.
 
 **Dati NON migrati** (nessun equivalente in v18):
 
@@ -147,9 +138,12 @@ Passi:
   mostrare un avviso. Rimuovere manualmente le mappature di posizione fiscale duplicate
   e riprovare.
 
-- *Fatture con più DI mostrano importo = 0*: comportamento atteso. La vecchia relazione
-  many2many non memorizzava gli importi per dichiarazione. Aprire le fatture interessate
-  e assegnare l'importo corretto nel tab "Dichiarazioni di Intento".
+- *Importo DI sulla fattura a 0 o approssimativo*: nel percorso di migrazione normale,
+  `l10n_it_edi_doi_amount` viene derivato dalla somma degli importi delle righe di
+  dichiarazione v16 (valore esatto). Se la tabella delle righe era già assente al
+  momento della migrazione, il fallback usa `ABS(amount_untaxed)` come approssimazione.
+  Se si riscontrano importi a zero, aprire le fatture interessate e assegnare l'importo
+  corretto nel tab "Dichiarazioni di Intento".
 
 - *Limiti annuali non migrati*: il concetto non esiste in v18. Rivedere ogni
   dichiarazione e impostare il campo `threshold` con il valore appropriato.

@@ -2,11 +2,14 @@
 # ©  2015 Apulia Software srl
 # Copyright (C) 2017 Lorenzo Battistini - Agile Business Group
 # Copyright 2023 Simone Rubino - Aion Tech
+# Copyright 2025 Simone Rubino - PyTech
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import base64
 import datetime
 import os
+
+from dateutil.relativedelta import relativedelta
 
 from odoo import Command
 from odoo.exceptions import UserError
@@ -43,6 +46,41 @@ class TestInvoiceDueCost(riba_common.TestRibaCommon):
         )
         new_inv = self.invoice.copy()
         self.assertEqual(len(new_inv.invoice_line_ids), 1)
+
+    def test_add_due_cost_from_list_confirm(self):
+        """Collection fees are added when confirming from the list view.
+
+        Regression test for https://github.com/OCA/l10n-italy/issues/5063:
+        when invoices are confirmed in batch from the list view through the
+        "Confirm Entries" wizard, the collection fees must be added. Before
+        this fix the fee-adding logic lived in action_post() only, so it was
+        skipped because the wizard posts the moves calling _post() directly.
+        """
+        self.invoice.company_id.due_cost_service_id = self.service_due_cost.id
+        # Reproduce the list-view "Confirm Entries" action: the wizard posts
+        # the selected moves calling _post() (not action_post()).
+        wizard = (
+            self.env["validate.account.move"]
+            .with_context(active_model="account.move", active_ids=self.invoice.ids)
+            .create({})
+        )
+        wizard.validate_move()
+        self.assertEqual(self.invoice.state, "posted")
+        # The invoice has 3 lines: 1 product + 2 collection fees (one per due
+        # date).
+        self.assertEqual(len(self.invoice.invoice_line_ids), 3)
+        self.assertEqual(
+            self.invoice.invoice_line_ids[1].product_id, self.service_due_cost
+        )
+        self.assertEqual(
+            self.invoice.invoice_line_ids[2].product_id, self.service_due_cost
+        )
+        # The two collection fees total 10.00 (5.00 x 2 due dates).
+        self.assertEqual(
+            self.invoice.invoice_line_ids[1].price_unit
+            + self.invoice.invoice_line_ids[2].price_unit,
+            10.00,
+        )
 
     def test_not_add_due_cost(self):
         # create 2 invoice for partner in same month on the second one no
@@ -983,9 +1021,11 @@ class TestInvoiceDueCost(riba_common.TestRibaCommon):
 
         # Find the bank fee line
         bank_fee_line = past_due_move.line_ids.filtered(
-            lambda line: line.name == "Bank Fee"
-            and line.account_id == past_due_wizard.bank_expense_account_id
-            and line.debit > 0
+            lambda line: (
+                line.name == "Bank Fee"
+                and line.account_id == past_due_wizard.bank_expense_account_id
+                and line.debit > 0
+            )
         )
 
         # Assert that partner_id is set
@@ -1024,9 +1064,11 @@ class TestInvoiceDueCost(riba_common.TestRibaCommon):
 
         # Find the bank fee line
         bank_fee_line = past_due_move.line_ids.filtered(
-            lambda line: line.name == "Bank Fee"
-            and line.account_id == past_due_wizard.bank_expense_account_id
-            and line.debit > 0
+            lambda line: (
+                line.name == "Bank Fee"
+                and line.account_id == past_due_wizard.bank_expense_account_id
+                and line.debit > 0
+            )
         )
 
         # Assert that partner_id is not set
@@ -1034,4 +1076,63 @@ class TestInvoiceDueCost(riba_common.TestRibaCommon):
         self.assertFalse(
             bank_fee_line.partner_id,
             "Bank fee line should not have partner_id when charge_to_customer is False",
+        )
+
+    def test_set_acceptance_date(self):
+        """The acceptance date is propagated to the acceptance move."""
+        # Arrange
+        company = self.env.company
+        company.due_cost_service_id = self.service_due_cost
+        riba_configuration = self.riba_config_sbf
+
+        invoice = self._create_invoice()
+        invoice.action_post()
+        acceptance_date = invoice.date + relativedelta(days=7)
+
+        to_issue_action = self.env.ref("l10n_it_riba_oca.action_riba_to_issue")
+        to_issue_records = self.env[to_issue_action.res_model].search(
+            safe_eval.safe_eval(to_issue_action.domain)
+        )
+        invoice_to_issue_records = to_issue_records & invoice.line_ids
+        self.assertTrue(invoice_to_issue_records)
+
+        issue_wizard_model = self.env["riba.issue"].with_context(
+            active_model=invoice_to_issue_records._name,
+            active_ids=invoice_to_issue_records.ids,
+        )
+        issue_wizard_form = Form(issue_wizard_model)
+        issue_wizard_form.configuration_id = riba_configuration
+        issue_wizard = issue_wizard_form.save()
+        issue_result = issue_wizard.create_list()
+        slip = self.env[issue_result["res_model"]].browse(issue_result["res_id"])
+        with Form(slip) as slip_form:
+            slip_form.date_accepted = acceptance_date
+        # pre-condition
+        self.assertEqual(slip.date_accepted, acceptance_date)
+        self.assertFalse(slip.acceptance_move_ids)
+
+        # Act
+        slip.confirm()
+
+        # Assert
+        acceptance_moves = slip.acceptance_move_ids
+        self.assertFalse(
+            acceptance_moves,
+            "The cache is fixed! Remove cache invalidation",
+        )
+        slip.invalidate_recordset(
+            fnames=[
+                "acceptance_move_ids",
+            ]
+        )
+
+        acceptance_moves = slip.acceptance_move_ids
+        self.assertTrue(acceptance_moves)
+        self.assertEqual(
+            acceptance_moves.mapped("date"), [acceptance_date] * len(acceptance_moves)
+        )
+        acceptance_lines = acceptance_moves.line_ids
+        self.assertTrue(acceptance_lines)
+        self.assertEqual(
+            acceptance_lines.mapped("date"), [acceptance_date] * len(acceptance_lines)
         )

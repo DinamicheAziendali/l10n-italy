@@ -3,6 +3,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.fields import Command
 
 
 class AccountMove(models.Model):
@@ -61,7 +62,7 @@ class AccountMove(models.Model):
                     self.company_id,
                     inv_tax.date,
                 )
-                for inv_tax in self.line_ids.filtered(
+                for inv_tax in self.invoice_line_ids.filtered(
                     lambda line: set(line.tax_ids.ids)
                     & set(
                         stamp_product_id.l10n_it_account_stamp_stamp_duty_apply_tax_ids.ids
@@ -83,7 +84,7 @@ class AccountMove(models.Model):
         "invoice_date",
         "move_type",
         "l10n_it_account_stamp_manually_apply_stamp_duty",
-        "line_ids.tax_ids",
+        "invoice_line_ids.tax_ids",
     )
     def _compute_l10n_it_account_stamp_is_stamp_duty_applied(self):
         for invoice in self:
@@ -216,7 +217,6 @@ class AccountMove(models.Model):
                 if inv.state == "posted":
                     posted = True
                     inv.state = "draft"
-                line_model = self.env["account.move.line"]
                 stamp_product_id = inv.company_id.with_context(
                     lang=inv.partner_id.lang
                 ).l10n_it_account_stamp_stamp_duty_product_id
@@ -227,10 +227,12 @@ class AccountMove(models.Model):
                 income_vals, expense_vals = inv._build_stamp_duty_lines(
                     stamp_product_id
                 )
-                income_vals["move_id"] = inv.id
-                expense_vals["move_id"] = inv.id
-                line_model.with_context(check_move_validity=False).create(income_vals)
-                line_model.with_context(check_move_validity=False).create(expense_vals)
+
+                inv.line_ids = [
+                    Command.create(income_vals),
+                    Command.create(expense_vals),
+                ]
+
                 if posted:
                     inv.state = "posted"
         return res

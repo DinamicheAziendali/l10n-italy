@@ -25,6 +25,7 @@ Declarations of Intent:
 You can also use the traditional single-declaration field for backward
 compatibility, or mix both approaches for different invoices.
 
+
 **Italiano**
 
 Nella configurazione dell'azienda è necessario definire un'imposta

@@ -35,12 +35,6 @@
                             <field name="virtual_locations_root" />
                         </div>
                     </setting>
-                    <setting id="product_name_in_invoice">
-                        <field name="use_dn_product_name_in_invoice" />
-                    </setting>
-                    <setting id="price_unit_in_invoice">
-                        <field name="use_dn_price_unit_in_invoice" />
-                    </setting>
                     <setting id="ref_order_dn_report">
                         <field name="display_ref_order_dn_report" />
                         <div class="row mt-2">
@@ -78,6 +72,14 @@
                         <div class="row mt-2">
                             <div class="text-muted">
                                 Prints Delivery Method on DN report (if there are any)
+                            </div>
+                        </div>
+                    </setting>
+                    <setting id="total_amount_dn_report">
+                        <field name="display_total_in_dn_with_prices" />
+                        <div class="row mt 2">
+                            <div class="text-muted">
+                                Prints Total Amount on DN report
                             </div>
                         </div>
                     </setting>

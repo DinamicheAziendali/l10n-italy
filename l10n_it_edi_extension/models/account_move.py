@@ -2,9 +2,6 @@
 # Copyright 2025 Simone Rubino
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import re
-import unicodedata
-
 from odoo import api, fields, models, osv
 from odoo.exceptions import UserError
 from odoo.tools import float_compare, html2plaintext, is_html_empty
@@ -269,35 +266,10 @@ class AccountMoveInherit(models.Model):
             )
         return res
 
-    @api.model
-    def _sanitize_causale(self, text):
-        # Normalize text into NFC
-        text = unicodedata.normalize("NFC", text)
-
-        # Mapping of "fancy" or typographic characters to ASCII-friendly equivalents
-        replacements = {
-            "\u2018": "'",  # left single quotation mark → straight apostrophe
-            "\u2019": "'",  # right single quotation mark → straight apostrophe
-            "\u201c": '"',  # left double quotation mark → straight quote
-            "\u201d": '"',  # right double quotation mark → straight quote
-            "\u2013": "-",  # en dash → hyphen
-            "\u2014": "-",  # em dash → hyphen
-            "\u2026": "...",  # ellipsis → three dots
-            "\u20ac": "EUR",  # euro sign → EUR text
-        }
-
-        for bad, good in replacements.items():
-            text = text.replace(bad, good)
-
-        # Remove any character outside Basic Latin + Latin-1 Supplement range
-        text = re.sub(r"[^\u0000-\u00FF]", "?", text)
-
-        return text
-
     def _l10n_it_edi_get_values(self, pdf_values=None):
         res = super()._l10n_it_edi_get_values(pdf_values)
 
-        causale_list = []
+        causale_lines = []
         if not is_html_empty(self.narration):
             try:
                 narration_text = html2plaintext(self.narration)
@@ -305,112 +277,13 @@ class AccountMoveInherit(models.Model):
                 narration_text = ""
 
             # max length of Causale is 200
-            for causale in narration_text.split("\n"):
-                # Skip if causale is empty or only spaces
-                if not causale.strip():
-                    continue
+            for line in narration_text.splitlines():
+                if line.strip():
+                    causale_lines.extend(
+                        line[i : i + 200] for i in range(0, len(line), 200)
+                    )
 
-                causale = self._sanitize_causale(causale)
-                causale_list_200 = [
-                    causale[i : i + 200] for i in range(0, len(causale), 200)
-                ]
-                for causale200 in causale_list_200:
-                    causale_list.append(causale200)
-
-        res["causale"] = causale_list
-
-        # adding note/section
-        allows_display_type = ["product", "rounding", "line_note", "line_section"]
-        base_amls = self.line_ids.filtered(
-            lambda x: x.display_type in allows_display_type
-        ).sorted(
-            key=lambda il: (-il.sequence, il.date, il.move_name, -il.id), reverse=True
-        )
-        base_lines = res["base_lines"]
-        existing_lines_map = {bl["record"]: bl for bl in base_lines}
-        last_record = base_lines[0].copy() if base_lines else {}
-
-        for index, base_aml in enumerate(base_amls, start=1):
-            if base_aml in existing_lines_map:
-                existing_line = existing_lines_map[base_aml]
-                existing_line["it_values"]["numero_linea"] = index
-                last_record = existing_line.copy()
-                continue
-
-            record = last_record.copy()
-            record.update(
-                {
-                    "analytic_distribution": False,
-                    "deferred_end_date": False,
-                    "deferred_start_date": False,
-                    "discount": 0.0,
-                    "discount_amount_before_dispatching": 0.0,
-                    "filter_tax_function": None,
-                    "gross_price_subtotal": 0.0,
-                    "id": base_aml.id,
-                    "manual_tax_amounts": None,
-                    "manual_total_excluded": None,
-                    "manual_total_excluded_currency": None,
-                    "name": base_aml.name,
-                    "price_subtotal": 0.0,
-                    "price_unit": 0.0,
-                    "product_id": self.env["product.product"],
-                    "product_uom_id": self.env["uom.uom"],
-                    "quantity": 0.0,
-                    "rate": 1.0,
-                    "record": base_aml,
-                    "sign": -1,
-                    "special_mode": False,
-                    "special_type": False,
-                }
-            )
-            record["it_values"] = record.get("it_values", {}).copy()
-            record["it_values"].update(
-                {
-                    "admin_ref": None,
-                    "altri_dati_gestionali_list": [],
-                    "descrizione": base_aml.name,
-                    "numero_linea": index,
-                    "prezzo_totale": 0.0,
-                    "prezzo_unitario": 0.0,
-                    "quantita": 0.0,
-                    "quantita_pd": 2,
-                    "ritenuta": None,
-                    "sconto_maggiorazione_list": [],
-                },
-            )
-            record["tax_details"] = record.get("tax_details", {}).copy()
-            record["tax_details"].update(
-                {
-                    "delta_total_excluded": 0.0,
-                    "delta_total_excluded_currency": 0.0,
-                    "raw_total_excluded": 0.0,
-                    "raw_total_excluded_currency": 0.0,
-                    "raw_total_included": 0.0,
-                    "raw_total_included_currency": 0.0,
-                    "total_excluded": 0.0,
-                    "total_excluded_currency": 0.0,
-                    "total_included": 0.0,
-                    "total_included_currency": 0.0,
-                }
-            )
-            for taxes_data in record["tax_details"].get("taxes_data", []):
-                taxes_data.update(
-                    {
-                        "base_amount": 0.0,
-                        "base_amount_currency": 0.0,
-                        "raw_base_amount": 0.0,
-                        "raw_base_amount_currency": 0.0,
-                        "raw_tax_amount": 0.0,
-                        "raw_tax_amount_currency": 0.0,
-                        "tax_amount": 0.0,
-                        "tax_amount_currency": 0.0,
-                    }
-                )
-            base_lines.append(record)
-
-        base_lines = sorted(base_lines, key=lambda bl: bl["it_values"]["numero_linea"])
-        res["base_lines"] = base_lines
+        res["causale_lines"] = causale_lines
 
         return res
 
@@ -503,12 +376,12 @@ class AccountMoveInherit(models.Model):
             if not extra_info["simplified"]
             else ".//DatiBeniServizi"
         )
-        if elements_line := body_tree.xpath(tag_name):
-            for element_line in elements_line:
-                self.l10n_it_edi_amount_untaxed += get_float(
-                    element_line, ".//PrezzoTotale"
-                )
+        amount_untaxed = sum(
+            get_float(element_line, ".//PrezzoTotale")
+            for element_line in body_tree.xpath(tag_name)
+        )
 
+        amount_tax = 0.0
         if elements_summary := body_tree.xpath(".//DatiBeniServizi/DatiRiepilogo"):
             self.env["l10n_it_edi.summary_data"].create(
                 [
@@ -532,8 +405,22 @@ class AccountMoveInherit(models.Model):
                     for element_summary in elements_summary
                 ]
             )
-            for element_summary in elements_summary:
-                self.l10n_it_edi_amount_tax += get_float(element_summary, ".//Imposta")
+            amount_tax = sum(
+                get_float(element_summary, ".//Imposta")
+                for element_summary in elements_summary
+            )
+
+        # Single batch write replaces N+M per-iteration writes from the
+        # previous "self.field += value" accumulation loops.
+        # skip_invoice_sync avoids _sync_dynamic_lines firing on a write
+        # that only touches XML-derived header amounts.
+        if amount_untaxed or amount_tax:
+            self.with_context(skip_invoice_sync=True).write(
+                {
+                    "l10n_it_edi_amount_untaxed": amount_untaxed,
+                    "l10n_it_edi_amount_tax": amount_tax,
+                }
+            )
 
         return extra_info, message_to_log
 
