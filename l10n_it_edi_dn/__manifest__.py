@@ -3,7 +3,7 @@
 
 {
     "name": "Italy - E-invoicing - DDT",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.0",
     "category": "Accounting/Localizations/EDI",
     "summary": "DDT in fatture elettroniche",
     "author": "Giuseppe Borruso, Odoo Community Association (OCA)",
