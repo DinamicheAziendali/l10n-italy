@@ -91,7 +91,10 @@ class SaleOrderLine(models.Model):
         invoiceable_dn_lines = self._get_invoiceable_dn_lines() - invoiced_dn_lines
 
         if invoiceable_dn_lines:
-            invoiced_dn_line = fields.first(invoiceable_dn_lines)
+            invoiced_dn_line = next(
+                iter(invoiceable_dn_lines),
+                invoiceable_dn_lines,
+            )
             values.update(
                 {
                     "delivery_note_line_id": invoiced_dn_line.id,
