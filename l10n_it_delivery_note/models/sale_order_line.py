@@ -84,10 +84,16 @@ class SaleOrderLine(models.Model):
 
     def _prepare_invoice_line(self, **optional_values):
         values = super()._prepare_invoice_line(**optional_values)
-        invoiced_dn_lines = self.env.context.get(
-            "delivery_note_invoiced_lines",
-            self.env["stock.delivery.note.line"].browse(),
-        )
+        invoiced_dn_line_ids = self.env.context.get("_delivery_note_invoiced_line_ids")
+        if invoiced_dn_line_ids is None:
+            invoiced_dn_lines = self.env.context.get(
+                "delivery_note_invoiced_lines",
+                self.env["stock.delivery.note.line"].browse(),
+            )
+        else:
+            invoiced_dn_lines = self.env["stock.delivery.note.line"].browse(
+                invoiced_dn_line_ids
+            )
         invoiceable_dn_lines = self._get_invoiceable_dn_lines() - invoiced_dn_lines
 
         if invoiceable_dn_lines:
@@ -104,8 +110,15 @@ class SaleOrderLine(models.Model):
                     ),
                 }
             )
-            self.env.context = dict(
-                self.env.context,
-                delivery_note_invoiced_lines=invoiced_dn_lines | invoiced_dn_line,
-            )
+            if invoiced_dn_line_ids is None:
+                self.env = self.env(
+                    context=dict(
+                        self.env.context,
+                        delivery_note_invoiced_lines=(
+                            invoiced_dn_lines | invoiced_dn_line
+                        ),
+                    )
+                )
+            else:
+                invoiced_dn_line_ids.append(invoiced_dn_line.id)
         return values

@@ -121,7 +121,10 @@ class SaleOrder(models.Model):
         return new_order_lines
 
     def _create_invoices(self, grouped=False, final=False, date=None):
-        invoice_ids = super()._create_invoices(grouped=grouped, final=final, date=date)
+        invoice_ids = super(
+            SaleOrder,
+            self.with_context(_delivery_note_invoiced_line_ids=[]),
+        )._create_invoices(grouped=grouped, final=final, date=date)
 
         self._assign_delivery_notes_invoices(invoice_ids.ids)
         self._generate_delivery_note_lines(invoice_ids.ids)
