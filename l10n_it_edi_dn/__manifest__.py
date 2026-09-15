@@ -13,9 +13,9 @@
         "l10n_it_delivery_note",
         "l10n_it_edi",
     ],
-    "data": [
-        "data/invoice_it_template.xml",
-    ],
+    # "data": [
+    #     "data/invoice_it_template.xml",
+    # ],
     "auto_install": True,
     "installable": True,
 }
