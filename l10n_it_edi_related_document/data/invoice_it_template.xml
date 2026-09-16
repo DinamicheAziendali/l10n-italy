@@ -5,7 +5,7 @@
         inherit_id="l10n_it_edi.account_invoice_it_FatturaPA_export"
     >
         <xpath
-            expr="//t[@t-elif='record.ref and not record.reversed_entry_id']"
+            expr="//DatiOrdineAcquisto[@t-elif='record.ref and not record.reversed_entry_id']"
             position="after"
         >
             <t
