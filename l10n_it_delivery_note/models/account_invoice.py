@@ -196,6 +196,7 @@ class AccountInvoice(models.Model):
         """Extend to add dati_ddt_list for delivery notes."""
         values = super()._l10n_it_edi_get_values(pdf_values)
         values["dati_ddt_list"] = self._get_dati_ddt(values["base_lines"])
+        values["ddt_dict"] = []
         return values
 
     def _get_ddt_values(self):
