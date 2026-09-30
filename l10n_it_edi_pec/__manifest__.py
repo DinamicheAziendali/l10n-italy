@@ -28,6 +28,4 @@
         "views/ir_mail_server_view.xml",
     ],
     "installable": True,
-    "pre_init_hook": "_l10n_it_edi_pec_pre_init_hook",
-    "post_init_hook": "_l10n_it_edi_pec_post_init_hook",
 }
