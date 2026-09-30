@@ -89,8 +89,8 @@ def add_field_if_not_exists(env, table, field_name, field_type, module):
 
 def _l10n_it_account_tax_kind_migration(env):
     table = "account_tax"
-    add_field_if_not_exists(env, table, "l10n_it_law_reference", "char", "l10n_it")
-    rename_fields(env, table, {"l10n_it_law_reference": "law_reference"})
+    add_field_if_not_exists(env, table, "invoice_legal_notes", "char", "l10n_it")
+    rename_fields(env, table, {"invoice_legal_notes": "law_reference"})
 
     add_field_if_not_exists(env, table, "l10n_it_exempt_reason", "char", "l10n_it")
     condition = "account_tax.kind_id = account_tax_kind.id"
