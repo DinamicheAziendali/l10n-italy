@@ -2,6 +2,10 @@
 # Copyright 2025 Simone Rubino
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import base64
+import binascii
+import logging
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Domain
@@ -9,6 +13,8 @@ from odoo.tools import float_compare, html2plaintext, is_html_empty
 
 from odoo.addons.base.models.ir_qweb_fields import Markup
 from odoo.addons.l10n_it_edi.models.account_move import get_date, get_float, get_text
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountMoveInherit(models.Model):
@@ -29,6 +35,7 @@ class AccountMoveInherit(models.Model):
         comodel_name="ir.attachment",
         string="Imported Electronic Bill",
         readonly=True,
+        copy=False,
     )
     l10n_it_edi_line_ids = fields.One2many(
         "l10n_it_edi.line",
@@ -123,6 +130,10 @@ class AccountMoveInherit(models.Model):
     )
     l10n_it_edi_validation_message = fields.Text(
         compute="_compute_l10n_it_edi_validation_message"
+    )
+    l10n_it_document_type_code = fields.Char(
+        related="l10n_it_document_type.code",
+        string="Document Type Code",
     )
 
     # -------------------------------------------------------------------------
@@ -226,9 +237,161 @@ class AccountMoveInherit(models.Model):
             filetype, allow_fallback=allow_fallback
         )
 
+    def action_l10n_it_edi_ext_send_self_invoices(self):
+        """Send the selected self-invoices to the SdI.
+
+        Each move is sent with `action_l10n_it_edi_send`
+        and committed right after, so that Odoo stays aligned with the SdI
+        even if the request is interrupted (e.g. worker time limit).
+        A move that cannot be sent does not stop the others:
+        the moves already sent stay sent and the next ones are still tried.
+        The reason is shown in the e-invoicing warning of the move
+        (failed export checks, upload errors)
+        or in the final notification (errors raised while sending).
+        """
+        moves = self.filtered(
+            lambda move: move._l10n_it_edi_ext_is_self_invoice_to_send()
+        )
+        if not moves:
+            raise UserError(
+                self.env._(
+                    "None of the selected documents is a self-invoice "
+                    "ready to be sent to the SdI."
+                )
+            )
+
+        error_moves = self.browse()
+        error_messages = []
+        for move in moves:
+            try:
+                # Roll back the changes of the failing move only,
+                # so that they are not committed
+                with self.env.cr.savepoint():
+                    move.action_l10n_it_edi_send()
+            # Catch any error, so that it does not stop the next moves
+            except Exception as error:
+                if not isinstance(error, UserError):
+                    _logger.exception(
+                        "Error while sending %s to the SdI", move.display_name
+                    )
+                # Do not write the error in the move:
+                # another process sending it could have locked it
+                error_moves |= move
+                error_messages.append(f"{move.display_name}: {error}")
+            # Save each move right away, like core e-invoicing localizations
+            # (e.g. l10n_ro_edi, l10n_my_edi): if the request is interrupted,
+            # Odoo still knows which moves the SdI has received.
+            # Committing is safe here because each move is sent independently:
+            # nothing left in the transaction depends on the next moves
+            if self._can_commit():
+                self.env.cr.commit()  # pylint: disable=invalid-commit
+
+        not_sent_moves = moves.filtered(
+            lambda move: not (move.l10n_it_edi_transaction and move.l10n_it_edi_state)
+        )
+        messages = [
+            self.env._(
+                "%(count)s self-invoices sent to the SdI.",
+                count=len(moves - not_sent_moves),
+            )
+        ]
+        if warning_moves := not_sent_moves - error_moves:
+            messages.append(
+                self.env._(
+                    "Not sent, see the warning in each document: %(moves)s.",
+                    moves=", ".join(warning_moves.mapped("display_name")),
+                )
+            )
+        if error_messages:
+            messages.append(
+                self.env._(
+                    "Not sent because of an error: %(errors)s.",
+                    errors="; ".join(error_messages),
+                )
+            )
+        if skipped_moves := self - moves:
+            messages.append(
+                self.env._(
+                    "%(count)s selected documents skipped "
+                    "because they are not self-invoices ready to be sent.",
+                    count=len(skipped_moves),
+                )
+            )
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": self.env._("Send to SDI"),
+                "message": " ".join(messages),
+                "type": "warning" if not_sent_moves else "success",
+                "sticky": bool(not_sent_moves),
+                "next": {"type": "ir.actions.client", "tag": "soft_reload"},
+            },
+        }
+
     # -------------------------------------------------------------------------
     # Helpers
     # -------------------------------------------------------------------------
+
+    def _get_xml_tree(self, file_data):
+        # Extend Odoo standard check to also recognize signed e-invoice files
+        # (e.g. .p7m files reported as "application/octet-stream").
+        xml_tree = super()._get_xml_tree(file_data)
+        if (
+            xml_tree is None
+            and file_data["raw"]
+            and file_data["name"]
+            and file_data["name"].lower().endswith(".p7m")
+        ):
+            p7m_xml_tree = self._parse_xml_with_recovery(
+                file_data["raw"], file_data["name"]
+            )
+            if self._is_l10n_it_edi_import_file({"xml_tree": p7m_xml_tree}):
+                xml_tree = p7m_xml_tree
+        return xml_tree
+
+    def _l10n_it_edi_ext_decode_p7m_base64(self, content, name=None):
+        """Some programs download p7m files as base64 text."""
+        try:
+            return base64.b64decode(content)
+        except binascii.Error:
+            _logger.info(f"The p7m file '{name}' is not base64 encoded")
+            return ""
+
+    def _parse_xml_with_recovery(self, content, name=None):
+        xml_tree = super()._parse_xml_with_recovery(content, name=name)
+        if xml_tree is None and name and name.lower().endswith(".p7m"):
+            decoded = self._l10n_it_edi_ext_decode_p7m_base64(content, name=name)
+            xml_tree = super()._parse_xml_with_recovery(decoded, name=name)
+        return xml_tree
+
+    def _l10n_it_edi_ext_is_self_invoice(self):
+        """Tell whether the move is sent to the SdI like a self-invoice,
+        with `action_l10n_it_edi_send`."""
+        self.ensure_one()
+        return self.l10n_it_edi_is_self_invoice
+
+    def _l10n_it_edi_ext_is_self_invoice_to_send(self):
+        """Tell whether the move can be sent now with `action_l10n_it_edi_send`.
+
+        Keep in sync with the visibility of the "Send to SDI" button
+        in view `l10n_it_edi.account_invoice_form_l10n_it`
+        and in its extension in this module.
+        """
+        self.ensure_one()
+        return (
+            self._l10n_it_edi_ext_is_self_invoice()
+            and self.state == "posted"
+            and not self.is_move_sent
+            and self.country_code == "IT"
+            and self.l10n_it_edi_state not in ("rejected", "rejected_by_pa_partner")
+            and self._l10n_it_edi_ext_is_document_type_to_send()
+        )
+
+    def _l10n_it_edi_ext_is_document_type_to_send(self):
+        """Tell whether the document type of the move can be sent to the SdI."""
+        self.ensure_one()
+        return self.l10n_it_document_type_code not in ("TD01", "TD04", "TD24")
 
     def _l10n_it_edi_add_base_lines_xml_values(
         self, base_lines_aggregated_values, is_downpayment
@@ -1063,13 +1226,13 @@ class AccountMoveInherit(models.Model):
             and (attachment_name := data.get("name", ""))
             and (attachment_raw := data.get("raw", b""))
         ):
-            xml_att = self.env["ir.attachment"].create(
+            # Link the imported attachment, create one only for embedded files
+            xml_att = data.get("attachment") or self.env["ir.attachment"].create(
                 {
                     "name": attachment_name,
                     "raw": attachment_raw,
                     "res_model": invoice._name,
                     "res_id": invoice.id,
-                    "mimetype": "application/xml",
                 }
             )
             invoice.l10n_it_edi_ext_attachment_in_id = xml_att.id

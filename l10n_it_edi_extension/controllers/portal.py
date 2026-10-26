@@ -10,8 +10,6 @@ from odoo import api, tools
 from odoo.exceptions import UserError
 from odoo.http import Controller, request, route
 
-from odoo.addons.l10n_it_edi.tools.remove_signature import remove_signature
-
 _logger = logging.getLogger(__name__)
 
 
@@ -22,28 +20,14 @@ class FatturaPAController(Controller):
         return "FoglioStileAssoSoftware.xsl"
 
     def get_xml_string(self, doc_data):
-        # from _decode_edi_l10n_it_edi()
-        # for files with a Cades signature, _decode_edi_l10n_it_edi() returns the
-        # orginal (signed) contents and a list of etree subtrees, each starting
-        # from FatturaElettronicaBody, neither of which is useful to us here
-        #
-        # so we copy the code snipped that's useful to us
-        # 8<
-        def parse_xml(parser, name, content):
-            try:
-                return etree.fromstring(content, parser)
-            except (etree.ParseError, ValueError) as e:
-                _logger.info("XML parsing of %s failed: %s", name, e)
-
         name = doc_data.get("filename", "")
         content = doc_data.get("content", b"")
-        parser = etree.XMLParser(recover=True, resolve_entities=False)
-        if (xml_tree := parse_xml(parser, name, content)) is None:
-            # The file may have a Cades signature, trying to remove it
-            if (xml_tree := parse_xml(parser, name, remove_signature(content))) is None:
-                _logger.info("Italian EDI invoice file %s cannot be decoded.", name)
-                return []
-        # >8
+        xml_tree = request.env["account.move"]._parse_xml_with_recovery(
+            content, name=name
+        )
+        if xml_tree is None:
+            _logger.info("Italian EDI invoice file %s cannot be decoded.", name)
+            return []
 
         xml_string = etree.tostring(
             xml_tree, pretty_print=True, encoding="unicode"
@@ -73,17 +57,20 @@ class FatturaPAController(Controller):
         website=True,
     )
     def fatturapa_preview(self, invoice_id, **data):
-        invoice = request.env["account.move"].sudo().browse(int(invoice_id))
+        invoice = request.env["account.move"].browse(int(invoice_id)).exists()
+        if not invoice:
+            raise request.not_found()
+        invoice.check_access("read")
 
-        if doc_data := invoice._get_invoice_legal_documents(
+        doc_data = invoice.sudo()._get_invoice_legal_documents(
             "fatturapa", allow_fallback=True
-        ):
-            if errors := doc_data.get("errors"):
-                raise UserError(
-                    request.env._(
-                        "Error while creating XML:\n- %s", "\n- ".join(errors)
-                    )
-                )
+        )
+        if not doc_data:
+            raise request.not_found()
+        if errors := doc_data.get("errors"):
+            raise UserError(
+                request.env._("Error while creating XML:\n- %s", "\n- ".join(errors))
+            )
 
         html = self.get_fattura_elettronica_preview(doc_data)
         if isinstance(html, bytes):

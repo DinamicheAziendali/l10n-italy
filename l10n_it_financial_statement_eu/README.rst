@@ -20,9 +20,9 @@ ITA - Bilancio UE con XBRL
 .. |badge2| image:: https://img.shields.io/badge/license-AGPL--3-blue.png
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
-.. |badge3| image:: https://img.shields.io/badge/github-DinmaicheAziendali%2Fl10n--italy-lightgray.png?logo=github
-    :target: https://github.com/DinmaicheAziendali/l10n-italy/tree/19.0/l10n_it_financial_statement_eu
-    :alt: DinmaicheAziendali/l10n-italy
+.. |badge3| image:: https://img.shields.io/badge/github-DinamicheAziendali%2Fl10n--italy-lightgray.png?logo=github
+    :target: https://github.com/DinamicheAziendali/l10n-italy/tree/19.0/l10n_it_financial_statement_eu
+    :alt: DinamicheAziendali/l10n-italy
 
 |badge1| |badge2| |badge3|
 
@@ -178,10 +178,10 @@ the "Financial statement EU" wizard:
 Bug Tracker
 ===========
 
-Bugs are tracked on `GitHub Issues <https://github.com/DinmaicheAziendali/l10n-italy/issues>`_.
+Bugs are tracked on `GitHub Issues <https://github.com/DinamicheAziendali/l10n-italy/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
-`feedback <https://github.com/DinmaicheAziendali/l10n-italy/issues/new?body=module:%20l10n_it_financial_statement_eu%0Aversion:%2019.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/DinamicheAziendali/l10n-italy/issues/new?body=module:%20l10n_it_financial_statement_eu%0Aversion:%2019.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -212,6 +212,6 @@ Current maintainer:
 
 |maintainer-mktsrl| 
 
-This module is part of the `DinmaicheAziendali/l10n-italy <https://github.com/DinmaicheAziendali/l10n-italy/tree/19.0/l10n_it_financial_statement_eu>`_ project on GitHub.
+This module is part of the `DinamicheAziendali/l10n-italy <https://github.com/DinamicheAziendali/l10n-italy/tree/19.0/l10n_it_financial_statement_eu>`_ project on GitHub.
 
 You are welcome to contribute.
