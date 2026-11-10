@@ -1,7 +1,3 @@
-.. image:: https://odoo-community.org/readme-banner-image
-   :target: https://odoo-community.org/get-involved?utm_source=readme
-   :alt: Odoo Community Association
-
 =======================
 ITA - Ricevute bancarie
 =======================
@@ -17,14 +13,20 @@ ITA - Ricevute bancarie
 .. |badge1| image:: https://img.shields.io/badge/maturity-Beta-yellow.png
     :target: https://odoo-community.org/page/development-status
     :alt: Beta
-.. |badge2| image:: https://img.shields.io/badge/license-AGPL--3-blue.png
+.. |badge2| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
-.. |badge3| image:: https://img.shields.io/badge/github-DinamicheAziendali%2Fl10n--italy-lightgray.png?logo=github
-    :target: https://github.com/DinamicheAziendali/l10n-italy/tree/19.0/l10n_it_riba_oca
-    :alt: DinamicheAziendali/l10n-italy
+.. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fl10n--italy-lightgray.png?logo=github
+    :target: https://github.com/OCA/l10n-italy/tree/19.0/l10n_it_riba_oca
+    :alt: OCA/l10n-italy
+.. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
+    :target: https://translation.odoo-community.org/projects/l10n-italy-19-0/l10n-italy-19-0-l10n_it_riba_oca
+    :alt: Translate me on Weblate
+.. |badge5| image:: https://img.shields.io/badge/runboat-Try%20me-875A7B.png
+    :target: https://runboat.odoo-community.org/builds?repo=OCA/l10n-italy&target_branch=19.0
+    :alt: Try me on Runboat
 
-|badge1| |badge2| |badge3|
+|badge1| |badge2| |badge3| |badge4| |badge5|
 
 **Italiano**
 
@@ -72,6 +74,23 @@ Nel caso si vogliano gestire anche le spese per ogni scadenza con
 ricevuta bancaria, si deve configurare un prodotto di tipo servizio e
 collegarlo in *Configurazione → Impostazioni → Contabilità → Imposte →
 Spese di incasso RiBa*.
+
+Il comportamento delle spese di incasso può essere personalizzato per
+singolo cliente nella scheda *Contabilità* del partner, sezione *RiBa*:
+
+-  *Exclude expenses Ri.Ba.*: se attivo, alle fatture del cliente non
+   verranno mai aggiunte righe di spese di incasso.
+-  *Ri.Ba. Policy expenses* (visibile solo se il campo precedente non è
+   attivo):
+
+   -  *More invoices, one expense per Month* (predefinito): viene
+      addebitata al massimo una spesa per ogni mese di scadenza. Alla
+      conferma di una fattura, la spesa non viene aggiunta per le
+      scadenze che cadono in un mese in cui il cliente ha già altre
+      scadenze RiBa non ancora maturate su fatture alle quali sono già
+      state addebitate le spese.
+   -  *One expense per maturity*: viene addebitata una spesa per ogni
+      scadenza, indipendentemente dalle altre fatture del cliente.
 
 Usage
 =====
@@ -125,13 +144,25 @@ emettere più fatture. Non è possibile raggruppare Riba in fase di
 emissione se le fatture contengono CIG e CUP differenti. Verrà creata
 una riga di distinta per ogni fattura.
 
+Known issues / Roadmap
+======================
+
+**Italiano**
+
+Nella sezione di configurazione, i nomi dei campi *Exclude expenses
+Ri.Ba.* e *Ri.Ba. Policy expenses* e dei valori *More invoices, one
+expense per Month* e *One expense per maturity* sono riportati in
+inglese perché non ancora tradotti. Quando le traduzioni italiane di
+questi termini saranno disponibili, andranno aggiornati anche i
+riferimenti nella documentazione.
+
 Bug Tracker
 ===========
 
-Bugs are tracked on `GitHub Issues <https://github.com/DinamicheAziendali/l10n-italy/issues>`_.
+Bugs are tracked on `GitHub Issues <https://github.com/OCA/l10n-italy/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
-`feedback <https://github.com/DinamicheAziendali/l10n-italy/issues/new?body=module:%20l10n_it_riba_oca%0Aversion:%2019.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/OCA/l10n-italy/issues/new?body=module:%20l10n_it_riba_oca%0Aversion:%2019.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -169,6 +200,16 @@ Contributors
 Maintainers
 -----------
 
-This module is part of the `DinamicheAziendali/l10n-italy <https://github.com/DinamicheAziendali/l10n-italy/tree/19.0/l10n_it_riba_oca>`_ project on GitHub.
+This module is maintained by the OCA.
 
-You are welcome to contribute.
+.. image:: https://odoo-community.org/logo.png
+   :alt: Odoo Community Association
+   :target: https://odoo-community.org
+
+OCA, or the Odoo Community Association, is a nonprofit organization whose
+mission is to support the collaborative development of Odoo features and
+promote its widespread use.
+
+This module is part of the `OCA/l10n-italy <https://github.com/OCA/l10n-italy/tree/19.0/l10n_it_riba_oca>`_ project on GitHub.
+
+You are welcome to contribute. To learn how please visit https://odoo-community.org/page/Contribute.

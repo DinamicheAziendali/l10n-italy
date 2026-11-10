@@ -178,9 +178,14 @@ class AccountMove(models.Model):
         :param all_date_due: list of due dates for partner
         :return: True if month of invoice_date_due is in a list of all_date_due
         """
-        for d in all_date_due:
-            if invoice_date_due.month == d.month and invoice_date_due.year == d.year:
-                return True
+        self.ensure_one()
+        if self.partner_id.riba_policy_expenses != "unlimited":
+            for d in all_date_due:
+                if (
+                    invoice_date_due.month == d.month
+                    and invoice_date_due.year == d.year
+                ):
+                    return True
         return False
 
     def _post(self, soft=True):
@@ -192,6 +197,7 @@ class AccountMove(models.Model):
                 or not invoice.invoice_payment_term_id
                 or not invoice.invoice_payment_term_id.riba
                 or invoice.invoice_payment_term_id.riba_payment_cost == 0.0
+                or invoice.partner_id.commercial_partner_id.riba_exclude_expenses
             ):
                 continue
             if not invoice.company_id.due_cost_service_id:
@@ -201,9 +207,16 @@ class AccountMove(models.Model):
             # Apply Collection Fees on invoice only on first due date of the month
             # Get Date of first due date
             move_line = self.env["account.move.line"].search(
-                [("partner_id", "=", invoice.partner_id.id)]
+                [
+                    ("partner_id", "=", invoice.partner_id.id),
+                    ("move_id", "!=", invoice.id),
+                    ("move_id.invoice_payment_term_id.riba", "=", True),
+                    ("date_maturity", ">=", fields.Date.context_today(invoice)),
+                ]
             )
-            if not any(line.due_cost_line for line in move_line):
+            if not any(
+                line.due_cost_line for line in move_line.mapped("move_id.line_ids")
+            ):
                 move_line = self.env["account.move.line"]
             # Filtered recordset with date_maturity
             move_line = move_line.filtered(lambda line: line.date_maturity is not False)
@@ -211,11 +224,7 @@ class AccountMove(models.Model):
             move_line = move_line.sorted(key=lambda r: r.date_maturity)
             # Get date
             previous_date_due = move_line.mapped("date_maturity")
-            pterm = self.env["account.payment.term"].browse(
-                invoice.invoice_payment_term_id.id
-            )
-
-            pterm_list = pterm._compute_terms(
+            pterm_list = invoice.invoice_payment_term_id._compute_terms(
                 date_ref=invoice.invoice_date,
                 currency=invoice.currency_id,
                 company=invoice.company_id,
@@ -225,10 +234,9 @@ class AccountMove(models.Model):
                 untaxed_amount_currency=0,
                 sign=1,
             )
-
             for pay_date in pterm_list["line_ids"]:
-                if not self.month_check(pay_date["date"], previous_date_due):
-                    # Get Line values for service product
+                if not invoice.month_check(pay_date["date"], previous_date_due):
+                    # ---- Get Line values for service product
                     service_prod = invoice.company_id.due_cost_service_id
                     account = service_prod.product_tmpl_id.get_product_accounts(
                         invoice.fiscal_position_id
@@ -413,26 +421,6 @@ class AccountMoveLine(models.Model):
         related="move_id.riba_partner_bank_id.acc_number", string="IBAN", store=False
     )
     due_cost_line = fields.Boolean("RiBa Collection Fees Line")
-
-    @api.model
-    def get_view(self, view_id=None, view_type="form", **options):
-        view_payments_tree_id = self.env.ref("l10n_it_riba_oca.view_riba_to_issue_tree")
-        if view_id == view_payments_tree_id.id:
-            # Use RiBa slip
-            result = super(models.Model, self).get_view(
-                view_id=view_id,
-                view_type=view_type,
-                **options,
-            )
-        else:
-            # Use special views for account.move.line object
-            # (for ex. list view contains user defined fields)
-            result = super().get_view(
-                view_id=view_id,
-                view_type=view_type,
-                **options,
-            )
-        return result
 
     def update_paid_riba_lines(self):
         """

@@ -48,13 +48,6 @@
         "wizard/wizard_riba_multiple_payment_views.xml",
     ],
     "demo": ["demo/riba_demo.xml"],
-    "external_dependencies": {
-        "python": [
-            "openupgradelib",
-            "unidecode",
-        ],
-    },
+    "external_dependencies": {"python": ["unidecode"]},
     "installable": True,
-    "pre_init_hook": "pre_absorb_old_module",
-    "post_init_hook": "post_absorb_old_module",
 }
