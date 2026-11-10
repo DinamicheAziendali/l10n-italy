@@ -4,6 +4,8 @@ from odoo import fields, models
 
 
 class AccountTaxRegistry(models.Model):
+    # pylint: disable=attribute-string-redundant
+    _name = "account.tax.registry"
     _description = "Tax registry"
     name = fields.Char(required=True)
     company_id = fields.Many2one(
