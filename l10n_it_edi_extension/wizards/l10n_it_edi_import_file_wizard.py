@@ -8,6 +8,7 @@ import os
 import zipfile
 
 from odoo import fields, models
+from odoo.addons.l10n_it_edi.models.account_move import get_text
 from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.tools import html_escape
@@ -100,6 +101,20 @@ class EInvoiceImportFileWizard(models.TransientModel):
                         for record, file_data in zip(records, files_data, strict=False):
                             record._extend_with_attachments([file_data], new=True)
                             if record.is_sale_document():
+                                tree = file_data["xml_tree"]
+                                tree = tree.find(".//FatturaElettronicaBody")
+                                if number := get_text(tree, ".//DatiGeneraliDocumento//Numero"):
+                                    self.env.cr.execute(
+                                        f"SELECT id FROM account_move WHERE name = '{number}' LIMIT 1"
+                                    )
+                                    if self.env.cr.fetchone():
+                                        skipped_files.append(filename)
+                                        record.unlink()
+                                        attachment.unlink()
+                                        continue
+
+                                    record.name = number
+
                                 record.l10n_it_edi_attachment_name = file_data.get(
                                     "name", ""
                                 )
