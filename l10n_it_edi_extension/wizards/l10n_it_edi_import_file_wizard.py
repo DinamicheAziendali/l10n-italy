@@ -115,6 +115,15 @@ class EInvoiceImportFileWizard(models.TransientModel):
 
                                     record.name = number
 
+                                payments_info = record._l10n_it_edi_get_payment_info(tree)
+                                payment_due_dates = [
+                                    payment_info.get("invoice_date_due")
+                                    for payment_info in payments_info["info"]
+                                ]
+                                if payment_due_dates := [x for x in payment_due_dates if x]:
+                                    record.invoice_payment_term_id = False
+                                    record.invoice_date_due = max(payment_due_dates)
+
                                 record.l10n_it_edi_attachment_name = file_data.get(
                                     "name", ""
                                 )
