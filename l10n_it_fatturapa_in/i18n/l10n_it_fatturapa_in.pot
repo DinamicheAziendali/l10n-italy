@@ -68,8 +68,16 @@ msgstr ""
 
 #. module: l10n_it_fatturapa_in
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__ir_attachment_id
+#: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__payrol_rel
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_wizard_link_to_invoice__attachment_id
 msgid "Attachment"
+msgstr ""
+
+#. module: l10n_it_fatturapa_in
+#. odoo-python
+#: code:addons/l10n_it_fatturapa_in/wizard/wizard_import_fatturapa.py:0
+#, python-format
+msgid "Attachment '%(name)s' has no content and has been skipped"
 msgstr ""
 
 #. module: l10n_it_fatturapa_in
@@ -1357,7 +1365,7 @@ msgstr ""
 #: code:addons/l10n_it_fatturapa_in/wizard/wizard_import_fatturapa.py:0
 #, python-format
 msgid ""
-"Two distinct partners with VAT number %(vat)s or Fiscal Code %(fiscalcode)s "
+"Two distinct partners {partners} with VAT number {vat} or Fiscal Code {cf} "
 "already present in db."
 msgstr ""
 

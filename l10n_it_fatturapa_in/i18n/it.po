@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-09 20:32+0000\n"
-"PO-Revision-Date: 2024-12-15 15:06+0000\n"
+"PO-Revision-Date: 2026-11-09 15:46+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.6.2\n"
+"X-Generator: Weblate 5.15.2\n"
 
 #. module: l10n_it_fatturapa_in
 #: model_terms:ir.ui.view,arch_db:l10n_it_fatturapa_in.view_account_config_settings_ftpa_in
@@ -39,8 +39,8 @@ msgstr ""
 "<span class=\"o_form_label\">Fatture fornitori</span>\n"
 "                            <span class=\"fa fa-lg fa-building-o\" title=\"I "
 "valori impostati qui sono specifici per azienda.\" aria-label=\"I valori "
-"impostati qui sono specifici per azienda.\" groups=\"base."
-"group_multi_company\" role=\"img\"/>"
+"impostati qui sono specifici per azienda.\" "
+"groups=\"base.group_multi_company\" role=\"img\"/>"
 
 #. module: l10n_it_fatturapa_in
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__access_token
@@ -82,9 +82,17 @@ msgstr "Codice articoli"
 
 #. module: l10n_it_fatturapa_in
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__ir_attachment_id
+#: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__payrol_rel
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_wizard_link_to_invoice__attachment_id
 msgid "Attachment"
 msgstr "Allegato"
+
+#. module: l10n_it_fatturapa_in
+#. odoo-python
+#: code:addons/l10n_it_fatturapa_in/wizard/wizard_import_fatturapa.py:0
+#, python-format
+msgid "Attachment '%(name)s' has no content and has been skipped"
+msgstr "L'allegato '%(name)s' non ha contenuto ed è stato saltato"
 
 #. module: l10n_it_fatturapa_in
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__message_attachment_count
@@ -1452,11 +1460,11 @@ msgstr ""
 #: code:addons/l10n_it_fatturapa_in/wizard/wizard_import_fatturapa.py:0
 #, python-format
 msgid ""
-"Two distinct partners with VAT number %(vat)s or Fiscal Code %(fiscalcode)s "
+"Two distinct partners {partners} with VAT number {vat} or Fiscal Code {cf} "
 "already present in db."
 msgstr ""
-"Nel database sono già presenti due diversi partner con partita IVA %(vat)s o "
-"codice fiscale %(fiscalcode)s."
+"Nel database sono già presenti due diversi partner con partita IVA o codice "
+"fiscale."
 
 #. module: l10n_it_fatturapa_in
 #: model:ir.model.fields,field_description:l10n_it_fatturapa_in.field_fatturapa_attachment_in__type
@@ -1660,6 +1668,14 @@ msgstr ""
 #, python-format
 msgid "You can select only one XML file to link."
 msgstr "È possibile selezionare solo un file XML da collegare."
+
+#, python-format
+#~ msgid ""
+#~ "Two distinct partners with VAT number %(vat)s or Fiscal Code "
+#~ "%(fiscalcode)s already present in db."
+#~ msgstr ""
+#~ "Nel database sono già presenti due diversi partner con partita IVA "
+#~ "%(vat)s o codice fiscale %(fiscalcode)s."
 
 #, python-format
 #~ msgid ""
